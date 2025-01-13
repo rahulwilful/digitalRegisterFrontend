@@ -1,20 +1,26 @@
 import {View, Text, Image} from 'react-native';
 import React, {useEffect} from 'react';
 import {createDrawerNavigator} from '@react-navigation/drawer';
-import Tabs from './Tabs';
-import AddUser from '../screens/Authentication/AddUser';
-import AddItem from '../screens/Items/AddItem';
-import AddRecord from '../screens/WareHouse/AddRecord';
-import StackNav from './StackNav';
+
 import {headerBackgroundColor} from '../Constants/Colours';
 import {
+  allItemsIcon,
+  allUsersIcon,
   homeIcon,
   newItemIcon,
   newRecordIcon,
   newUserIcon,
 } from '../Constants/imagesAndIcons';
+
+import Tabs from './Tabs';
+import AddUser from '../screens/Users/AddUser';
+import AddItem from '../screens/Items/AddItem';
+import AddRecord from '../screens/WareHouse/AddRecord';
+import {ItemStack, StackNav, UserStack} from './StackNav';
+
 import {useSelector} from 'react-redux';
 import AllItems from '../screens/Items/AllItems';
+import AllUsers from '../screens/Users/AllUsers';
 
 const Drawer = createDrawerNavigator();
 
@@ -26,8 +32,6 @@ const DrawerNav = () => {
   useEffect(() => {
     console.log('user', user);
   }, [user]);
-
- 
 
   return (
     <Drawer.Navigator
@@ -46,12 +50,12 @@ const DrawerNav = () => {
         name="Home"
         component={StackNav}
         options={{
-          headerTitle: headerTitle,
           drawerIcon: () => (
             <Image source={homeIcon} style={{width: 30, height: 30}} />
           ),
         }}
       />
+
       <Drawer.Screen
         name="New Record"
         component={AddRecord}
@@ -61,6 +65,7 @@ const DrawerNav = () => {
           ),
         }}
       />
+
       {user?.role_type.value == 'super_admin' && (
         <Drawer.Screen
           name="New User"
@@ -68,6 +73,18 @@ const DrawerNav = () => {
           options={{
             drawerIcon: () => (
               <Image source={newUserIcon} style={{width: 35, height: 35}} />
+            ),
+          }}
+        />
+      )}
+
+      {user?.role_type.value == 'super_admin' && (
+        <Drawer.Screen
+          name="All Users"
+          component={UserStack}
+          options={{
+            drawerIcon: () => (
+              <Image source={allUsersIcon} style={{width: 35, height: 35}} />
             ),
           }}
         />
@@ -85,11 +102,11 @@ const DrawerNav = () => {
 
       <Drawer.Screen
         name="All Items"
-        component={AllItems}
+        component={ItemStack}
         options={{
           headerTitle: 'All Items',
           drawerIcon: () => (
-            <Image source={newItemIcon} style={{width: 40, height: 40}} />
+            <Image source={allItemsIcon} style={{width: 40, height: 40}} />
           ),
         }}
       />

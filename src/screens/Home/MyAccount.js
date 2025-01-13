@@ -173,13 +173,11 @@ const MyAccount = ({navigation}) => {
           />
         </View>
 
-        <TextInput style={[s.input]} placeholder="Name" value={name} 
-        
-        />
+        <TextInput style={[s.input]} placeholder="Name" value={name} />
         <TextInput
           style={[s.input]}
           placeholder="Mobile Number"
-          value={mobileNo}
+          value={mobileNo.toString()}
         />
         <TextInput
           style={[s.input]}
@@ -201,14 +199,7 @@ const MyAccount = ({navigation}) => {
         />
         <View style={[ES.flexRow, ES.gap2]}>
           <Btn
-            method={() =>
-              navigation.navigate('drawerHome', {
-                screen: 'Home',
-                params: {
-                  screen: 'stackUpdateAccount',
-                },
-              })
-            }
+            method={() => navigation.navigate('stackUpdateAccount')}
             px={10}
             width={'30%'}>
             <View style={[ES.h100]}>

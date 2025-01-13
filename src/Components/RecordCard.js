@@ -11,39 +11,59 @@ import {
 import React, {useEffect, useState} from 'react';
 
 import ES from '../styles/ES';
-import {image} from '../Constants/imagesAndIcons';
-import {backgroundColor} from '../Constants/Colours';
+
+import {
+  calanderIcon,
+  image,
+  pickupPersonIcon,
+  recordIcon,
+} from '../Constants/imagesAndIcons';
+
+import {backgroundColor, primaryTextColor} from '../Constants/Colours';
 import NormalText from './NormalText';
+import LinearGradient from 'react-native-linear-gradient';
+import HeadingText from './HeadingText';
 
 const RecordCard = props => {
   return (
     <View style={[ES.w100]}>
-      <View
-        style={[
-          ES.w95,
-          ES.bRadius12,
-          ES.overflowHidden,
-          ES.shadow5,
-          ES.pb1,
-          ES.px04,
-          ES.bgLight,
-        ]}>
+      <LinearGradient
+        colors={['#fff', '#fffaf7']}
+        start={{x: 0, y: 0}} // Gradient starting point
+        end={{x: 1, y: 1}}
+        style={[s.card]}>
         <View style={[s.listConatinerHeaer]}>
           <View style={[ES.hs70, ES.ws70, ES.overflowHidden, ES.bRadius5]}>
-            <Image source={image.locationHome} style={[ES.hs70, ES.ws70]} />
+            <Image source={recordIcon} style={[ES.hs70, ES.ws70]} />
           </View>
 
-          <View style={[ES.fx1]}>
-            <Text style={[ES.f20, ES.fw500, ES.capitalize, ES.fx1]}>
-              Manager: {props.item.warehouse_admin.name}
-            </Text>
-            <View style={[ES.fx1, ES.flexRow, ES.gap2]}>
-              <Text style={[s.subInfo]}>
-                Pickup Boy: {props.item.pickup_person.name}
-              </Text>
-              <Text style={[s.subInfo]}>
-                City: {props.item.storage_location_id.city}
-              </Text>
+          <View style={[ES.fx1, ES.justifyContentCenter, ES.gap1]}>
+            <HeadingText
+              size={20}
+              capitalize
+              style={[ES.f20, ES.fw500, ES.capitalize, ES.fx1]}>
+              {props.item.warehouse_admin.name}
+            </HeadingText>
+            <View style={[ES.fx0, ES.flexRow, ES.gap2, ES.alignItemsCenter]}>
+              <NormalText size={16}>
+                <Text style={[ES.tempBorder]}>
+                  <Image
+                    source={pickupPersonIcon}
+                    style={[ES.ws19, ES.hs19, ES.objectFitContain]}
+                  />
+                  <Text> : {props.item.pickup_person.name}</Text>
+                </Text>
+              </NormalText>
+
+              <NormalText size={16}>
+                <Text style={[ES.tempBorder]}>
+                  <Image
+                    source={calanderIcon}
+                    style={[ES.ws19, ES.hs19, ES.objectFitContain]}
+                  />
+                  <Text> : {props.item.createdAt.slice(0, 10)}</Text>
+                </Text>
+              </NormalText>
             </View>
           </View>
         </View>
@@ -53,36 +73,24 @@ const RecordCard = props => {
             keyExtractor={(subItem, index) => index.toString()}
             renderItem={({item: subItem}) => (
               <View style={[s.itemContainer]}>
-                <TouchableOpacity style={[ES.w40]}>
-                  <Text
-                    style={[
-                      ES.f16,
-                      ES.fw500,
-                      ES.px08,
-                      ES.capitalize,
-                      ES.textDark,
-                    ]}>
-                    Item: {subItem.item_id.item_name}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[ES.w25]}>
+                <View style={[ES.fx3]}>
+                  <NormalText size={17} capitalize color={primaryTextColor}>
+                    {subItem.item_id.item_name}
+                  </NormalText>
+                </View>
+                <View style={[ES.fx2]}>
                   <Text style={[ES.f16, ES.fw500, ES.px08, ES.capitalize]}>
-                    qty: <NormalText>{subItem.quantity}</NormalText>
+                    qty:{' '}
+                    <NormalText>
+                      {subItem.quantity} {subItem.item_id.quantity_unit}
+                    </NormalText>
                   </Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[ES.w25]}>
-                  <Text style={[ES.f16, ES.fw500, ES.px08, ES.capitalize]}>
-                    unit:{' '}
-                    <Text style={[s.lightText]}>
-                      {subItem.item_id.quantity_unit}
-                    </Text>
-                  </Text>
-                </TouchableOpacity>
+                </View>
               </View>
             )}
           />
         </View>
-      </View>
+      </LinearGradient>
     </View>
   );
 };
@@ -90,6 +98,14 @@ const RecordCard = props => {
 export default RecordCard;
 
 const s = StyleSheet.create({
+  card: StyleSheet.flatten([
+    ES.w95,
+    ES.bRadius12,
+    ES.overflowHidden,
+    ES.shadow1,
+    ES.pb1,
+    ES.px04,
+  ]),
   conatainer: StyleSheet.flatten([
     ES.screenHeight,
     ES.centerItems,
@@ -146,16 +162,12 @@ const s = StyleSheet.create({
 
   listConatinerHeaer: StyleSheet.flatten([
     ES.py06,
-    ES.bgLight,
+
     ES.flexRow,
     ES.px1,
     ES.py1,
     ES.gap2,
     ES.w100,
-    {
-      borderBottomWidth: 0.8,
-      borderColor: '#bababa',
-    },
   ]),
 
   subInfo: StyleSheet.flatten([
@@ -168,7 +180,7 @@ const s = StyleSheet.create({
     ES.mt06,
     ES.w100,
     ES.flexRow,
-    ES.justifyContentSpaceBetween,
+    ES.px08,
     ES.pb04,
     {
       borderBottomWidth: 0.4,

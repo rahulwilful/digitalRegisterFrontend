@@ -12,19 +12,33 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
+
 import {
   backgroundColor,
+  blackButton,
+  bluebutton,
   headerBackgroundColor,
+  primaryColor,
   primaryTextColor,
+  whiteButton,
 } from '../../Constants/Colours';
 import ES from '../../styles/ES';
 import axiosClient from '../../../axiosClient';
 import RecordCard from '../../Components/RecordCard';
 import DatePicker from 'react-native-date-picker';
-import {noDataImage} from '../../Constants/imagesAndIcons';
+import {
+  filterIcon,
+  noDataImage,
+  resetIcon,
+} from '../../Constants/imagesAndIcons';
 import {useDispatch, useSelector} from 'react-redux';
 import Loading from '../../Constants/Loading';
 import {setHeader} from '../../Redux/actions/action';
+import HeadingText from '../../Components/HeadingText';
+import DropDownPicker from 'react-native-dropdown-picker';
+import ModalComponent from '../../Components/ModalComponent';
+import Btn from '../../Components/Btn';
+import NormalText from '../../Components/NormalText';
 
 const renderLoader = () => {
   return (
@@ -33,7 +47,6 @@ const renderLoader = () => {
     </View>
   );
 };
-
 
 const Records = ({route}) => {
   const dispatch = useDispatch();
@@ -50,6 +63,9 @@ const Records = ({route}) => {
 
   const [adminModal, setAdminModal] = useState(false);
   const [pickupModal, setPickupModal] = useState(false);
+  const [pickupModalLoading, setPickupModalLoading] = useState(false);
+  const [adminModalLoading, setAdminModalLoading] = useState(false);
+  const [filterModal, setFilterModal] = useState(false);
 
   const [wareHouseAdmin, setWareHouseAdmin] = useState('');
   const [pickupPerson, setPickupPerson] = useState('');
@@ -60,6 +76,7 @@ const Records = ({route}) => {
   const [toDate, setToDate] = useState(new Date());
   const [isFromDatePickerOpen, setIsFromDatePickerOpen] = useState(false);
   const [isToDatePickerOpen, setIsToDatePickerOpen] = useState(false);
+  const [isSorting, setIsSorting] = useState(false);
 
   const [footerLoader, setFooterLoader] = useState(false);
 
@@ -79,7 +96,8 @@ const Records = ({route}) => {
     dispatch(setHeader('Records'));
   }, [user]);
 
-  const handleLoadMoreRecords = async item => {
+  const handleLoadMoreRecords = async () => {
+    if (isSorting || pickupPerson != '' || wareHouseAdmin != '') return;
     setFooterLoader(true);
     let lastDate = records[records.length - 1].createdAt;
     console.log('Records handleLoadMoreRecords: ', lastDate);
@@ -90,10 +108,7 @@ const Records = ({route}) => {
         .catch(err => {
           setFooterLoader(false);
         });
-      /* console.log(
-        'Register Log recordRes : ',
-        recordRes.data.result[0].warehouse_admin.name,
-      ); */
+
       setRecords([...records, ...recordRes.data.result]);
       setOriginalRecords([...originalRecords, ...recordRes.data.result]);
       setLocation(recordRes.data.result[0].storage_location_id.name);
@@ -107,6 +122,8 @@ const Records = ({route}) => {
 
   const getRecords = async () => {
     setIsLoadning(true);
+    setPickupModalLoading(true);
+    setAdminModalLoading(true);
     try {
       const recordRes = await axiosClient.get(
         `/register/get/by/location/${locationId}`,
@@ -140,6 +157,7 @@ const Records = ({route}) => {
     } catch (error) {
       console.log('error', error);
     }
+    setPickupModalLoading(false);
 
     try {
       const adminsRes = await axiosClient.get(
@@ -160,86 +178,19 @@ const Records = ({route}) => {
       console.log('error', error);
     }
     setIsLoadning(false);
+
+    setAdminModalLoading(false);
   };
 
   useEffect(() => {
     getRecords();
   }, []);
 
-  const handleSearchItems = searchedValue => {
+  const getSortedRecords = async searchedValue => {
     setIsLoadning(true);
-    if (searchedValue.trim() === '') {
-      setRecords(originalRecords);
-      setIsLoadning(false);
-      return;
-    }
+    setFilterModal(false);
+    setIsSorting(true);
 
-    const filteredRecords = [];
-    for (let i = 0; i < originalRecords.length; i++) {
-      const record = originalRecords[i];
-      const matchingItems = [];
-
-      for (let j = 0; j < record.item_list.length; j++) {
-        const item = record.item_list[j];
-        if (
-          item.item_id.item_name
-            .toLowerCase()
-            .includes(searchedValue.toLowerCase())
-        ) {
-          matchingItems.push(item);
-        }
-      }
-
-      if (matchingItems.length > 0) {
-        filteredRecords.push({
-          ...record,
-          item_list: matchingItems,
-        });
-      }
-    }
-
-    setRecords(filteredRecords);
-    setRenderKey(renderKey + 1);
-    setIsLoadning(false);
-  };
-
-  const selectPickupPerson = id => {
-    let temp = [...pickupPersones];
-    let flag = 0;
-    for (let i in temp) {
-      if (temp[i]._id == id) {
-        temp[i].selected = true;
-        setPickupPerson(temp[i]);
-        flag = 1;
-      } else {
-        temp[i].selected = false;
-      }
-    }
-    if (flag == 0) setPickupPerson('');
-    setPickupPersones(temp);
-    setPickupModal(false);
-  };
-
-  const selectWareHouseAdmin = id => {
-    let temp = [...wareHouseAdmins];
-    let flag = 0;
-    for (let i in temp) {
-      if (temp[i]._id == id) {
-        temp[i].selected = true;
-        flag = 1;
-        setWareHouseAdmin(temp[i]);
-      } else {
-        temp[i].selected = false;
-      }
-    }
-
-    if (flag == 0) setWareHouseAdmin('');
-    setWareHouseAdmins(temp);
-    setAdminModal(false);
-  };
-
-  const getSortedRecords = async () => {
-    setIsLoadning(true);
     console.log('fromDate: ', fromDate, 'toDate: ', toDate);
     console.log(
       'pickupPerson: ',
@@ -251,10 +202,11 @@ const Records = ({route}) => {
     try {
       const sortedRes = await axiosClient.post(`/register/get/sorted/records`, {
         storage_location_id: locationId,
-        warehouse_admin: wareHouseAdmin._id || '',
-        pickup_person: pickupPerson._id || '',
-        fromDate: '',
-        toDate: '',
+        warehouse_admin: wareHouseAdmin?._id || '',
+        pickup_person: pickupPerson?._id || '',
+        fromDate: fromDate,
+        toDate: toDate,
+        item_name: searchedValue || '',
       });
       console.log('sortedRes: ', sortedRes.data.result);
       if (sortedRes.data.result.length > 0) {
@@ -273,130 +225,191 @@ const Records = ({route}) => {
     }
     setIsLoadning(false);
   };
+  useEffect(() => {
+    console.log('pickupPerson: ', pickupPerson);
+  }, [pickupPerson]);
+
+  const handleSetPickupPerson = item => {
+    console.log('sampleFunction', item);
+    setPickupPerson(item);
+    setPickupModal(false);
+  };
+
+  const handleSetWareHouseAdmin = item => {
+    console.log('handleSetWareHouseAdmin', item);
+
+    setWareHouseAdmin(item);
+    setAdminModal(false);
+  };
+
+  const handleResetFilters = () => {
+    setIsSorting(false);
+    setPickupPerson('');
+    setWareHouseAdmin('');
+    setFromDate(new Date('2024-01-01T00:00:00.000Z'));
+    setToDate(new Date());
+
+    getRecords();
+    setFilterModal(false);
+  };
 
   return (
     <>
-      <Modal
-        visible={adminModal}
-        onRequestClose={() => setAdminModal(false)}
-        style={[]}
-        animationType="slide"
-        presentationStyle="formSheet">
-        <ScrollView style={[ES.py1]}>
-          <View style={[]}>
-            <Text style={[ES.modalHeadingText, ES.textCenter, ES.mb2]}>
-              Select warehouse admin
-            </Text>
-
-            <View style={[s.modalListContainer]}>
-              <Text style={[ES.textDark, ES.f16, ES.fw500]}>None</Text>
-              <TouchableOpacity
-                onPress={() => selectWareHouseAdmin('none')}
-                style={[s.radio, ES.bgLight]}></TouchableOpacity>
-            </View>
-            <FlatList
-              data={wareHouseAdmins}
-              keyExtractor={(item, index) => index.toString()}
-              contentContainerStyle={[]}
-              renderItem={({item}) => (
-                <View style={[s.modalListContainer]}>
-                  <Text style={[ES.textDark, ES.f16, ES.fw500]}>
-                    {item.name}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => selectWareHouseAdmin(item._id)}
-                    style={[
-                      s.radio,
-                      item.selected ? ES.bgPrimary : ES.bgLight,
-                    ]}></TouchableOpacity>
-                </View>
-              )}
-            />
-          </View>
-        </ScrollView>
-      </Modal>
-
-      <Modal
-        visible={pickupModal}
-        style={[]}
-        onRequestClose={() => setPickupModal(false)}
-        animationType="slide"
-        presentationStyle="pageSheet">
-        <ScrollView style={[ES.py1]}>
-          <View style={[]}>
-            <Text style={[ES.modalHeadingText, ES.textCenter, ES.mb2]}>
-              Select Pickup Person
-            </Text>
-
-            <View style={[s.modalListContainer]}>
-              <Text style={[ES.textDark, ES.f16, ES.fw500]}>None</Text>
-              <TouchableOpacity
-                onPress={() => selectPickupPerson('none')}
-                style={[s.radio, ES.bgLight]}></TouchableOpacity>
+      <ModalComponent
+        height={'70%'}
+        isModalVisible={pickupModal}
+        closeModal={() => setPickupModal(false)}>
+        <View style={[ES.fx1, ES.py2]}>
+          <View style={[ES.fx1, pickupModalLoading ? ES.dNone : null]}>
+            <View style={[ES.fx1, s.modalListContainer]}>
+              <Btn
+                method={() => handleSetPickupPerson('')}
+                width={'95%'}
+                bgColor={whiteButton}
+                color={primaryTextColor}>
+                <Text> None</Text>
+              </Btn>
             </View>
             <FlatList
               data={pickupPersones}
-              keyExtractor={(item, index) => index.toString()}
-              contentContainerStyle={[]}
+              contentContainerStyle={[ES.pb1, ES.w100]}
               renderItem={({item}) => (
                 <View style={[s.modalListContainer]}>
-                  <Text style={[ES.textDark, ES.f16, ES.fw500]}>
-                    {item.name}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => selectPickupPerson(item._id)}
-                    style={[
-                      s.radio,
-                      item.selected ? ES.bgPrimary : ES.bgLight,
-                    ]}></TouchableOpacity>
+                  {pickupPerson._id != item._id ? (
+                    <Btn
+                      method={() => handleSetPickupPerson(item)}
+                      width={'95%'}
+                      bgColor={whiteButton}
+                      color={primaryTextColor}>
+                      <Text> {item.name.slice(0, 9)}</Text>
+                    </Btn>
+                  ) : (
+                    <Btn width={'95%'}>
+                      <Text> {item.name.slice(0, 9)} </Text>
+                    </Btn>
+                  )}
                 </View>
               )}
             />
           </View>
-        </ScrollView>
-      </Modal>
+          <View style={[ES.fx1, pickupModalLoading ? null : ES.dNone]}>
+            <Loading />
+          </View>
+        </View>
+      </ModalComponent>
+
+      <ModalComponent
+        height={'70%'}
+        isModalVisible={adminModal}
+        closeModal={() => setAdminModal(false)}>
+        <View style={[ES.fx1, ES.py2]}>
+          <View style={[ES.fx1, adminModalLoading ? ES.dNone : null]}>
+            <View style={[ES.fx1, s.modalListContainer]}>
+              <Btn
+                method={() => handleSetWareHouseAdmin('')}
+                width={'95%'}
+                bgColor={whiteButton}
+                color={primaryTextColor}>
+                <Text> None</Text>
+              </Btn>
+            </View>
+            <FlatList
+              data={wareHouseAdmins}
+              contentContainerStyle={[ES.pb1, ES.w100]}
+              renderItem={({item}) => (
+                <View style={[s.modalListContainer]}>
+                  {wareHouseAdmin._id != item._id ? (
+                    <Btn
+                      method={() => handleSetWareHouseAdmin(item)}
+                      width={'95%'}
+                      bgColor={whiteButton}
+                      color={primaryTextColor}>
+                      <Text> {item.name.slice(0, 9)}</Text>
+                    </Btn>
+                  ) : (
+                    <Btn width={'95%'}>
+                      <Text> {item.name.slice(0, 9)} </Text>
+                    </Btn>
+                  )}
+                </View>
+              )}
+            />
+          </View>
+          <View style={[ES.fx1, adminModalLoading ? null : ES.dNone]}>
+            <Loading />
+          </View>
+        </View>
+      </ModalComponent>
+
+      <ModalComponent
+        isModalVisible={filterModal}
+        closeModal={() => setFilterModal(false)}
+        height={'40%'}>
+        <View
+          style={[ES.fx1, ES.justifyContentSpaceEvenly, ES.alignItemsCenter]}>
+          <Btn
+            width={'85%'}
+            method={() => {
+              setPickupModal(true);
+            }}>
+            <Text>
+              {pickupPerson == '' ? 'Select Pickup Boy' : pickupPerson.name}
+            </Text>
+          </Btn>
+
+          <Btn
+            width={'85%'}
+            method={() => {
+              setAdminModal(true);
+            }}>
+            <Text>
+              {wareHouseAdmin == '' ? 'Select Manager' : wareHouseAdmin.name}
+            </Text>
+          </Btn>
+
+          <Btn width={'85%'} method={() => setIsFromDatePickerOpen(true)}>
+            <Text>
+              From {fromDate ? fromDate.toLocaleDateString() : 'From Date'}
+            </Text>
+          </Btn>
+          <Btn method={() => setIsToDatePickerOpen(true)} width={'85%'}>
+            <Text>To {toDate ? toDate.toLocaleDateString() : 'To Date'}</Text>
+          </Btn>
+          <View style={[ES.w85, ES.flexRow, ES.justifyContentSpaceBetween]}>
+            <Btn
+              method={() => getSortedRecords()}
+              bgColor={blackButton}
+              width={'70%'}>
+              <Text>Search</Text>
+            </Btn>
+            <Btn
+              method={() => handleResetFilters()}
+              bgColor={bluebutton}
+              width={'25%'}
+              px={1}>
+              <View>
+                <Image
+                  source={resetIcon}
+                  style={[ES.hs27, ES.objectFitContain]}
+                />
+              </View>
+            </Btn>
+          </View>
+        </View>
+      </ModalComponent>
 
       <View style={[s.header]}>
         <View style={[s.searchContainer]}>
           <TextInput
-            style={[s.textInput, ES.textDanger]}
+            style={[s.textInput, ES.fx1]}
             placeholder="Search"
-            onChangeText={text => handleSearchItems(text)}
+            onChangeText={text => getSortedRecords(text)}
           />
-        </View>
-
-        <View style={[s.sortContainer]}>
-          <TouchableOpacity
-            onPress={() => setAdminModal(true)}
-            style={[s.sortButton]}>
-            <Text style={[s.buttonText]}>
-              {wareHouseAdmin == '' ? 'Select Manager' : wareHouseAdmin.name}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setPickupModal(true)}
-            style={[s.sortButton]}>
-            <Text style={[s.buttonText]}>
-              {pickupPerson == '' ? 'Select Pickup Boy' : pickupPerson.name}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={[s.inputContainer]}>
-          <TouchableOpacity
-            style={[s.dateButton]}
-            onPress={() => setIsFromDatePickerOpen(true)}>
-            <Text style={[s.buttonText]}>
-              From {fromDate ? fromDate.toLocaleDateString() : 'From Date'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => setIsToDatePickerOpen(true)}
-            style={[s.dateButton]}>
-            <Text style={[s.buttonText]}>
-              To {toDate ? toDate.toLocaleDateString() : 'To Date'}
-            </Text>
+          <TouchableOpacity onPress={() => setFilterModal(true)}>
+            <Image
+              source={filterIcon}
+              style={[ES.hs50, ES.ws50, ES.objectFitContain]}
+            />
           </TouchableOpacity>
         </View>
 
@@ -427,14 +440,6 @@ const Records = ({route}) => {
             setIsToDatePickerOpen(false);
           }}
         />
-
-        <View style={[ES.w100, ES.alignItemsCenter]}>
-          <TouchableOpacity
-            onPress={() => getSortedRecords()}
-            style={[s.searchButton]}>
-            <Text style={[s.searchText]}>Search</Text>
-          </TouchableOpacity>
-        </View>
       </View>
 
       <View
@@ -442,10 +447,13 @@ const Records = ({route}) => {
           ES.w100,
           isLoading == true ? ES.dNone : ES.dBlock,
           s.contentContainer,
-        ]}>
+        ]}
+        key={isLoading}>
         <View style={[ES.w100, {backgroundColor: '#efefef'}]}>
-          <View style={[ES.mt1]}>
-            <Text style={[ES.headingText, ES.textCenter]}>{location}</Text>
+          <View style={[ES.mt1, ES.centerItems]}>
+            <HeadingText style={[ES.headingText, ES.textCenter]}>
+              <Text style={[ES.capitalize]}>{location}</Text>
+            </HeadingText>
           </View>
 
           <View
@@ -459,7 +467,11 @@ const Records = ({route}) => {
               keyExtractor={(item, index) => index.toString()}
               contentContainerStyle={[s.flatList]}
               renderItem={({item}) => <RecordCard item={item} />}
-              onEndReached={handleLoadMoreRecords}
+              onEndReached={
+                !isSorting && records.length >= 10
+                  ? handleLoadMoreRecords
+                  : null
+              }
               onEndReachedThreshold={0.3}
               maxToRenderPerBatch={20}
               ListFooterComponent={() => {
@@ -478,9 +490,10 @@ const Records = ({route}) => {
           <View
             style={[
               records.length == 0 ? ES.dBlock : ES.dNone,
-              ES.fx1,
+              ES.h100,
               ES.gap2,
-            ]}>
+            ]}
+            key={records}>
             <View style={[ES.w100, ES.h50, ES.alignItemsCenter]}>
               <Image
                 source={noDataImage}
@@ -520,19 +533,24 @@ const s = StyleSheet.create({
     ES.shadow10,
     {
       backgroundColor: headerBackgroundColor,
-      borderBottomLeftRadius: 20, // Apply radius to bottom-left corner
-      borderBottomRightRadius: 20,
+      /* borderBottomLeftRadius: 20, 
+      borderBottomRightRadius: 20, */
     },
   ]),
   contentContainer: StyleSheet.flatten([{flex: 0.85}]),
   searchContainer: StyleSheet.flatten([
     ES.fx0,
-    ES.gap4,
+    ES.gap1,
     ES.px1,
     ES.flexRow,
     ES.alignItemsCenter,
   ]),
-
+  input: StyleSheet.flatten([
+    {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
+    ES.w99,
+    ES.px1,
+    ES.f16,
+  ]),
   textInput: StyleSheet.flatten([
     ES.px1,
     ES.py1,
@@ -575,14 +593,7 @@ const s = StyleSheet.create({
     ES.capitalize,
     ES.textSecondary,
   ]),
-  modalListContainer: StyleSheet.flatten([
-    ES.fx0,
-    ES.flexRow,
-    ES.justifyContentSpaceBetween,
-    ES.px2,
-    ES.alignItemsCenter,
-    ES.mt06,
-  ]),
+  modalListContainer: StyleSheet.flatten([ES.fx0, ES.px2, ES.mt06]),
   radio: StyleSheet.flatten([
     ES.hs15,
     ES.ws15,

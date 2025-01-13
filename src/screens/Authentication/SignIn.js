@@ -15,6 +15,7 @@ import {
   backgroundColor,
   primaryColor,
   primaryColorOrange,
+  primaryTextColor,
 } from '../../Constants/Colours';
 import axios from 'axios';
 import axiosClient from '../../../axiosClient';
@@ -162,7 +163,7 @@ const s = StyleSheet.create({
   ]),
   text: StyleSheet.flatten([ES.textLight]),
   input: StyleSheet.flatten([
-    {borderBottomWidth: 1, borderColor: primaryColorOrange, borderRadius: 5},
+    {borderBottomWidth: 1, borderColor: primaryTextColor, borderRadius: 5},
     ES.w90,
     ES.px1,
     ES.f16,

@@ -19,22 +19,20 @@ import {Picker} from '@react-native-picker/picker';
 import HeadingText from '../../Components/HeadingText';
 import Btn from '../../Components/Btn';
 
-import {
-  editUserIcon,
-  logOutIcon,
-  userIconOrange,
-  whitePenIcon,
-} from '../../Constants/imagesAndIcons';
+import {editUserIcon, userIconOrange} from '../../Constants/imagesAndIcons';
 
-const UpdateAccount = () => {
-  const [name, setName] = useState('rahul');
-  const [email, setEmail] = useState('rahre49@gmail.com');
-  const [password, setPassword] = useState('111111');
+const UpdateUser = ({route}) => {
+  console.log('UpdateUser: ', route.params);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [mobileNo, setMobileNo] = useState('');
   const [storageLocation, setStorageLocation] = useState('');
   const [role, setRole] = useState('');
+  const [user, setUser] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [currentUser, setCurrentUser] = useState({});
+  const [userId, setUserId] = useState(route.params.id);
 
   const [storageLocations, setStorageLocations] = useState([]);
   const [roles, setRoles] = useState([]);
@@ -47,15 +45,10 @@ const UpdateAccount = () => {
     if (token) dispatch(toggleLogin(true));
   };
 
-  const handleLogOut = async () => {
-    await AsyncStorage.removeItem('token');
-    dispatch(toggleLogin(false));
-  };
-
-  const getData = async () => {
+  const getUser = async () => {
     try {
-      const currentRes = await axiosClient.get('/user/getcurrentuser');
-      setCurrentUser(currentRes.data.result);
+      const currentRes = await axiosClient.get(`user/get/${route.params.id}`);
+      setUser(currentRes.data.result);
       console.log('currentRes: ', currentRes.data.result.mobile_no);
       setName(currentRes.data.result.name);
       setMobileNo(currentRes.data.result.mobile_no);
@@ -65,7 +58,16 @@ const UpdateAccount = () => {
     } catch (error) {
       console.log('Error fetching storage locations:', error);
     }
+  };
 
+  useEffect(() => {
+    getUser();
+  }, [route.params.id]);
+  useEffect(() => {
+    console.log('storageLocation : ', storageLocation);
+  }, [storageLocation]);
+
+  const getData = async () => {
     try {
       const storageRes = await axiosClient.get('/storage/location/getall');
       setStorageLocations(storageRes.data.result);
@@ -87,7 +89,7 @@ const UpdateAccount = () => {
     getData();
   }, []);
 
-  const handleAddUser = async () => {
+  const handleUpdateUser = async () => {
     if (!verifyInputs()) return;
 
     try {
@@ -99,13 +101,12 @@ const UpdateAccount = () => {
         storage_location_id: storageLocation,
         role_type: role,
       };
+      console.log('form: ', form);
 
-      const token = await AsyncStorage.getItem('token');
-
-      const res = await axiosClient.post('/user/create', form);
+      const res = await axiosClient.put(`/user/update/${user._id}`, form);
       dispatch(toggleLogin(true));
       if (res) {
-        showToast('User added successfully');
+        showToast('User updated ');
       }
     } catch (error) {
       if (error.response?.status === 409) {
@@ -129,6 +130,21 @@ const UpdateAccount = () => {
       return false;
     }
 
+    if (!email) {
+      showToast('Please enter email');
+      return false;
+    }
+
+    if (!storageLocation) {
+      showToast('Please select storage location');
+      return false;
+    }
+
+    if (!role) {
+      showToast('Please select role');
+      return false;
+    }
+
     return true;
   };
 
@@ -139,10 +155,6 @@ const UpdateAccount = () => {
       ToastAndroid.CENTER,
     );
   };
-
-  useEffect(() => {
-    console.log('mobileNo : ', mobileNo);
-  }, [mobileNo]);
 
   return (
     <View style={[s.container]}>
@@ -155,20 +167,25 @@ const UpdateAccount = () => {
           style={[s.input]}
           placeholder="Name"
           value={name}
-          onChangeText={text => setName(text)}
+          onChangeText={setName}
         />
+
         <TextInput
           style={[s.input]}
           placeholder="Mobile Number"
-          value={mobileNo.toString()}
-          onChangeText={text => setMobileNo(text)}
+          keyboardType="phone-pad"
+          value={mobileNo ? mobileNo.toString() : ''}
+          onChangeText={setMobileNo}
         />
+
         <TextInput
           style={[s.input]}
           placeholder="Email"
           keyboardType="email-address"
           value={email}
+          onChangeText={setEmail}
         />
+
         {storageLocations.length > 0 && (
           <View style={[s.input]}>
             <Picker
@@ -200,17 +217,15 @@ const UpdateAccount = () => {
             </Picker>
           </View>
         )}
-        <View style={[ES.flexRow, ES.gap2]}>
-          <Btn method={handleAddUser} px={10} width={'30%'}>
-            <Text>Update</Text>
-          </Btn>
-        </View>
+        <Btn method={handleUpdateUser}>
+          <Text style={[ES.textLight, ES.fw700, ES.f20]}>Update </Text>
+        </Btn>
       </View>
     </View>
   );
 };
 
-export default UpdateAccount;
+export default UpdateUser;
 
 const s = StyleSheet.create({
   container: StyleSheet.flatten([
@@ -225,7 +240,6 @@ const s = StyleSheet.create({
     ES.px1,
     ES.f16,
   ]),
-
   button: StyleSheet.flatten([
     ES.tempBorder,
     ES.bgPrimary,
@@ -234,13 +248,10 @@ const s = StyleSheet.create({
     ES.py04,
     ES.shadow1,
   ]),
-
   card: StyleSheet.flatten([
     ES.w80,
-    ES.h70,
     ES.fx0,
     ES.centerItems,
-    ES.pt5,
     ES.gap5,
     ES.px1,
     ES.bRadius10,
@@ -260,6 +271,7 @@ const s = StyleSheet.create({
     ES.hs100,
     ES.ws100,
     ES.centerItems,
+
     ES.relative,
     ES.shadow10,
     ES.absolute,

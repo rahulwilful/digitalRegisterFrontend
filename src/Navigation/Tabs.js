@@ -3,7 +3,7 @@ import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Home from '../screens/Home/Home';
 import MyAccount from '../screens/Home/MyAccount';
-import StackNav from './StackNav';
+import {StackNav, AccountStack} from './StackNav';
 import {homeIcon, userIcon} from '../Constants/imagesAndIcons';
 import DrawerNav from './DrawerNav';
 
@@ -45,7 +45,7 @@ const Tabs = () => {
             />
           ),
         }}
-        component={MyAccount}
+        component={AccountStack}
       />
     </Tab.Navigator>
   );

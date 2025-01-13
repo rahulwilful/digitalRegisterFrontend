@@ -28,7 +28,7 @@ const UpdateItem = ({route}) => {
   const [loading, setLoading] = useState(true);
 
   console.log(' route.params.item_id: ', route);
-  const id = route.params;
+  const id = route.params.item_id;
 
   const [storageLocations, setStorageLocations] = useState([]);
   const [roles, setRoles] = useState([]);

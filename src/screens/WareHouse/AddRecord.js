@@ -8,18 +8,33 @@ import {
   Image,
   FlatList,
   ScrollView,
+  Modal,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import ES from '../../styles/ES';
 import axiosClient from '../../../axiosClient';
 import {Picker} from '@react-native-picker/picker';
-import {backgroundColor, primaryColor} from '../../Constants/Colours';
+import {
+  backgroundColor,
+  lightTextColor,
+  primaryColor,
+  primaryLightTextColor,
+  primaryTextColor,
+  whiteButton,
+} from '../../Constants/Colours';
 import {useDispatch, useSelector} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DropDownPicker from 'react-native-dropdown-picker';
-import {cancelIcon, itemIcon, penIcon} from '../../Constants/imagesAndIcons';
+import {
+  cancelIcon,
+  downArrowIcon,
+  itemIcon,
+  penIcon,
+} from '../../Constants/imagesAndIcons';
 import Btn from '../../Components/Btn';
 import HeadingText from '../../Components/HeadingText';
+import NormalText from '../../Components/NormalText';
+import ModalComponent from '../../Components/ModalComponent';
+import Loading from '../../Constants/Loading';
 
 const AddRecord = () => {
   const [name, setName] = useState('rahul');
@@ -29,23 +44,30 @@ const AddRecord = () => {
   const [storageLocation, setStorageLocation] = useState('');
   const [role, setRole] = useState('');
 
-  const [pickupPersonId, setPickupPersonId] = useState('');
-
-  const [dropDownOpen, setDropDownOpen] = useState(false);
+  const [pickupPerson, setPickupPerson] = useState('');
+  const [pickupPersons, setPickupPersons] = useState([]);
+  const [pickPersonModal, setPickPersonModal] = useState(false);
+  const [pickupModalLoading, setPickupModalLoading] = useState(false);
 
   const [renderKey, setRenderKey] = useState(0);
+  const [originalItems, setOriginalItems] = useState([]);
   const [items, setItems] = useState([]);
-  const [pickupPersons, setPickupPersons] = useState([]);
-
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [quantity, setQuantity] = useState(null);
   const [item_list, setItem_list] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
+
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [quantity, setQuantity] = useState(null);
+
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const user = useSelector(state => state.user);
 
   const dispatch = useDispatch();
 
   const getData = async () => {
+    setIsLoading(true);
     console.log('AddRecorduser storage_location_id', user.storage_location_id);
     try {
       const pickupRes = await axiosClient.get(
@@ -61,7 +83,7 @@ const AddRecord = () => {
     }
 
     try {
-      const itemRes = await axiosClient.get('/item/getall');
+      const itemRes = await axiosClient.get('/item/getall/active');
       console.log('itemRes: ', itemRes.data.result);
       let temp = itemRes.data.result;
       let temp2 = [];
@@ -71,11 +93,13 @@ const AddRecord = () => {
           value: temp[i],
         });
       }
-      setItems(temp2);
+      setItems(itemRes.data.result);
+      setOriginalItems(itemRes.data.result);
       setRenderKey(renderKey + 1);
     } catch (error) {
       console.log('error: ', error);
     }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -162,7 +186,7 @@ const AddRecord = () => {
   }, [item_list]);
 
   const handleAddRecord = async () => {
-    if (pickupPersonId == '') {
+    if (pickupPerson == '') {
       showToast('Please select a pickup person');
       return false;
     }
@@ -175,7 +199,7 @@ const AddRecord = () => {
       const form = {
         storage_location_id: user.storage_location_id,
         warehouse_admin: user._id,
-        pickup_person: pickupPersonId,
+        pickup_person: pickupPerson._id,
         item_list: item_list,
       };
       console.log('form', form);
@@ -185,8 +209,10 @@ const AddRecord = () => {
 
       if (recordRes) {
         showToast('Record added successfully');
-        //vigation.navigate('Home');
       }
+
+      setPickupPerson('');
+      setItem_list([]);
     } catch (error) {
       console.log('error: ', error);
     }
@@ -233,6 +259,7 @@ const AddRecord = () => {
     setItem_list([...item_list, newItem]);
     setSelectedItem(null);
     setQuantity(null);
+    setModalVisible(true);
   };
 
   const handleEditItem = item => {
@@ -257,166 +284,314 @@ const AddRecord = () => {
     }
   };
 
+  const getItemsByName = async name => {
+    setIsLoading(true);
+    setSearchQuery(name);
+
+    let form = {
+      item_name: name,
+    };
+    console.log('name: ', form);
+
+    if (name.length === 0) {
+      setItems(originalItems);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const res = await axiosClient.post(`/item/get/active/by/name`, form);
+
+      // console.log('AllItems res: ', res.data.result.length);
+
+      setItems(res.data.result);
+    } catch (error) {
+      if (error.response.data.message) {
+        showToast(error.response.data.message);
+      } else {
+        showToast('Something went wrong');
+      }
+      setItems([]);
+      console.log('error: ', error);
+    }
+    setIsLoading(false);
+  };
+
   return (
-    <View style={[s.container]}>
-      <View style={[s.inputContainer]} key={renderKey}>
-        <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
-          Add Record
-        </HeadingText>
-        <View style={[ES.w100]}>
-          {pickupPersons.length > 0 && (
-            <View style={[s.input]}>
-              <Picker selectedValue={role} onValueChange={setPickupPersonId}>
-                <Picker.Item label="Select a Pickup Person" value="" />
-                {pickupPersons.map(item => (
-                  <Picker.Item
-                    key={item._id}
-                    label={item.name}
-                    value={item._id}
-                  />
-                ))}
-              </Picker>
-            </View>
-          )}
+    <>
+      <ModalComponent
+        isModalVisible={isModalVisible}
+        height={'90%'}
+        closeModal={() => setModalVisible(false)}>
+        <View style={[ES.fx1, ES.gap1]}>
+          <View style={[]}>
+            <TextInput
+              value={searchQuery}
+              onChangeText={text => getItemsByName(text)}
+              placeholder="Search..."
+              style={[s.input]}
+            />
+          </View>
+          <View style={[ES.p04, ES.fx1, isLoading ? ES.dNone : ES.dBlock]}>
+            <FlatList
+              data={items}
+              contentContainerStyle={[ES.flexColumn]}
+              renderItem={({item}) => (
+                <TouchableOpacity
+                  onPress={() => {
+                    setSelectedItem(item);
+                    setModalVisible(false);
+                  }}
+                  style={[
+                    ES.p04,
+                    {borderBottomWidth: 0.2, borderColor: primaryColor},
+                  ]}>
+                  <NormalText size={18} color={primaryTextColor}>
+                    {item.item_name}{' '}
+                    <Text style={[{color: lightTextColor}, ES.fw500, ES.f12]}>
+                      ({item.quantity_unit})
+                    </Text>
+                  </NormalText>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+          <View style={[ES.fx1, isLoading ? ES.dBlock : ES.dNone]}>
+            <Loading />
+          </View>
         </View>
-        <View style={[ES.w100, ES.relative]}>
-          {items.length > 0 && selectedItem == null && (
+      </ModalComponent>
+
+      <ModalComponent
+        height={'70%'}
+        isModalVisible={pickPersonModal}
+        closeModal={() => setPickPersonModal(false)}>
+        <View style={[ES.fx1, ES.py2]}>
+          <View style={[ES.fx1, pickupModalLoading ? ES.dNone : null]}>
+            <View style={[ES.fx1, s.modalListContainer]}>
+              <Btn
+                method={() => {
+                  setPickupPerson(''), setPickPersonModal(false);
+                }}
+                width={'95%'}
+                bgColor={whiteButton}
+                color={primaryTextColor}>
+                <Text> None</Text>
+              </Btn>
+            </View>
+            <FlatList
+              data={pickupPersons}
+              contentContainerStyle={[ES.pb1, ES.w100]}
+              renderItem={({item}) => (
+                <View style={[s.modalListContainer]}>
+                  {pickupPerson._id != item._id ? (
+                    <Btn
+                      method={() => {
+                        setPickupPerson(item), setPickPersonModal(false);
+                      }}
+                      width={'95%'}
+                      bgColor={whiteButton}
+                      color={primaryTextColor}>
+                      <Text> {item.name.slice(0, 9)}</Text>
+                    </Btn>
+                  ) : (
+                    <Btn width={'95%'}>
+                      <Text> {item.name.slice(0, 9)} </Text>
+                    </Btn>
+                  )}
+                </View>
+              )}
+            />
+          </View>
+          <View style={[ES.fx1, pickupModalLoading ? null : ES.dNone]}>
+            <Loading />
+          </View>
+        </View>
+      </ModalComponent>
+
+      <View style={[s.container]}>
+        <View style={[s.inputContainer]} key={renderKey}>
+          <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
+            Add Record
+          </HeadingText>
+
+          <View style={[ES.w100, ES.relative]}>
             <View style={[ES.hs35]}>
-              <DropDownPicker
-                style={[s.selectSearch]}
-                open={dropDownOpen}
-                value={selectedItem}
-                items={items}
-                setOpen={setDropDownOpen}
-                setValue={setSelectedItem}
-                setItems={setItems}
-                searchable={true}
-                placeholder="Add Item"
-              />
-            </View>
-          )}
-        </View>
-
-        {selectedItem != null && (
-          <View style={[ES.fx0, ES.flexRow, ES.gap1]}>
-            <View
-              style={[
-                ES.fx6,
-                s.input,
-                ES.flexRow,
-                ES.justifyContentSpaceBetween,
-                ES.alignItemsCenter,
-              ]}>
-              <TextInput
-                style={[, ES.capitalize]}
-                placeholder="Name"
-                value={selectedItem.item_name}
-              />
-
               <TouchableOpacity
-                style={[]}
-                onPress={() => {
-                  setSelectedItem(null);
-                  setQuantity(null);
-                }}>
+                onPress={() => setPickPersonModal(true)}
+                style={[
+                  ES.flexRow,
+                  ES.justifyContentSpaceBetween,
+                  ES.alignItemsCenter,
+                  ES.py06,
+                  ES.px2,
+                  ES.bRadius5,
+                  s.input,
+                ]}>
+                <NormalText color={'rgb(68, 64, 64)'}>
+                  <Text>
+                    {pickupPerson ? pickupPerson.name : 'Select Pickup Person'}
+                  </Text>
+                </NormalText>
                 <Image
-                  source={cancelIcon}
-                  style={[ES.hs25, ES.ws25, ES.objectFitContain]}
+                  source={downArrowIcon}
+                  style={[ES.hs11, ES.objectFitContain]}
                 />
               </TouchableOpacity>
             </View>
-
-            <TextInput
-              placeholder="Qty"
-              style={[s.input, ES.fx2]}
-              keyboardType="number-pad"
-              value={quantity ? quantity.toString() : ''} // Ensure it's a string
-              onChangeText={text => {
-                const sanitizedText = text.replace(/[^0-9]/g, ''); // Removes non-numeric characters
-                setQuantity(sanitizedText); // Updates state with sanitized input
-              }}
-            />
-
-            <View style={[ES.fx0, ES.centerItems]}>
-              <TouchableOpacity
-                onPress={handleAddItem}
-                style={[{backgroundColor: primaryColor}, ES.bRadius5, ES.p06]}>
-                <Text style={[ES.textLight, ES.fw700, ES.f16]}>Add</Text>
-              </TouchableOpacity>
-            </View>
           </View>
-        )}
 
-        <TouchableOpacity>
-          <Btn method={handleAddRecord}>
-            <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add Record </Text>
-          </Btn>
-        </TouchableOpacity>
-      </View>
+          <View style={[ES.w100, ES.relative]}>
+            {items.length > 0 && selectedItem == null && (
+              <View style={[ES.hs35]}>
+                <TouchableOpacity
+                  onPress={() => setModalVisible(true)}
+                  style={[
+                    ES.flexRow,
+                    ES.justifyContentSpaceBetween,
+                    ES.alignItemsCenter,
+                    ES.py06,
+                    ES.px2,
+                    ES.bRadius5,
+                    s.input,
+                  ]}>
+                  <NormalText color={'rgb(68, 64, 64)'}>
+                    <Text>Select Item</Text>
+                  </NormalText>
+                  <Image
+                    source={downArrowIcon}
+                    style={[ES.hs11, ES.objectFitContain]}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
 
-      <ScrollView>
-        <View style={[ES.w100, ES.fx1, ES.mt1, ES.pb3, ES.relative, ES.z1]}>
-          {item_list.length > 0 && (
-            <View style={[]}>
-              <FlatList
-                data={item_list}
-                keyExtractor={(subItem, index) => index.toString()}
-                contentContainerStyle={[ES.fx0, ES.px04]}
-                renderItem={({item: subItem}) => (
-                  <View style={[s.itemContainer]}>
-                    <View style={[ES.fx0, ES.centerItems]}>
-                      <Image
-                        source={itemIcon}
-                        style={[ES.hs50, ES.ws50, ES.objectFitContain]}
-                      />
-                    </View>
-                    <View style={[ES.fx1]}>
-                      <TouchableOpacity style={[]}>
-                        <Text
-                          style={[ES.f18, ES.fw500, ES.px08, ES.capitalize]}>
-                          Item: {subItem.item_name}
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity style={[, ES.flexRow]}>
-                        <Text
-                          style={[
-                            ES.f16,
-                            ES.fw500,
-                            ES.px08,
-                            ES.capitalize,
-                            ES.textSecondary,
-                          ]}>
-                          qty:{' '}
-                          <Text style={[s.lightText]}>
-                            {subItem.quantity} {subItem.quantity_unit}
-                          </Text>
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => handleEditItem(subItem)}
-                      style={[]}>
-                      <Image
-                        source={penIcon}
-                        style={[ES.hs35, ES.ws35, ES.objectFitContain]}
-                      />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => handleRemoveItem(subItem)}
-                      style={[]}>
-                      <Image
-                        source={cancelIcon}
-                        style={[ES.hs27, ES.ws27, ES.objectFitContain]}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
+          {selectedItem != null && (
+            <View style={[ES.fx0, ES.flexRow, ES.gap1]}>
+              <View
+                style={[
+                  ES.fx6,
+                  s.input,
+                  ES.flexRow,
+                  ES.justifyContentSpaceBetween,
+                  ES.alignItemsCenter,
+                ]}>
+                <TextInput
+                  style={[, ES.capitalize]}
+                  placeholder="Name"
+                  value={selectedItem.item_name}
+                />
+
+                <TouchableOpacity
+                  style={[]}
+                  onPress={() => {
+                    setSelectedItem(null);
+                    setQuantity(null);
+                  }}>
+                  <Image
+                    source={cancelIcon}
+                    style={[ES.hs25, ES.ws25, ES.objectFitContain]}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <TextInput
+                placeholder="Qty"
+                style={[s.input, ES.fx2]}
+                keyboardType="number-pad"
+                value={quantity ? quantity.toString() : ''}
+                onChangeText={text => {
+                  const sanitizedText = text.replace(/[^0-9]/g, '');
+                  setQuantity(sanitizedText);
+                }}
               />
+
+              <View style={[ES.fx0, ES.centerItems]}>
+                <TouchableOpacity
+                  onPress={handleAddItem}
+                  style={[
+                    {backgroundColor: primaryColor},
+                    ES.bRadius5,
+                    ES.p06,
+                  ]}>
+                  <Text style={[ES.textLight, ES.fw700, ES.f16]}>Add</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
+
+          <TouchableOpacity>
+            <Btn method={handleAddRecord}>
+              <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add Record </Text>
+            </Btn>
+          </TouchableOpacity>
         </View>
-      </ScrollView>
-    </View>
+
+        <ScrollView>
+          <View style={[ES.w100, ES.fx1, ES.mt1, ES.pb3, ES.relative, ES.z1]}>
+            {item_list.length > 0 && (
+              <View style={[]}>
+                <FlatList
+                  data={item_list}
+                  keyExtractor={(subItem, index) => index.toString()}
+                  contentContainerStyle={[ES.fx0, ES.px04]}
+                  renderItem={({item: subItem}) => (
+                    <View style={[s.itemContainer]}>
+                      <View style={[ES.fx0, ES.centerItems]}>
+                        <Image
+                          source={itemIcon}
+                          style={[ES.hs50, ES.ws50, ES.objectFitContain]}
+                        />
+                      </View>
+                      <View style={[ES.fx1]}>
+                        <TouchableOpacity style={[]}>
+                          <Text
+                            style={[ES.f18, ES.fw500, ES.px08, ES.capitalize]}>
+                            Item: {subItem.item_name}
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[, ES.flexRow]}>
+                          <Text
+                            style={[
+                              ES.f16,
+                              ES.fw500,
+                              ES.px08,
+                              ES.capitalize,
+                              ES.textSecondary,
+                            ]}>
+                            qty:{' '}
+                            <Text style={[s.lightText]}>
+                              {subItem.quantity} {subItem.quantity_unit}
+                            </Text>
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                      <TouchableOpacity
+                        onPress={() => handleEditItem(subItem)}
+                        style={[]}>
+                        <Image
+                          source={penIcon}
+                          style={[ES.hs35, ES.ws35, ES.objectFitContain]}
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => handleRemoveItem(subItem)}
+                        style={[]}>
+                        <Image
+                          source={cancelIcon}
+                          style={[ES.hs27, ES.ws27, ES.objectFitContain]}
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                />
+              </View>
+            )}
+          </View>
+        </ScrollView>
+      </View>
+    </>
   );
 };
 
@@ -464,6 +639,14 @@ const s = StyleSheet.create({
     ES.py04,
     ES.shadow1,
   ]),
+  modal: StyleSheet.flatten([
+    ES.w90,
+    ES.h90,
+    ES.bgLight,
+    ES.bRadius10,
+    ES.shadow10,
+    {borderWidth: 0.5, borderColor: '#000'},
+  ]),
   inputContainer: StyleSheet.flatten([
     ES.w100,
     ES.fx0,
@@ -478,5 +661,13 @@ const s = StyleSheet.create({
       borderBottomRightRadius: 20,
       backgroundColor,
     },
+  ]),
+  modalListContainer: StyleSheet.flatten([ES.fx0, ES.px2, ES.mt06]),
+  modalClose: StyleSheet.flatten([
+    ES.fx0,
+    ES.alignItemsEnd,
+    ES.w100,
+    ES.pt06,
+    ES.pe06,
   ]),
 });

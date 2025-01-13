@@ -31,7 +31,7 @@ import SignIn from './src/screens/Authentication/SignIn';
 import SignUp from './src/screens/Authentication/SignUp';
 import Register from './src/screens/WareHouse/Register';
 import Routes from './src/Navigation/Routes';
-import AddUser from './src/screens/Authentication/AddUser';
+import AddUser from './src/screens/Users/AddUser';
 import AddRecord from './src/screens/WareHouse/AddRecord';
 import axiosClient from './axiosClient';
 import {addUser} from './src/Redux/actions/userActions';

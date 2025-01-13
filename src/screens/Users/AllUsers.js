@@ -7,7 +7,6 @@ import {
   ScrollView,
   ToastAndroid,
   Image,
-  Modal,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import axiosClient from '../../../axiosClient';
@@ -18,20 +17,24 @@ import {headerBackgroundColor, primaryColor} from '../../Constants/Colours';
 import Loading from '../../Constants/Loading';
 import {useDispatch, useSelector} from 'react-redux';
 import {addAllItems, addIAlltems} from '../../Redux/actions/itemActions';
-import {noDataImage} from '../../Constants/imagesAndIcons';
-import LinearGradient from 'react-native-linear-gradient';
+import {allUsersIcon, noDataImage} from '../../Constants/imagesAndIcons';
+import UserCard from '../../Components/UserCard';
 import ModalComponent from '../../Components/ModalComponent';
 import Btn from '../../Components/Btn';
 
-const AllItems = () => {
+const AllUsers = () => {
   const reduxItems = useSelector(state => state.items);
   const [items, setItems] = useState([]);
   const [originalItems, setOriginalItems] = useState([]);
+
+  const [users, setUsers] = useState([]);
+  const [originalUsers, setOriginalUsers] = useState([]);
+
   const [isLoading, setIsLoading] = useState(true);
   const [renderKey, setRenderKey] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
+
   const [isModalVisible, setModalVisible] = useState(false);
-  const [itemToDeleteRestore, setItemToDeleteRestore] = useState({});
+  const [userToDeleteRestore, setUserToDeleteRestore] = useState({});
 
   const dispatch = useDispatch();
 
@@ -43,9 +46,8 @@ const AllItems = () => {
     );
   };
 
-  const getItemsByName = async name => {
+  const getUsersByName = async name => {
     setIsLoading(true);
-    setSearchQuery(name);
 
     let form = {
       item_name: name,
@@ -61,7 +63,7 @@ const AllItems = () => {
     try {
       const res = await axiosClient.post(`/item/get/by/name`, form);
 
-      // console.log('AllItems res: ', res.data.result.length);
+      console.log('AllItems res: ', res);
       setItems(res.data.result);
     } catch (error) {
       if (error.response.data.message) {
@@ -69,38 +71,35 @@ const AllItems = () => {
       } else {
         showToast('Something went wrong');
       }
-      setItems([]);
       console.log('error: ', error);
     }
     setIsLoading(false);
   };
 
-  const handleDeleteItem = async id => {
-    console.log('handleDeleteItem: ', id);
+  const handleDeleteUser = async id => {
+    console.log('handleDeleteUser: ', id);
 
     try {
-      const res = await axiosClient.delete(`/item/${id}`);
+      const res = await axiosClient.delete(`/user/delete/${id}`);
       if (res) {
-        showToast('item deleted');
+        showToast(res.data.message);
       }
 
-      console.log('res.data: ', res.data);
-
-      let temp = items;
+      let temp = users;
       for (let i in temp) {
         if (temp[i]._id === id) {
           temp[i].is_delete = true;
         }
       }
 
-      setItems(temp);
-      let temp2 = originalItems;
+      setUsers(temp);
+      let temp2 = originalUsers;
       for (let i in temp2) {
         if (temp2[i]._id === id) {
           temp2[i].is_delete = true;
         }
       }
-      setOriginalItems(temp2);
+      setOriginalUsers(temp2);
       setRenderKey(renderKey + 1);
     } catch (error) {
       if (error.response.data.message) {
@@ -113,30 +112,30 @@ const AllItems = () => {
     setModalVisible(false);
   };
 
-  const handleRestoreItem = async id => {
-    console.log('handleRestoreItem: ', id);
+  const handleRestoreUser = async id => {
+    console.log('handleRestoreUser: ', id);
 
     try {
-      const res = await axiosClient.put(`/item/restore/${id}`);
+      const res = await axiosClient.put(`/user/restore/${id}`);
       if (res) {
-        showToast('item restored');
+        showToast(res.data.message);
       }
-      console.log('res.data: ', res.data);
-      let temp = items;
+
+      let temp = users;
       for (let i in temp) {
         if (temp[i]._id === id) {
           temp[i].is_delete = false;
         }
       }
 
-      setItems(temp);
-      let temp2 = originalItems;
+      setUsers(temp);
+      let temp2 = originalUsers;
       for (let i in temp2) {
         if (temp2[i]._id === id) {
           temp2[i].is_delete = false;
         }
       }
-      setOriginalItems(temp2);
+      setOriginalUsers(temp2);
       setRenderKey(renderKey + 1);
     } catch (error) {
       if (error.response.data.message) {
@@ -149,16 +148,16 @@ const AllItems = () => {
     setModalVisible(false);
   };
 
-  const getItems = async () => {
-    console.log('getItems: ');
-    setSearchQuery('');
+  const getUsers = async () => {
+    console.log('getUsers: ');
     setIsLoading(true);
+
     try {
-      const res = await axiosClient.get(`/item/getall`);
-      console.log('AllItems res: ', res.data.result);
-      setItems(res.data.result);
-      setOriginalItems(res.data.result);
-      useDispatch(addAllItems(res.data.result));
+      const res = await axiosClient.get(`/user/getall`);
+
+      //console.log('res: ', res.data.result);
+      setUsers(res.data.result);
+      setOriginalUsers(res.data.result);
     } catch (error) {
       console.log('error: ', error);
     }
@@ -166,32 +165,36 @@ const AllItems = () => {
   };
 
   useEffect(() => {
-    getItems();
+    getUsers();
   }, []);
+
+  const handleSearchFilter = text => {
+    if (text.length === 0) {
+      setItems(originalItems);
+    }
+    {
+      const newData = originalItems.filter(item => {
+        const itemData = item.item_name
+          ? item.item_name.toUpperCase()
+          : ''.toUpperCase();
+        const textData = text.toUpperCase();
+        return itemData.indexOf(textData) > -1;
+      });
+      setItems(newData);
+    }
+  };
 
   const closeModal = () => {
     setModalVisible(false);
   };
 
-  const openModal = item => {
-    setItemToDeleteRestore(item);
+  const openModal = user => {
+    setUserToDeleteRestore(user);
     setModalVisible(true);
   };
 
   return (
     <>
-      {/*  <Modal visible={true} transparent={true} animationType="slide">
-        <View style={[ES.fx1, ES.centerItems, ES.p1]}>
-          <LinearGradient
-            colors={['#fff', '#fff4ed']} // Gradient colors
-            start={{x: 0, y: 0}} // Gradient starting point
-            end={{x: 1, y: 1}}
-            style={[s.modal]}>
-
-            </LinearGradient>
-        </View>
-      </Modal> */}
-
       <ModalComponent
         isModalVisible={isModalVisible}
         closeModal={closeModal}
@@ -199,19 +202,19 @@ const AllItems = () => {
         <View style={[ES.justifyContentSpaceEvenly, ES.fx1, ES.gap1]}>
           <View style={[ES.centerItems]}>
             <HeadingText>
-              <Text>{itemToDeleteRestore.item_name}</Text>
+              <Text>{userToDeleteRestore.name}</Text>
             </HeadingText>
           </View>
           <View style={[ES.centerItems]}>
             <Btn
               width={'50%'}
               method={() =>
-                itemToDeleteRestore.is_delete
-                  ? handleRestoreItem(itemToDeleteRestore._id)
-                  : handleDeleteItem(itemToDeleteRestore._id)
+                userToDeleteRestore.is_delete
+                  ? handleRestoreUser(userToDeleteRestore._id)
+                  : handleDeleteUser(userToDeleteRestore._id)
               }>
               <Text>
-                {itemToDeleteRestore.is_delete ? 'Restore' : 'Delete'}
+                {userToDeleteRestore.is_delete ? 'Restore' : 'Delete'}
               </Text>
             </Btn>
           </View>
@@ -220,33 +223,32 @@ const AllItems = () => {
 
       <View style={[ES.fx1]}>
         <View style={[ES.py1]}>
-          <HeadingText center>All Items</HeadingText>
+          <HeadingText center>All Users</HeadingText>
         </View>
 
         <View style={[s.header]}>
           <TextInput
             style={[s.textInput]}
             placeholder="Search"
-            value={searchQuery}
-            onChangeText={text => getItemsByName(text)}
+            onChangeText={text => getUsersByName(text)}
           />
         </View>
 
-        {isLoading == false && items.length > 0 && (
+        {isLoading == false && users.length > 0 && (
           <View style={[ES.w100, ES.fx1]}>
             <FlatList
-              data={items}
+              data={users}
               contentContainerStyle={[ES.px1, ES.gap2, ES.mt1, ES.pb5]}
               renderItem={({item}) => (
-                <ItemCard
+                <UserCard
                   item={item}
-                  handleDeleteItem={handleDeleteItem}
-                  handleRestoreItem={handleRestoreItem}
+                  handleDeleteUser={handleDeleteUser}
+                  handleRestoreUser={handleRestoreUser}
                   openModal={openModal}
                 />
               )}
               refreshing={isLoading}
-              onRefresh={getItems}
+              onRefresh={getUsers}
               maxToRenderPerBatch={20}
             />
           </View>
@@ -254,7 +256,7 @@ const AllItems = () => {
 
         <View
           style={[
-            isLoading == false && items.length == 0 ? ES.dBlock : ES.dNone,
+            isLoading == false && users.length == 0 ? ES.dBlock : ES.dNone,
             ES.fx1,
             ES.gap2,
           ]}>
@@ -277,7 +279,7 @@ const AllItems = () => {
   );
 };
 
-export default AllItems;
+export default AllUsers;
 
 const s = StyleSheet.create({
   header: StyleSheet.flatten([ES.px1, ES.flexRow, ES.centerItems, ES.w100]),
@@ -287,20 +289,5 @@ const s = StyleSheet.create({
     ES.w90,
     ES.px1,
     ES.f16,
-  ]),
-  modal: StyleSheet.flatten([
-    ES.w90,
-    ES.h90,
-    ES.bgLight,
-    ES.bRadius10,
-    ES.shadow10,
-    {borderWidth: 0.5, borderColor: '#000'},
-  ]),
-  modalClose: StyleSheet.flatten([
-    ES.fx0,
-    ES.alignItemsEnd,
-    ES.w100,
-    ES.pt06,
-    ES.pe06,
   ]),
 });
