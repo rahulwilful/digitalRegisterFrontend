@@ -114,7 +114,7 @@ const Home = ({navigation}) => {
                       ]}>
                       {item.name}
                     </Text>
-                    <View style={[ES.fx1, 2, ES.flexRow, ES.gap4]}>
+                    <View style={[ES.fx1, ES.flexRow, ES.gap1]}>
                       <Text style={[s.subInfo]}>State: {item.state}</Text>
 
                       <Text style={[s.subInfo]}>City: {item.city}</Text>
@@ -196,7 +196,7 @@ const s = StyleSheet.create({
     ES.w100,
   ]),
   subInfo: StyleSheet.flatten([
-    ES.f18,
+    ES.f17,
     ES.fw400,
     ES.capitalize,
     ES.textSecondary,

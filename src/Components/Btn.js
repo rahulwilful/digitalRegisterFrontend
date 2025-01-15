@@ -17,7 +17,7 @@ const Btn = ({children, method, color, px, width, bgColor}) => {
           style={[
             color ? {color: color} : ES.textLight,
             ES.fw700,
-            ES.f20,
+            ES.f18,
             ES.textCenter,
             ES.centerItems,
           ]}>

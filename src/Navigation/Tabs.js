@@ -18,7 +18,6 @@ const Tabs = () => {
         name="drawerHome"
         options={{
           title: '',
-
           tabBarIcon: ({focused}) => (
             <Image
               source={homeIcon}
@@ -31,6 +30,7 @@ const Tabs = () => {
         }}
         component={DrawerNav}
       />
+
       <Tab.Screen
         name="tabMyAccount"
         options={{

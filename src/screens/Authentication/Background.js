@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ToastAndroid,
   ImageBackground,
+  Dimensions,
 } from 'react-native';
 import React, {Children, useEffect, useState} from 'react';
 import ES from '../../styles/ES';
@@ -17,6 +18,8 @@ import axiosClient from '../../../axiosClient';
 import {toggleLogin} from '../../Redux/actions/action';
 import {ScrollView} from 'react-native-gesture-handler';
 import {wareHouseImage} from '../../Constants/imagesAndIcons';
+
+const screenHeight = Dimensions.get('window').height;
 
 const Background = ({children}) => {
   return (
@@ -41,7 +44,7 @@ export default Background;
 
 const s = StyleSheet.create({
   conatiner: StyleSheet.flatten([
-    ES.screenHeight,
+    {height: screenHeight},
     ES.centerItems,
     ES.w100,
     ES.absolute,

@@ -56,12 +56,22 @@ const Routes = () => {
         ]}>
         <Loading size={'large'} color={'#fff'} />
       </View>
-      <GestureHandlerRootView
-        style={[isLoading ? ES.dNone : ES.dBlock, {flex: 1}]}>
-        <NavigationContainer>
-          {isLoggedIn ? <Tabs /> : <UnAuthorized />}
-        </NavigationContainer>
-      </GestureHandlerRootView>
+
+      {isLoggedIn ? (
+        <GestureHandlerRootView
+          style={[isLoading ? ES.dNone : ES.dBlock, {flex: 1}]}>
+          <NavigationContainer>
+            <Tabs />
+          </NavigationContainer>
+        </GestureHandlerRootView>
+      ) : (
+        <GestureHandlerRootView
+          style={[isLoading ? ES.dNone : ES.dBlock, {flex: 1}]}>
+          <NavigationContainer>
+            <UnAuthorized />
+          </NavigationContainer>
+        </GestureHandlerRootView>
+      )}
     </>
   );
 };

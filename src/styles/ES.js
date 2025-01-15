@@ -6,7 +6,7 @@ const sceenWidth = Dimensions.get('window').width;
 
 const ES = StyleSheet.create({
   screenHeight: {
-    height: screenHeight,
+    height: screenHeight * 0.82,
   },
   minScreenHeight: {
     minHeight: screenHeight,

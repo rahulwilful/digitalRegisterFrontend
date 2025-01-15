@@ -19,8 +19,9 @@ import Btn from '../../Components/Btn';
 import headingText from '../../Components/HeadingText';
 import HeadingText from '../../Components/HeadingText';
 import Loading from '../../Constants/Loading';
+import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
 
-const UpdateItem = ({route}) => {
+const UpdateItem = ({route, navigation}) => {
   const [itemName, setItemName] = useState('');
   const [quantityUnit, setQuantityUnit] = useState('');
   const [item, setItem] = useState({});
@@ -69,6 +70,9 @@ const UpdateItem = ({route}) => {
 
       if (res) {
         showToast(res.data.message);
+        setTimeout(() => {
+          navigation.goBack();
+        }, 1000);
       }
     } catch (error) {
       if (error.response.data.message) {
@@ -103,33 +107,37 @@ const UpdateItem = ({route}) => {
   };
 
   return (
-    <View style={[s.container]}>
-      <View style={[s.card, loading ? ES.dNone : ES.dBlock]}>
-        <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
-          Update Item
-        </HeadingText>
-        <TextInput
-          style={[s.input]}
-          placeholder="Item Name"
-          value={itemName}
-          onChangeText={setItemName}
-        />
-        <TextInput
-          style={[s.input]}
-          placeholder="Quantity Unit"
-          value={quantityUnit}
-          onChangeText={setQuantityUnit}
-        />
+    <>
+      <KeyboardAvoidingComponent>
+        <View style={[s.container]}>
+          <View style={[s.card, loading ? ES.dNone : ES.dBlock]}>
+            <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
+              Update Item
+            </HeadingText>
+            <TextInput
+              style={[s.input]}
+              placeholder="Item Name"
+              value={itemName}
+              onChangeText={setItemName}
+            />
+            <TextInput
+              style={[s.input]}
+              placeholder="Quantity Unit"
+              value={quantityUnit}
+              onChangeText={setQuantityUnit}
+            />
 
-        <Btn method={handleUpdateItem}>
-          <Text style={[ES.textLight, ES.fw700, ES.f20]}>Update </Text>
-        </Btn>
-      </View>
+            <Btn method={handleUpdateItem}>
+              <Text style={[ES.textLight, ES.fw700, ES.f20]}>Update </Text>
+            </Btn>
+          </View>
 
-      <View style={[loading ? ES.dBlock : ES.dNone]}>
-        <Loading />
-      </View>
-    </View>
+          <View style={[loading ? ES.dBlock : ES.dNone]}>
+            <Loading />
+          </View>
+        </View>
+      </KeyboardAvoidingComponent>
+    </>
   );
 };
 
@@ -138,6 +146,7 @@ export default UpdateItem;
 const s = StyleSheet.create({
   container: StyleSheet.flatten([
     ES.fx1,
+    ES.my2,
     ES.centerItems,
     ES.w100,
     {backgroundColor},

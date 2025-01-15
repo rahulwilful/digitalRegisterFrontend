@@ -7,6 +7,10 @@ import {
   ToastAndroid,
   ScrollView,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import ES from '../../styles/ES';
@@ -20,14 +24,19 @@ import HeadingText from '../../Components/HeadingText';
 import Btn from '../../Components/Btn';
 
 import {userIconOrange} from '../../Constants/imagesAndIcons';
+import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
 
-const AddUser = () => {
-  const [name, setName] = useState('rahul');
-  const [email, setEmail] = useState('rahre49@gmail.com');
-  const [password, setPassword] = useState('111111');
-  const [mobileNo, setMobileNo] = useState('1234567890');
+const AddUser = ({navigation}) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [mobileNo, setMobileNo] = useState('');
   const [storageLocation, setStorageLocation] = useState('');
   const [role, setRole] = useState('');
+
+  const screenHeight = Dimensions.get('window').height;
+
+  console.log('screen hight: ', screenHeight);
 
   const [storageLocations, setStorageLocations] = useState([]);
   const [roles, setRoles] = useState([]);
@@ -81,6 +90,9 @@ const AddUser = () => {
       dispatch(toggleLogin(true));
       if (res) {
         showToast('User added successfully');
+        setTimeout(() => {
+          navigation.goBack();
+        }, 1000);
       }
     } catch (error) {
       if (error.response?.status === 409) {
@@ -136,95 +148,88 @@ const AddUser = () => {
   };
 
   return (
-    <View style={[s.container]}>
-      <View style={[s.card]}>
-        <View style={[s.imageContainer]}>
-          <Image
-            source={userIconOrange}
-            style={[ES.hs100, ES.objectFitContain]}
-          />
-          {/*   <Image source={userIconOrange} style={[s.userIcon]} /> */}
-        </View>
+    <>
+      <KeyboardAvoidingComponent>
+        <View style={[s.container, ES.my5]}>
+          <View style={[s.card]}>
+            <View style={[s.imageContainer]}>
+              <Image
+                source={userIconOrange}
+                style={[ES.hs100, ES.objectFitContain]}
+              />
+            </View>
 
-        {/*  <View style={[ES.mt4]}>
-          <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
-            Add User
-          </HeadingText>
-        </View> */}
-        <TextInput
-          style={[s.input]}
-          placeholder="Name"
-          value={name}
-          onChangeText={setName}
-        />
-        <TextInput
-          style={[s.input]}
-          placeholder="Mobile Number"
-          keyboardType="phone-pad"
-          value={mobileNo}
-          onChangeText={setMobileNo}
-        />
-        <TextInput
-          style={[s.input]}
-          placeholder="Email"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={[s.input]}
-          placeholder="Password"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-        {storageLocations.length > 0 && (
-          <View style={[s.input]}>
-            <Picker
-              selectedValue={storageLocation}
-              onValueChange={setStorageLocation}>
-              <Picker.Item label={'Select Location'} />
-              {storageLocations.map(item => (
-                <Picker.Item
-                  key={item._id}
-                  label={item.name}
-                  value={item._id}
-                />
-              ))}
-            </Picker>
+            <TextInput
+              style={[s.input]}
+              placeholder="Name"
+              value={name}
+              onChangeText={setName}
+            />
+            <TextInput
+              style={[s.input]}
+              placeholder="Mobile Number"
+              keyboardType="phone-pad"
+              value={mobileNo}
+              onChangeText={setMobileNo}
+            />
+            <TextInput
+              style={[s.input]}
+              placeholder="Email"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+            />
+            <TextInput
+              style={[s.input]}
+              placeholder="Password"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+            />
+            {storageLocations.length > 0 && (
+              <View style={[s.input]}>
+                <Picker
+                  selectedValue={storageLocation}
+                  onValueChange={setStorageLocation}>
+                  <Picker.Item label={'Select Location'} />
+                  {storageLocations.map(item => (
+                    <Picker.Item
+                      key={item._id}
+                      label={item.name}
+                      value={item._id}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            )}
+            {roles.length > 0 && (
+              <View style={[s.input]}>
+                <Picker selectedValue={role} onValueChange={setRole}>
+                  <Picker.Item label={'Select Role'} />
+                  {roles.map(item => (
+                    <Picker.Item
+                      key={item._id}
+                      label={item.name}
+                      value={item._id}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            )}
+            <Btn method={handleAddUser}>
+              <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
+            </Btn>
           </View>
-        )}
-        {roles.length > 0 && (
-          <View style={[s.input]}>
-            <Picker selectedValue={role} onValueChange={setRole}>
-              <Picker.Item label={'Select Role'} />
-              {roles.map(item => (
-                <Picker.Item
-                  key={item._id}
-                  label={item.name}
-                  value={item._id}
-                />
-              ))}
-            </Picker>
-          </View>
-        )}
-        <Btn method={handleAddUser}>
-          <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
-        </Btn>
-      </View>
-    </View>
+        </View>
+      </KeyboardAvoidingComponent>
+    </>
   );
 };
 
 export default AddUser;
 
 const s = StyleSheet.create({
-  container: StyleSheet.flatten([
-    ES.fx1,
-    ES.centerItems,
-    ES.w100,
-    {backgroundColor},
-  ]),
+  container: StyleSheet.flatten([ES.centerItems, ES.w100, {backgroundColor}]),
   input: StyleSheet.flatten([
     {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
     ES.w90,
@@ -243,7 +248,7 @@ const s = StyleSheet.create({
     ES.w80,
     ES.fx0,
     ES.centerItems,
-    ES.gap5,
+    ES.gap2,
     ES.px1,
     ES.bRadius10,
     ES.shadow7,

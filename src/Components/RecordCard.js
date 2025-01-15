@@ -45,17 +45,23 @@ const RecordCard = props => {
               {props.item.warehouse_admin.name}
             </HeadingText>
             <View style={[ES.fx0, ES.flexRow, ES.gap2, ES.alignItemsCenter]}>
-              <NormalText size={16}>
+              <NormalText size={13}>
                 <Text style={[ES.tempBorder]}>
                   <Image
                     source={pickupPersonIcon}
                     style={[ES.ws19, ES.hs19, ES.objectFitContain]}
                   />
-                  <Text> : {props.item.pickup_person.name}</Text>
+                  <Text>
+                    {' '}
+                    :{' '}
+                    {props.item.pickup_person.name.length <= 13
+                      ? props.item.pickup_person.name
+                      : props.item.pickup_person.name.slice(0, 13) + '...'}
+                  </Text>
                 </Text>
               </NormalText>
 
-              <NormalText size={16}>
+              <NormalText size={13}>
                 <Text style={[ES.tempBorder]}>
                   <Image
                     source={calanderIcon}

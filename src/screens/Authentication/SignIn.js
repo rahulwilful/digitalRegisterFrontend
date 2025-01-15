@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ToastAndroid,
   ImageBackground,
+  Dimensions,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import ES from '../../styles/ES';
@@ -27,6 +28,8 @@ import HeadingText from '../../Components/HeadingText';
 import Loading from '../../Constants/Loading';
 import LinearGradient from 'react-native-linear-gradient';
 import Btn from '../../Components/Btn';
+
+const screenHeight = Dimensions.get('window').height;
 
 const SignIn = ({navigation}) => {
   const [email, setEmail] = useState('super_admin@gmail.com');
@@ -80,8 +83,8 @@ const SignIn = ({navigation}) => {
 
   return (
     <>
-      <Background style={[ES.fx1]}>
-        <View style={[s.conatiner]}>
+      <Background>
+        <View style={[s.container]}>
           <View style={[s.card]}>
             <HeadingText size={36}> Sign In</HeadingText>
 
@@ -103,29 +106,6 @@ const SignIn = ({navigation}) => {
               />
             </View>
 
-            {/* <LinearGradient
-              colors={['#f2bf68', '#feb47b']} // Gradient colors
-              start={{x: 0, y: 0}} // Gradient starting point
-              end={{x: 1, y: 1}} // Gradient ending point
-              style={[s.button]}>
-              <TouchableOpacity onPress={handleLogin}>
-                <Text
-                  style={[
-                    isLoading ? ES.dNone : ES.dBlock,
-                    ES.textLight,
-                    ES.fw700,
-                    ES.f20,
-                    ES.textCenter,
-                  ]}>
-                  Login
-                </Text>
-                <View
-                  style={[isLoading ? ES.dBlock : ES.dNone, ES.hs30]}
-                  key={isLoading}>
-                  <Loading size={'small'} color={'#fff'} />
-                </View>
-              </TouchableOpacity>
-            </LinearGradient> */}
             <Btn method={handleLogin}>
               {isLoading ? (
                 <View style={[isLoading ? ES.dBlock : ES.dNone, ES.hs30]}>
@@ -154,8 +134,10 @@ const SignIn = ({navigation}) => {
 export default SignIn;
 
 const s = StyleSheet.create({
-  conatiner: StyleSheet.flatten([
-    ES.screenHeight,
+  container: StyleSheet.flatten([
+    {height: screenHeight},
+    ES.tempBorder,
+
     ES.justifyContentEnd,
     ES.alignItemsCenter,
     ES.w100,

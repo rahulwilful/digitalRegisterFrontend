@@ -18,8 +18,9 @@ import {Picker} from '@react-native-picker/picker';
 import Btn from '../../Components/Btn';
 import HeadingText from '../../Components/HeadingText';
 import {addAllItems, addItem} from '../../Redux/actions/itemActions';
+import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
 
-const AddItem = () => {
+const AddItem = ({navigation}) => {
   const [itemName, setItemName] = useState('');
   const [quantityUnit, setQuantityUnit] = useState('');
   const [name, setName] = useState('rahul');
@@ -77,16 +78,16 @@ const AddItem = () => {
         quantity_unit: quantityUnit,
       };
 
-      const token = await AsyncStorage.getItem('token');
-
       const res = await axiosClient.post('/item/add', form);
 
       let tempItems = items;
 
-      dispatch();
       if (res) {
         dispatch(addItem(res.data.result));
         showToast('Item added successfully');
+        setTimeout(() => {
+          navigation.goBack();
+        }, 1000);
       }
     } catch (error) {
       if (error.response?.status === 409) {
@@ -123,31 +124,35 @@ const AddItem = () => {
   };
 
   return (
-    <View style={[s.container]}>
-      <View style={[s.card]}>
-        <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
-          Add Item
-        </HeadingText>
+    <>
+      <KeyboardAvoidingComponent>
+        <View style={[s.container]}>
+          <View style={[s.card]}>
+            <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
+              Add Item
+            </HeadingText>
 
-        <TextInput
-          style={[s.input]}
-          placeholder="Item Name"
-          value={itemName}
-          onChangeText={setItemName}
-        />
+            <TextInput
+              style={[s.input]}
+              placeholder="Item Name"
+              value={itemName}
+              onChangeText={setItemName}
+            />
 
-        <TextInput
-          style={[s.input]}
-          placeholder="Quantity Unit"
-          value={quantityUnit}
-          onChangeText={setQuantityUnit}
-        />
+            <TextInput
+              style={[s.input]}
+              placeholder="Quantity Unit"
+              value={quantityUnit}
+              onChangeText={setQuantityUnit}
+            />
 
-        <Btn method={handleAddItem}>
-          <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
-        </Btn>
-      </View>
-    </View>
+            <Btn method={handleAddItem}>
+              <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
+            </Btn>
+          </View>
+        </View>
+      </KeyboardAvoidingComponent>
+    </>
   );
 };
 
@@ -157,6 +162,7 @@ const s = StyleSheet.create({
   container: StyleSheet.flatten([
     ES.fx1,
     ES.centerItems,
+    ES.my2,
     ES.w100,
     {backgroundColor},
   ]),

@@ -7,6 +7,7 @@ import {
   ToastAndroid,
   ScrollView,
   Image,
+  Keyboard,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import ES from '../../styles/ES';
@@ -25,8 +26,9 @@ import {
   userIconOrange,
   whitePenIcon,
 } from '../../Constants/imagesAndIcons';
+import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
 
-const UpdateAccount = () => {
+const UpdateAccount = ({navigation}) => {
   const [name, setName] = useState('rahul');
   const [email, setEmail] = useState('rahre49@gmail.com');
   const [password, setPassword] = useState('111111');
@@ -87,7 +89,7 @@ const UpdateAccount = () => {
     getData();
   }, []);
 
-  const handleAddUser = async () => {
+  const handleUpdateUser = async () => {
     if (!verifyInputs()) return;
 
     try {
@@ -106,6 +108,9 @@ const UpdateAccount = () => {
       dispatch(toggleLogin(true));
       if (res) {
         showToast('User added successfully');
+        setTimeout(() => {
+          navigation.goBack();
+        }, 1000);
       }
     } catch (error) {
       if (error.response?.status === 409) {
@@ -145,68 +150,75 @@ const UpdateAccount = () => {
   }, [mobileNo]);
 
   return (
-    <View style={[s.container]}>
-      <View style={[s.card]}>
-        <View style={[s.imageContainer]}>
-          <Image source={editUserIcon} style={[ES.hs65, ES.objectFitContain]} />
-        </View>
+    <>
+      <KeyboardAvoidingComponent>
+        <View style={[s.container]}>
+          <View style={[s.card]}>
+            <View style={[s.imageContainer]}>
+              <Image
+                source={editUserIcon}
+                style={[ES.hs65, ES.objectFitContain]}
+              />
+            </View>
 
-        <TextInput
-          style={[s.input]}
-          placeholder="Name"
-          value={name}
-          onChangeText={text => setName(text)}
-        />
-        <TextInput
-          style={[s.input]}
-          placeholder="Mobile Number"
-          value={mobileNo.toString()}
-          onChangeText={text => setMobileNo(text)}
-        />
-        <TextInput
-          style={[s.input]}
-          placeholder="Email"
-          keyboardType="email-address"
-          value={email}
-        />
-        {storageLocations.length > 0 && (
-          <View style={[s.input]}>
-            <Picker
-              selectedValue={storageLocation}
-              onValueChange={setStorageLocation}>
-              <Picker.Item label={'Select Location'} />
-              {storageLocations.map(item => (
-                <Picker.Item
-                  key={item._id}
-                  label={item.name}
-                  value={item._id}
-                />
-              ))}
-            </Picker>
-          </View>
-        )}
+            <TextInput
+              style={[s.input]}
+              placeholder="Name"
+              value={name}
+              onChangeText={text => setName(text)}
+            />
+            <TextInput
+              style={[s.input]}
+              placeholder="Mobile Number"
+              value={mobileNo.toString()}
+              onChangeText={text => setMobileNo(text)}
+            />
+            <TextInput
+              style={[s.input]}
+              placeholder="Email"
+              keyboardType="email-address"
+              value={email}
+            />
+            {storageLocations.length > 0 && (
+              <View style={[s.input]}>
+                <Picker
+                  selectedValue={storageLocation}
+                  onValueChange={setStorageLocation}>
+                  <Picker.Item label={'Select Location'} />
+                  {storageLocations.map(item => (
+                    <Picker.Item
+                      key={item._id}
+                      label={item.name}
+                      value={item._id}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            )}
 
-        {roles.length > 0 && (
-          <View style={[s.input]}>
-            <Picker selectedValue={role} onValueChange={setRole}>
-              <Picker.Item label={'Select Role'} />
-              {roles.map(item => (
-                <Picker.Item
-                  key={item._id}
-                  label={item.name}
-                  value={item._id}
-                />
-              ))}
-            </Picker>
+            {roles.length > 0 && (
+              <View style={[s.input]}>
+                <Picker selectedValue={role} onValueChange={setRole}>
+                  <Picker.Item label={'Select Role'} />
+                  {roles.map(item => (
+                    <Picker.Item
+                      key={item._id}
+                      label={item.name}
+                      value={item._id}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            )}
+            <View style={[ES.flexRow, ES.gap2]}>
+              <Btn method={handleUpdateUser} px={10} width={'50%'}>
+                <Text>Update</Text>
+              </Btn>
+            </View>
           </View>
-        )}
-        <View style={[ES.flexRow, ES.gap2]}>
-          <Btn method={handleAddUser} px={10} width={'30%'}>
-            <Text>Update</Text>
-          </Btn>
         </View>
-      </View>
-    </View>
+      </KeyboardAvoidingComponent>
+    </>
   );
 };
 
@@ -216,6 +228,7 @@ const s = StyleSheet.create({
   container: StyleSheet.flatten([
     ES.fx1,
     ES.centerItems,
+    ES.my5,
     ES.w100,
     {backgroundColor},
   ]),
@@ -237,7 +250,6 @@ const s = StyleSheet.create({
 
   card: StyleSheet.flatten([
     ES.w80,
-    ES.h70,
     ES.fx0,
     ES.centerItems,
     ES.pt5,

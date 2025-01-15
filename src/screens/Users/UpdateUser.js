@@ -20,8 +20,9 @@ import HeadingText from '../../Components/HeadingText';
 import Btn from '../../Components/Btn';
 
 import {editUserIcon, userIconOrange} from '../../Constants/imagesAndIcons';
+import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
 
-const UpdateUser = ({route}) => {
+const UpdateUser = ({route, navigation}) => {
   console.log('UpdateUser: ', route.params);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -107,6 +108,9 @@ const UpdateUser = ({route}) => {
       dispatch(toggleLogin(true));
       if (res) {
         showToast('User updated ');
+        setTimeout(() => {
+          navigation.goBack();
+        }, 1000);
       }
     } catch (error) {
       if (error.response?.status === 409) {
@@ -157,71 +161,78 @@ const UpdateUser = ({route}) => {
   };
 
   return (
-    <View style={[s.container]}>
-      <View style={[s.card]}>
-        <View style={[s.imageContainer]}>
-          <Image source={editUserIcon} style={[ES.hs65, ES.objectFitContain]} />
+    <>
+      <KeyboardAvoidingComponent>
+        <View style={[s.container]}>
+          <View style={[s.card]}>
+            <View style={[s.imageContainer]}>
+              <Image
+                source={editUserIcon}
+                style={[ES.hs65, ES.objectFitContain]}
+              />
+            </View>
+
+            <TextInput
+              style={[s.input]}
+              placeholder="Name"
+              value={name}
+              onChangeText={setName}
+            />
+
+            <TextInput
+              style={[s.input]}
+              placeholder="Mobile Number"
+              keyboardType="phone-pad"
+              value={mobileNo ? mobileNo.toString() : ''}
+              onChangeText={setMobileNo}
+            />
+
+            <TextInput
+              style={[s.input]}
+              placeholder="Email"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+            />
+
+            {storageLocations.length > 0 && (
+              <View style={[s.input]}>
+                <Picker
+                  selectedValue={storageLocation}
+                  onValueChange={setStorageLocation}>
+                  <Picker.Item label={'Select Location'} />
+                  {storageLocations.map(item => (
+                    <Picker.Item
+                      key={item._id}
+                      label={item.name}
+                      value={item._id}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            )}
+
+            {roles.length > 0 && (
+              <View style={[s.input]}>
+                <Picker selectedValue={role} onValueChange={setRole}>
+                  <Picker.Item label={'Select Role'} />
+                  {roles.map(item => (
+                    <Picker.Item
+                      key={item._id}
+                      label={item.name}
+                      value={item._id}
+                    />
+                  ))}
+                </Picker>
+              </View>
+            )}
+            <Btn method={handleUpdateUser}>
+              <Text style={[ES.textLight, ES.fw700, ES.f20]}>Update </Text>
+            </Btn>
+          </View>
         </View>
-
-        <TextInput
-          style={[s.input]}
-          placeholder="Name"
-          value={name}
-          onChangeText={setName}
-        />
-
-        <TextInput
-          style={[s.input]}
-          placeholder="Mobile Number"
-          keyboardType="phone-pad"
-          value={mobileNo ? mobileNo.toString() : ''}
-          onChangeText={setMobileNo}
-        />
-
-        <TextInput
-          style={[s.input]}
-          placeholder="Email"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
-
-        {storageLocations.length > 0 && (
-          <View style={[s.input]}>
-            <Picker
-              selectedValue={storageLocation}
-              onValueChange={setStorageLocation}>
-              <Picker.Item label={'Select Location'} />
-              {storageLocations.map(item => (
-                <Picker.Item
-                  key={item._id}
-                  label={item.name}
-                  value={item._id}
-                />
-              ))}
-            </Picker>
-          </View>
-        )}
-
-        {roles.length > 0 && (
-          <View style={[s.input]}>
-            <Picker selectedValue={role} onValueChange={setRole}>
-              <Picker.Item label={'Select Role'} />
-              {roles.map(item => (
-                <Picker.Item
-                  key={item._id}
-                  label={item.name}
-                  value={item._id}
-                />
-              ))}
-            </Picker>
-          </View>
-        )}
-        <Btn method={handleUpdateUser}>
-          <Text style={[ES.textLight, ES.fw700, ES.f20]}>Update </Text>
-        </Btn>
-      </View>
-    </View>
+      </KeyboardAvoidingComponent>
+    </>
   );
 };
 
@@ -230,6 +241,7 @@ export default UpdateUser;
 const s = StyleSheet.create({
   container: StyleSheet.flatten([
     ES.fx1,
+    ES.my5,
     ES.centerItems,
     ES.w100,
     {backgroundColor},

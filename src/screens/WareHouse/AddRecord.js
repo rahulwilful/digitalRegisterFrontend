@@ -36,7 +36,7 @@ import NormalText from '../../Components/NormalText';
 import ModalComponent from '../../Components/ModalComponent';
 import Loading from '../../Constants/Loading';
 
-const AddRecord = () => {
+const AddRecord = ({navigation}) => {
   const [name, setName] = useState('rahul');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -213,6 +213,10 @@ const AddRecord = () => {
 
       setPickupPerson('');
       setItem_list([]);
+
+      setTimeout(() => {
+        navigation.goBack();
+      }, 1000);
     } catch (error) {
       console.log('error: ', error);
     }
@@ -416,7 +420,7 @@ const AddRecord = () => {
           </HeadingText>
 
           <View style={[ES.w100, ES.relative]}>
-            <View style={[ES.hs35]}>
+            <View style={[]}>
               <TouchableOpacity
                 onPress={() => setPickPersonModal(true)}
                 style={[
@@ -443,7 +447,7 @@ const AddRecord = () => {
 
           <View style={[ES.w100, ES.relative]}>
             {items.length > 0 && selectedItem == null && (
-              <View style={[ES.hs35]}>
+              <View style={[]}>
                 <TouchableOpacity
                   onPress={() => setModalVisible(true)}
                   style={[
@@ -521,75 +525,81 @@ const AddRecord = () => {
             </View>
           )}
 
-          <TouchableOpacity>
+          <View style={[ES.w100, ES.fx0, ES.centerItems, ES.mt2]}>
             <Btn method={handleAddRecord}>
               <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add Record </Text>
             </Btn>
-          </TouchableOpacity>
+          </View>
         </View>
 
-        <ScrollView>
-          <View style={[ES.w100, ES.fx1, ES.mt1, ES.pb3, ES.relative, ES.z1]}>
-            {item_list.length > 0 && (
-              <View style={[]}>
-                <FlatList
-                  data={item_list}
-                  keyExtractor={(subItem, index) => index.toString()}
-                  contentContainerStyle={[ES.fx0, ES.px04]}
-                  renderItem={({item: subItem}) => (
-                    <View style={[s.itemContainer]}>
-                      <View style={[ES.fx0, ES.centerItems]}>
-                        <Image
-                          source={itemIcon}
-                          style={[ES.hs50, ES.ws50, ES.objectFitContain]}
-                        />
-                      </View>
-                      <View style={[ES.fx1]}>
-                        <TouchableOpacity style={[]}>
-                          <Text
-                            style={[ES.f18, ES.fw500, ES.px08, ES.capitalize]}>
-                            Item: {subItem.item_name}
-                          </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={[, ES.flexRow]}>
-                          <Text
-                            style={[
-                              ES.f16,
-                              ES.fw500,
-                              ES.px08,
-                              ES.capitalize,
-                              ES.textSecondary,
-                            ]}>
-                            qty:{' '}
-                            <Text style={[s.lightText]}>
-                              {subItem.quantity} {subItem.quantity_unit}
-                            </Text>
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                      <TouchableOpacity
-                        onPress={() => handleEditItem(subItem)}
-                        style={[]}>
-                        <Image
-                          source={penIcon}
-                          style={[ES.hs35, ES.ws35, ES.objectFitContain]}
-                        />
+        <View style={[ES.w100, ES.fx1, ES.mt1, ES.relative, ES.z1]}>
+          {item_list.length > 0 && (
+            <View style={[]}>
+              <FlatList
+                data={item_list}
+                keyExtractor={(subItem, index) => index.toString()}
+                contentContainerStyle={[ES.fx0, ES.px04, ES.pb4]}
+                renderItem={({item: subItem}) => (
+                  <View style={[s.itemContainer]}>
+                    <View style={[ES.fx0, ES.centerItems]}>
+                      <Image
+                        source={itemIcon}
+                        style={[ES.hs50, ES.ws50, ES.objectFitContain]}
+                      />
+                    </View>
+                    <View style={[ES.fx1]}>
+                      <TouchableOpacity style={[]}>
+                        <Text
+                          style={[
+                            ES.f18,
+                            ES.fw500,
+                            ES.px08,
+                            ES.capitalize,
+                            {color: primaryTextColor},
+                          ]}>
+                          {subItem.item_name.length <= 20
+                            ? subItem.item_name
+                            : subItem.item_name.substring(0, 20) + '...'}
+                        </Text>
                       </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => handleRemoveItem(subItem)}
-                        style={[]}>
-                        <Image
-                          source={cancelIcon}
-                          style={[ES.hs27, ES.ws27, ES.objectFitContain]}
-                        />
+                      <TouchableOpacity style={[, ES.flexRow]}>
+                        <Text
+                          style={[
+                            ES.f16,
+                            ES.fw500,
+                            ES.px08,
+                            ES.capitalize,
+                            ES.textSecondary,
+                          ]}>
+                          qty:{' '}
+                          <Text style={[s.lightText]}>
+                            {subItem.quantity} {subItem.quantity_unit}
+                          </Text>
+                        </Text>
                       </TouchableOpacity>
                     </View>
-                  )}
-                />
-              </View>
-            )}
-          </View>
-        </ScrollView>
+                    <TouchableOpacity
+                      onPress={() => handleEditItem(subItem)}
+                      style={[]}>
+                      <Image
+                        source={penIcon}
+                        style={[ES.hs35, ES.ws35, ES.objectFitContain]}
+                      />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleRemoveItem(subItem)}
+                      style={[]}>
+                      <Image
+                        source={cancelIcon}
+                        style={[ES.hs27, ES.ws27, ES.objectFitContain]}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              />
+            </View>
+          )}
+        </View>
       </View>
     </>
   );
@@ -600,7 +610,7 @@ export default AddRecord;
 const s = StyleSheet.create({
   itemContainer: StyleSheet.flatten([
     ES.py02,
-
+    ES.px06,
     ES.fx1,
     ES.w100,
     ES.flexRow,
@@ -609,7 +619,7 @@ const s = StyleSheet.create({
     ES.gap2,
   ]),
   container: StyleSheet.flatten([
-    ES.screenHeight,
+    ES.fx1,
     ES.alignItemsCenter,
 
     ES.w100,
@@ -651,7 +661,7 @@ const s = StyleSheet.create({
     ES.w100,
     ES.fx0,
     ES.centerItems,
-    ES.gap5,
+    ES.gap2,
     ES.px1,
 
     ES.shadow7,

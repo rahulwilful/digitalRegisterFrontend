@@ -24,6 +24,7 @@ import {
   userIconOrange,
   whitePenIcon,
 } from '../../Constants/imagesAndIcons';
+import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
 
 const MyAccount = ({navigation}) => {
   const [name, setName] = useState('rahul');
@@ -164,62 +165,66 @@ const MyAccount = ({navigation}) => {
   }, [mobileNo]);
 
   return (
-    <View style={[s.container]}>
-      <View style={[s.card]}>
-        <View style={[s.imageContainer]}>
-          <Image
-            source={userIconOrange}
-            style={[ES.hs100, ES.objectFitContain]}
-          />
-        </View>
+    <>
+      <KeyboardAvoidingComponent py={0}>
+        <View style={[s.container]}>
+          <View style={[s.card]}>
+            <View style={[s.imageContainer]}>
+              <Image
+                source={userIconOrange}
+                style={[ES.hs100, ES.objectFitContain]}
+              />
+            </View>
 
-        <TextInput style={[s.input]} placeholder="Name" value={name} />
-        <TextInput
-          style={[s.input]}
-          placeholder="Mobile Number"
-          value={mobileNo.toString()}
-        />
-        <TextInput
-          style={[s.input]}
-          placeholder="Email"
-          keyboardType="email-address"
-          value={email}
-        />
-        <TextInput
-          style={[s.input]}
-          placeholder="Storage Location"
-          keyboardType="email-address"
-          value={storageLocation}
-        />
-        <TextInput
-          style={[s.input]}
-          placeholder="Role"
-          keyboardType="email-address"
-          value={role}
-        />
-        <View style={[ES.flexRow, ES.gap2]}>
-          <Btn
-            method={() => navigation.navigate('stackUpdateAccount')}
-            px={10}
-            width={'30%'}>
-            <View style={[ES.h100]}>
-              <Image
-                source={whitePenIcon}
-                style={[ES.hs22, ES.ws22, ES.objectFitContain]}
-              />
+            <TextInput style={[s.input]} placeholder="Name" value={name} />
+            <TextInput
+              style={[s.input]}
+              placeholder="Mobile Number"
+              value={mobileNo.toString()}
+            />
+            <TextInput
+              style={[s.input]}
+              placeholder="Email"
+              keyboardType="email-address"
+              value={email}
+            />
+            <TextInput
+              style={[s.input]}
+              placeholder="Storage Location"
+              keyboardType="email-address"
+              value={storageLocation}
+            />
+            <TextInput
+              style={[s.input]}
+              placeholder="Role"
+              keyboardType="email-address"
+              value={role}
+            />
+            <View style={[ES.flexRow, ES.gap2]}>
+              <Btn
+                method={() => navigation.navigate('stackUpdateAccount')}
+                px={10}
+                width={'30%'}>
+                <View style={[ES.h100]}>
+                  <Image
+                    source={whitePenIcon}
+                    style={[ES.hs22, ES.ws22, ES.objectFitContain]}
+                  />
+                </View>
+              </Btn>
+              <Btn method={handleLogOut} px={10} width={'30%'}>
+                <View style={[ES.h100]}>
+                  <Image
+                    source={logOutIcon}
+                    style={[ES.hs22, ES.ws22, ES.objectFitContain]}
+                  />
+                </View>
+              </Btn>
             </View>
-          </Btn>
-          <Btn method={handleLogOut} px={10} width={'30%'}>
-            <View style={[ES.h100]}>
-              <Image
-                source={logOutIcon}
-                style={[ES.hs22, ES.ws22, ES.objectFitContain]}
-              />
-            </View>
-          </Btn>
+          </View>
         </View>
-      </View>
-    </View>
+      </KeyboardAvoidingComponent>
+    </>
   );
 };
 
@@ -228,6 +233,8 @@ export default MyAccount;
 const s = StyleSheet.create({
   container: StyleSheet.flatten([
     ES.fx1,
+    ES.my5,
+
     ES.centerItems,
     ES.w100,
     {backgroundColor},
@@ -250,16 +257,14 @@ const s = StyleSheet.create({
 
   card: StyleSheet.flatten([
     ES.w80,
-    ES.h70,
     ES.fx0,
     ES.centerItems,
-    ES.pt5,
     ES.gap5,
     ES.px1,
     ES.bRadius10,
+    ES.pb3,
     ES.shadow7,
 
-    ES.pb3,
     {
       backgroundColor,
       borderTopRightRadius: 100,
