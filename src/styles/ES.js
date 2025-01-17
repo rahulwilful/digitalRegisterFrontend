@@ -1159,6 +1159,9 @@ const ES = StyleSheet.create({
   textSecondary: {
     color: '#6c757d',
   },
+  placeHolderText: {
+    color: '#919191',
+  },
   /* ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
   tempBorder: {
     borderWidth: 1,

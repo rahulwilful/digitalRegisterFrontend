@@ -374,6 +374,7 @@ const AddRecord = ({navigation}) => {
           <View style={[ES.fx1, pickupModalLoading ? ES.dNone : null]}>
             <View style={[ES.fx1, s.modalListContainer]}>
               <Btn
+                size={16}
                 method={() => {
                   setPickupPerson(''), setPickPersonModal(false);
                 }}
@@ -390,17 +391,19 @@ const AddRecord = ({navigation}) => {
                 <View style={[s.modalListContainer]}>
                   {pickupPerson._id != item._id ? (
                     <Btn
+                      size={16}
+                      px={2}
                       method={() => {
                         setPickupPerson(item), setPickPersonModal(false);
                       }}
                       width={'95%'}
                       bgColor={whiteButton}
                       color={primaryTextColor}>
-                      <Text> {item.name.slice(0, 9)}</Text>
+                      <Text> {item.name}</Text>
                     </Btn>
                   ) : (
-                    <Btn width={'95%'}>
-                      <Text> {item.name.slice(0, 9)} </Text>
+                    <Btn size={16} width={'95%'}>
+                      <Text> {item.name} </Text>
                     </Btn>
                   )}
                 </View>
@@ -413,7 +416,7 @@ const AddRecord = ({navigation}) => {
         </View>
       </ModalComponent>
 
-      <View style={[s.container]}>
+      <View style={[s.container, isLoading ? ES.dNone : null]}>
         <View style={[s.inputContainer]} key={renderKey}>
           <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
             Add Record
@@ -601,6 +604,10 @@ const AddRecord = ({navigation}) => {
           )}
         </View>
       </View>
+
+      <View style={[ES.fx1, isLoading ? null : ES.dNone]}>
+        <Loading />
+      </View>
     </>
   );
 };
@@ -661,7 +668,7 @@ const s = StyleSheet.create({
     ES.w100,
     ES.fx0,
     ES.centerItems,
-    ES.gap2,
+    ES.gap4,
     ES.px1,
 
     ES.shadow7,

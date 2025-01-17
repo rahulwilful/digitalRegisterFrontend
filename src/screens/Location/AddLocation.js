@@ -7,6 +7,10 @@ import {
   ToastAndroid,
   ScrollView,
   Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import ES from '../../styles/ES';
@@ -19,22 +23,19 @@ import {Picker} from '@react-native-picker/picker';
 import HeadingText from '../../Components/HeadingText';
 import Btn from '../../Components/Btn';
 
-import {editUserIcon, userIconOrange} from '../../Constants/imagesAndIcons';
+import {locationIcon, userIconOrange} from '../../Constants/imagesAndIcons';
 import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
-import Loading from '../../Constants/Loading';
 
-const UpdateUser = ({route, navigation}) => {
-  console.log('UpdateUser: ', route.params);
+const AddLocation = ({navigation}) => {
   const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [mobileNo, setMobileNo] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [address, setAddress] = useState('');
+  const [pinCode, setPinCode] = useState('');
   const [storageLocation, setStorageLocation] = useState('');
   const [role, setRole] = useState('');
-  const [user, setUser] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
 
-  const [userId, setUserId] = useState(route.params.id);
+  const screenHeight = Dimensions.get('window').height;
 
   const [storageLocations, setStorageLocations] = useState([]);
   const [roles, setRoles] = useState([]);
@@ -46,31 +47,6 @@ const UpdateUser = ({route, navigation}) => {
     const token = await AsyncStorage.getItem('token');
     if (token) dispatch(toggleLogin(true));
   };
-
-  const getUser = async () => {
-    setIsLoading(true);
-    try {
-      const currentRes = await axiosClient.get(`user/get/${route.params.id}`);
-      setUser(currentRes.data.result);
-      console.log('currentRes: ', currentRes.data.result.mobile_no);
-      setName(currentRes.data.result.name);
-      setMobileNo(currentRes.data.result.mobile_no);
-      setEmail(currentRes.data.result.email);
-      setStorageLocation(currentRes.data.result.storage_location_id._id);
-      setRole(currentRes.data.result.role_type._id);
-    } catch (error) {
-      console.log('Error fetching storage locations:', error);
-    }
-    getData();
-  };
-
-  useEffect(() => {
-    checkLogin();
-    getUser();
-  }, [route.params.id]);
-  useEffect(() => {
-    console.log('storageLocation : ', storageLocation);
-  }, [storageLocation]);
 
   const getData = async () => {
     try {
@@ -87,28 +63,31 @@ const UpdateUser = ({route, navigation}) => {
     } catch (error) {
       console.log('Error fetching roles:', error);
     }
-
-    setIsLoading(false);
   };
 
-  const handleUpdateUser = async () => {
+  useEffect(() => {
+    checkLogin();
+    getData();
+  }, []);
+
+  const handleAddLocation = async () => {
     if (!verifyInputs()) return;
 
     try {
       const form = {
-        name,
-        mobile_no: mobileNo,
-        email,
-        password,
-        storage_location_id: storageLocation,
-        role_type: role,
+        name: name,
+        city: city,
+        state: state,
+        address: address,
+        pin_code: pinCode,
       };
       console.log('form: ', form);
+      const token = await AsyncStorage.getItem('token');
 
-      const res = await axiosClient.put(`/user/update/${user._id}`, form);
+      const res = await axiosClient.post('/storage/location/add', form);
       dispatch(toggleLogin(true));
       if (res) {
-        showToast('User updated ');
+        showToast('Location added successfully');
         setTimeout(() => {
           navigation.goBack();
         }, 1000);
@@ -130,23 +109,23 @@ const UpdateUser = ({route, navigation}) => {
       return false;
     }
 
-    if (!mobileNo) {
-      showToast('Please enter mobile number');
+    if (!city) {
+      showToast('Please enter city');
       return false;
     }
 
-    if (!email) {
-      showToast('Please enter email');
+    if (!state) {
+      showToast('Please enter state');
       return false;
     }
 
-    if (!storageLocation) {
-      showToast('Please select storage location');
+    if (!address) {
+      showToast('Please enter address');
       return false;
     }
 
-    if (!role) {
-      showToast('Please select role');
+    if (!pinCode) {
+      showToast('Please enter pin code');
       return false;
     }
 
@@ -164,92 +143,62 @@ const UpdateUser = ({route, navigation}) => {
   return (
     <>
       <KeyboardAvoidingComponent>
-        <View style={[s.container, isLoading ? ES.dNone : null]}>
+        <View style={[s.container, ES.my5]}>
           <View style={[s.card]}>
             <View style={[s.imageContainer]}>
               <Image
-                source={editUserIcon}
-                style={[ES.hs65, ES.objectFitContain]}
+                source={locationIcon}
+                style={[ES.hs100, ES.objectFitContain]}
               />
             </View>
 
             <TextInput
               style={[s.input]}
-              placeholder="Name"
+              placeholder="Warehouse Name"
               value={name}
               onChangeText={setName}
             />
-
             <TextInput
               style={[s.input]}
-              placeholder="Mobile Number"
+              placeholder="City"
+              value={city}
+              onChangeText={setCity}
+            />
+            <TextInput
+              style={[s.input]}
+              placeholder="State"
+              value={state}
+              onChangeText={setState}
+            />
+            <TextInput
+              style={[s.input]}
+              placeholder="Address"
+              value={address}
+              onChangeText={setAddress}
+            />
+            <TextInput
+              style={[s.input]}
+              placeholder="Pin Code"
               keyboardType="phone-pad"
-              value={mobileNo ? mobileNo.toString() : ''}
-              onChangeText={setMobileNo}
+              value={pinCode}
+              onChangeText={setPinCode}
             />
-
-            <TextInput
-              style={[s.input]}
-              placeholder="Email"
-              keyboardType="email-address"
-              value={email}
-              onChangeText={setEmail}
-            />
-
-            {storageLocations.length > 0 && (
-              <View style={[s.input]}>
-                <Picker
-                  selectedValue={storageLocation}
-                  onValueChange={setStorageLocation}>
-                  <Picker.Item label={'Select Location'} />
-                  {storageLocations.map(item => (
-                    <Picker.Item
-                      key={item._id}
-                      label={item.name}
-                      value={item._id}
-                    />
-                  ))}
-                </Picker>
-              </View>
-            )}
-
-            {roles.length > 0 && (
-              <View style={[s.input]}>
-                <Picker selectedValue={role} onValueChange={setRole}>
-                  <Picker.Item label={'Select Role'} />
-                  {roles.map(item => (
-                    <Picker.Item
-                      key={item._id}
-                      label={item.name}
-                      value={item._id}
-                    />
-                  ))}
-                </Picker>
-              </View>
-            )}
-            <Btn method={handleUpdateUser}>
-              <Text style={[ES.textLight, ES.fw700, ES.f20]}>Update </Text>
-            </Btn>
+            <View style={[ES.w100, ES.fx0, ES.centerItems, ES.mt1]}>
+              <Btn method={handleAddLocation}>
+                <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
+              </Btn>
+            </View>
           </View>
-        </View>
-        <View style={[ES.fx1, isLoading ? null : ES.dNone]}>
-          <Loading />
         </View>
       </KeyboardAvoidingComponent>
     </>
   );
 };
 
-export default UpdateUser;
+export default AddLocation;
 
 const s = StyleSheet.create({
-  container: StyleSheet.flatten([
-    ES.fx1,
-    ES.my5,
-    ES.centerItems,
-    ES.w100,
-    {backgroundColor},
-  ]),
+  container: StyleSheet.flatten([ES.centerItems, ES.w100, {backgroundColor}]),
   input: StyleSheet.flatten([
     {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
     ES.w90,
@@ -268,7 +217,7 @@ const s = StyleSheet.create({
     ES.w80,
     ES.fx0,
     ES.centerItems,
-    ES.gap5,
+    ES.gap3,
     ES.px1,
     ES.bRadius10,
     ES.shadow7,
@@ -287,7 +236,6 @@ const s = StyleSheet.create({
     ES.hs100,
     ES.ws100,
     ES.centerItems,
-
     ES.relative,
     ES.shadow10,
     ES.absolute,

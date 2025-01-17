@@ -17,28 +17,57 @@ import {
 import ES from '../../styles/ES';
 import axiosClient from '../../../axiosClient';
 import {
+  allItemsIcon,
+  allLocationsIcon,
+  allRecordsIcon,
+  allUsersIcon,
   image,
+  kgIcon,
   locationIcon,
+  locationOrangeIcon,
+  newItemIcon,
+  newRecordIcon,
+  newUserIcon,
   wareHouseIcon,
+  wareHouseIcon3,
+  wareHouseNoBgIcon,
 } from '../../Constants/imagesAndIcons';
 import {useDispatch} from 'react-redux';
 import {setHeader} from '../../Redux/actions/action';
 import {addUser} from '../../Redux/actions/userActions';
+import Card from '../../Components/Card';
+import Loading from '../../Constants/Loading';
 
 const Home = ({navigation}) => {
   const [locations, setLocations] = useState([]);
   const [orginalLocations, setOrginalLocations] = useState([]);
+  const [displaySuperAdminOptions, setDisplaySuperAdminOptions] =
+    useState(false);
+  const [displayAdminOptions, setDisplayAdminOptions] = useState(false);
+
+  const [currentUser, setCurrentUser] = useState({});
+  const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   dispatch(setHeader('Home'));
 
   const getCurrent = async () => {
+    setLoading(true);
     try {
       const currentRes = await axiosClient.get('/user/getcurrentuser');
       //console.log('App currentRes: ', currentRes.data.result);
+      if (currentRes.data.result.role_type.value === 'super_admin') {
+        setDisplaySuperAdminOptions(true);
+        setDisplayAdminOptions(true);
+      }
+      if (currentRes.data.result.role_type.value === 'admin') {
+        setDisplayAdminOptions(true);
+      }
       dispatch(addUser(currentRes.data.result));
+      setCurrentUser(currentRes.data.result);
     } catch (error) {
       console.log('App error: ', error);
     }
+    setLoading(false);
   };
 
   const getLocations = async () => {
@@ -72,61 +101,82 @@ const Home = ({navigation}) => {
   };
 
   return (
-    <ScrollView style={[ES.w100]}>
-      <View style={[ES.minScreenHeight, {backgroundColor: '#efefef'}]}>
-        <View style={[s.header]}>
-          <TextInput
-            style={[s.textInput]}
-            placeholder="Search"
-            onChangeText={text => handleSearchFilter(text)}
-          />
-        </View>
+    <View style={[ES.fx1]}>
+      <ScrollView style={[ES.w100, loading ? ES.dNone : ES.dBlock]}>
+        <View style={[{backgroundColor: '#efefef'}]}>
+          <View
+            style={[
+              locations.length > 0 ? ES.dBlock : ES.dNone,
+              ES.fx0,
+              ES.gap2,
+              ES.py2,
+            ]}>
+            <TouchableOpacity
+              onPress={() => {
+                displaySuperAdminOptions
+                  ? navigation.navigate('stackWareHouses')
+                  : navigation.navigate('stackRecord', {
+                      locationId: currentUser.storage_location_id._id,
+                    });
+              }}>
+              <Card image={allRecordsIcon}>All Records</Card>
+            </TouchableOpacity>
 
-        <View
-          style={[
-            locations.length > 0 ? ES.dBlock : ES.dNone,
-            ES.fx0,
-            ES.gap2,
-          ]}>
-          <FlatList
-            data={locations}
-            keyExtractor={(item, index) => index.toString()} // Add this
-            contentContainerStyle={[s.flatList]}
-            renderItem={({item}) => (
-              <View style={[ES.w95]}>
+            {displayAdminOptions && (
+              <View style={[ES.w100, ES.fx0, ES.gap2]}>
                 <TouchableOpacity
-                  onPress={() =>
-                    navigation.navigate('stackRecord', {locationId: item._id})
-                  }
-                  style={[s.listContainer]}>
-                  <View style={[ES.h100, ES.ws90, ES.overflowHidden]}>
-                    <Image source={wareHouseIcon} style={[ES.hs90, ES.ws90]} />
-                  </View>
+                  onPress={() => navigation.navigate('stackAddRecord')}>
+                  <Card image={newRecordIcon}>New Record</Card>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('newItem')}>
+                  <Card image={newItemIcon}>New Item</Card>
+                </TouchableOpacity>
 
-                  <View style={[ES.fx1, ES.py06]}>
-                    <Text
-                      style={[
-                        ES.f20,
-                        ES.fw500,
-                        ES.capitalize,
-                        ES.fx1,
-                        {color: primaryTextColor},
-                      ]}>
-                      {item.name}
-                    </Text>
-                    <View style={[ES.fx1, ES.flexRow, ES.gap1]}>
-                      <Text style={[s.subInfo]}>State: {item.state}</Text>
-
-                      <Text style={[s.subInfo]}>City: {item.city}</Text>
-                    </View>
-                  </View>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('allItems')}>
+                  <Card image={allItemsIcon}>All Items</Card>
                 </TouchableOpacity>
               </View>
             )}
-          />
+
+            {displaySuperAdminOptions && (
+              <View style={[ES.w100, ES.fx0, ES.gap2]}>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('newUser')}>
+                  <Card image={newUserIcon}>New User</Card>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('allUsers')}>
+                  <Card image={allUsersIcon}>All Users</Card>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('stackAddLocation')}>
+                  <Card image={locationOrangeIcon}>Add Location</Card>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('stackAllLocations')}>
+                  <Card image={allLocationsIcon}>All Locations</Card>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('stackAddQuantityUnits')}>
+                  <Card image={kgIcon}>Add Quantity Unit</Card>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('stackAllQuantityUnits')}>
+                  <Card image={kgIcon}>All Quantity Units</Card>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
         </View>
+      </ScrollView>
+      <View style={[loading ? ES.dBlock : ES.dNone, ES.fx1]}>
+        <Loading />
       </View>
-    </ScrollView>
+    </View>
   );
 };
 
@@ -134,7 +184,6 @@ export default Home;
 
 const s = StyleSheet.create({
   conatainer: StyleSheet.flatten([
-    ES.screenHeight,
     ES.centerItems,
     ES.w100,
     ES.tempBorder,
@@ -202,3 +251,42 @@ const s = StyleSheet.create({
     ES.textSecondary,
   ]),
 });
+
+{
+  /*  <FlatList
+            data={locations}
+            keyExtractor={(item, index) => index.toString()} // Add this
+            contentContainerStyle={[s.flatList]}
+            renderItem={({item}) => (
+              <View style={[ES.w95]}>
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate('stackRecord', {locationId: item._id})
+                  }
+                  style={[s.listContainer]}>
+                  <View style={[ES.h100, ES.ws90, ES.overflowHidden]}>
+                    <Image source={wareHouseIcon} style={[ES.hs90, ES.ws90]} />
+                  </View>
+
+                  <View style={[ES.fx1, ES.py06]}>
+                    <Text
+                      style={[
+                        ES.f20,
+                        ES.fw500,
+                        ES.capitalize,
+                        ES.fx1,
+                        {color: primaryTextColor},
+                      ]}>
+                      {item.name}
+                    </Text>
+                    <View style={[ES.fx1, ES.flexRow, ES.gap1]}>
+                      <Text style={[s.subInfo]}>State: {item.state}</Text>
+
+                      <Text style={[s.subInfo]}>City: {item.city}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            )}
+          /> */
+}

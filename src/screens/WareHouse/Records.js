@@ -77,6 +77,7 @@ const Records = ({route}) => {
   const [isFromDatePickerOpen, setIsFromDatePickerOpen] = useState(false);
   const [isToDatePickerOpen, setIsToDatePickerOpen] = useState(false);
   const [isSorting, setIsSorting] = useState(false);
+  const [loadMore, setLoadMore] = useState(true);
 
   const [footerLoader, setFooterLoader] = useState(false);
 
@@ -97,7 +98,8 @@ const Records = ({route}) => {
   }, [user]);
 
   const handleLoadMoreRecords = async () => {
-    if (isSorting || pickupPerson != '' || wareHouseAdmin != '') return;
+    if (isSorting || pickupPerson != '' || wareHouseAdmin != '' || !loadMore)
+      return;
     setFooterLoader(true);
     let lastDate = records[records.length - 1].createdAt;
     console.log('Records handleLoadMoreRecords: ', lastDate);
@@ -109,13 +111,20 @@ const Records = ({route}) => {
           setFooterLoader(false);
         });
 
+      console.log(
+        'recordRes.data.result.length: ',
+        recordRes.data.result.length,
+      );
+      if (recordRes.data.result.length < 9) {
+        setLoadMore(false);
+      }
       setRecords([...records, ...recordRes.data.result]);
       setOriginalRecords([...originalRecords, ...recordRes.data.result]);
       setLocation(recordRes.data.result[0].storage_location_id.name);
     } catch (error) {
       console.log('error', error);
-      setFooterLoader(false);
     }
+    setFooterLoader(false);
 
     return;
   };
@@ -124,6 +133,7 @@ const Records = ({route}) => {
     setIsLoadning(true);
     setPickupModalLoading(true);
     setAdminModalLoading(true);
+    setLoadMore(true);
     try {
       const recordRes = await axiosClient.get(
         `/register/get/by/location/${locationId}`,
@@ -243,12 +253,12 @@ const Records = ({route}) => {
   };
 
   const handleResetFilters = () => {
+    setLoadMore(true);
     setIsSorting(false);
     setPickupPerson('');
     setWareHouseAdmin('');
     setFromDate(new Date('2024-01-01T00:00:00.000Z'));
     setToDate(new Date());
-
     getRecords();
     setFilterModal(false);
   };
@@ -263,6 +273,8 @@ const Records = ({route}) => {
           <View style={[ES.fx1, pickupModalLoading ? ES.dNone : null]}>
             <View style={[ES.fx1, s.modalListContainer]}>
               <Btn
+                size={16}
+                px={2}
                 method={() => handleSetPickupPerson('')}
                 width={'95%'}
                 bgColor={whiteButton}
@@ -277,15 +289,17 @@ const Records = ({route}) => {
                 <View style={[s.modalListContainer]}>
                   {pickupPerson._id != item._id ? (
                     <Btn
+                      size={16}
+                      px={2}
                       method={() => handleSetPickupPerson(item)}
                       width={'95%'}
                       bgColor={whiteButton}
                       color={primaryTextColor}>
-                      <Text> {item.name.slice(0, 9)}</Text>
+                      <Text> {item.name }</Text>
                     </Btn>
                   ) : (
-                    <Btn width={'95%'}>
-                      <Text> {item.name.slice(0, 9)} </Text>
+                    <Btn size={16} px={2} width={'95%'}>
+                      <Text> {item.name } </Text>
                     </Btn>
                   )}
                 </View>
@@ -306,6 +320,8 @@ const Records = ({route}) => {
           <View style={[ES.fx1, adminModalLoading ? ES.dNone : null]}>
             <View style={[ES.fx1, s.modalListContainer]}>
               <Btn
+                size={16}
+                px={2}
                 method={() => handleSetWareHouseAdmin('')}
                 width={'95%'}
                 bgColor={whiteButton}
@@ -320,15 +336,17 @@ const Records = ({route}) => {
                 <View style={[s.modalListContainer]}>
                   {wareHouseAdmin._id != item._id ? (
                     <Btn
+                      size={16}
+                      px={2}
                       method={() => handleSetWareHouseAdmin(item)}
                       width={'95%'}
                       bgColor={whiteButton}
                       color={primaryTextColor}>
-                      <Text> {item.name.slice(0, 9)}</Text>
+                      <Text> {item.name }</Text>
                     </Btn>
                   ) : (
-                    <Btn width={'95%'}>
-                      <Text> {item.name.slice(0, 9)} </Text>
+                    <Btn size={16} px={2} width={'95%'}>
+                      <Text> {item.name } </Text>
                     </Btn>
                   )}
                 </View>
@@ -468,12 +486,14 @@ const Records = ({route}) => {
               contentContainerStyle={[s.flatList]}
               renderItem={({item}) => <RecordCard item={item} />}
               onEndReached={
-                !isSorting && records.length >= 10
+                loadMore && !isSorting && records.length >= 10
                   ? handleLoadMoreRecords
                   : null
               }
               onEndReachedThreshold={0.3}
               maxToRenderPerBatch={20}
+              refreshing={isLoading}
+              onRefresh={getRecords}
               ListFooterComponent={() => {
                 return (
                   <View style={[footerLoader ? ES.dBlock : ES.dNone]}>

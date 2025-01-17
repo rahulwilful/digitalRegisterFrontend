@@ -16,7 +16,7 @@ import Tabs from './Tabs';
 import AddUser from '../screens/Users/AddUser';
 import AddItem from '../screens/Items/AddItem';
 import AddRecord from '../screens/WareHouse/AddRecord';
-import {ItemStack, StackNav, UserStack} from './StackNav';
+import {ItemStack, HomeStack, UserStack} from './StackNav';
 
 import {useSelector} from 'react-redux';
 import AllItems from '../screens/Items/AllItems';
@@ -48,7 +48,7 @@ const DrawerNav = () => {
       }}>
       <Drawer.Screen
         name="Home"
-        component={StackNav}
+        component={HomeStack}
         options={{
           drawerIcon: () => (
             <Image source={homeIcon} style={{width: 30, height: 30}} />

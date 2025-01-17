@@ -25,6 +25,7 @@ import Btn from '../../Components/Btn';
 
 import {userIconOrange} from '../../Constants/imagesAndIcons';
 import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
+import Loading from '../../Constants/Loading';
 
 const AddUser = ({navigation}) => {
   const [name, setName] = useState('');
@@ -40,7 +41,7 @@ const AddUser = ({navigation}) => {
 
   const [storageLocations, setStorageLocations] = useState([]);
   const [roles, setRoles] = useState([]);
-
+  const [isLoading, setIsLoading] = useState(true);
   const isLoggedIn = useSelector(state => state.auth);
   const dispatch = useDispatch();
 
@@ -50,6 +51,7 @@ const AddUser = ({navigation}) => {
   };
 
   const getData = async () => {
+    setIsLoading(true);
     try {
       const storageRes = await axiosClient.get('/storage/location/getall');
       setStorageLocations(storageRes.data.result);
@@ -64,6 +66,7 @@ const AddUser = ({navigation}) => {
     } catch (error) {
       console.log('Error fetching roles:', error);
     }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -150,7 +153,7 @@ const AddUser = ({navigation}) => {
   return (
     <>
       <KeyboardAvoidingComponent>
-        <View style={[s.container, ES.my5]}>
+        <View style={[s.container, ES.my5, isLoading ? ES.dNone : null]}>
           <View style={[s.card]}>
             <View style={[s.imageContainer]}>
               <Image
@@ -220,6 +223,9 @@ const AddUser = ({navigation}) => {
               <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
             </Btn>
           </View>
+        </View>
+        <View style={[ES.fx1, isLoading ? null : ES.dNone]}>
+          <Loading />
         </View>
       </KeyboardAvoidingComponent>
     </>

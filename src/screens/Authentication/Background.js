@@ -43,12 +43,7 @@ const Background = ({children}) => {
 export default Background;
 
 const s = StyleSheet.create({
-  conatiner: StyleSheet.flatten([
-    {height: screenHeight},
-    ES.centerItems,
-    ES.w100,
-    ES.absolute,
-  ]),
+  conatiner: StyleSheet.flatten([{height: screenHeight}, ES.w100, ES.absolute]),
   text: StyleSheet.flatten([ES.textLight]),
   input: StyleSheet.flatten([
     {borderBottomWidth: 1, borderColor: '#007bff', borderRadius: 5},

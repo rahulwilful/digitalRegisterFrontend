@@ -3,6 +3,7 @@ import React from 'react';
 import {
   deleteIcon,
   itemIcon,
+  kgIcon,
   penIcon,
   restoreIcon,
 } from '../Constants/imagesAndIcons';
@@ -13,13 +14,7 @@ import {TouchableOpacity} from 'react-native-gesture-handler';
 import {useNavigation} from '@react-navigation/native';
 import {Screen} from 'react-native-screens';
 
-const ItemCard = ({
-  item,
-  handleDeleteItem,
-  handleRestoreItem,
-  openModal,
-  image,
-}) => {
+const QuantityUnitCard = ({item, openModal, image}) => {
   const navigation = useNavigation();
 
   return (
@@ -36,19 +31,18 @@ const ItemCard = ({
       ]}
       key={item.is_delete}>
       <View style={[ES.fx0, ES.centerItems]}>
-        <Image source={image ? image : itemIcon} style={[ES.hs50, ES.ws50]} />
+        <Image source={kgIcon} style={[ES.hs50, ES.ws50]} />
       </View>
       <View style={[ES.flexColumn, ES.justifyContentCenter, ES.fx1]}>
         <HeadingText capitalize size={18}>
-          {item.item_name}
+          {item.name}
         </HeadingText>
-        <NormalText capitalize>Unit: {item.quantity_unit}</NormalText>
       </View>
       <View style={[ES.flexRow, ES.gap1, ES.fx0, ES.centerItems]}>
         <TouchableOpacity
           onPress={() =>
-            navigation.navigate('stackUpdateItem', {
-              item_id: item._id,
+            navigation.navigate('stackUpdateQuantityUnit', {
+              id: item._id,
             })
           }>
           <Image
@@ -77,4 +71,4 @@ const ItemCard = ({
   );
 };
 
-export default ItemCard;
+export default QuantityUnitCard;

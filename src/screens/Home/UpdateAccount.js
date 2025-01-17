@@ -27,6 +27,7 @@ import {
   whitePenIcon,
 } from '../../Constants/imagesAndIcons';
 import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
+import Loading from '../../Constants/Loading';
 
 const UpdateAccount = ({navigation}) => {
   const [name, setName] = useState('rahul');
@@ -44,6 +45,8 @@ const UpdateAccount = ({navigation}) => {
   const isLoggedIn = useSelector(state => state.auth);
   const dispatch = useDispatch();
 
+  const [isLoading, setIsLoading] = useState(true);
+
   const checkLogin = async () => {
     const token = await AsyncStorage.getItem('token');
     if (token) dispatch(toggleLogin(true));
@@ -55,6 +58,7 @@ const UpdateAccount = ({navigation}) => {
   };
 
   const getData = async () => {
+    setIsLoading(true);
     try {
       const currentRes = await axiosClient.get('/user/getcurrentuser');
       setCurrentUser(currentRes.data.result);
@@ -82,6 +86,7 @@ const UpdateAccount = ({navigation}) => {
     } catch (error) {
       console.log('Error fetching roles:', error);
     }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -152,7 +157,7 @@ const UpdateAccount = ({navigation}) => {
   return (
     <>
       <KeyboardAvoidingComponent>
-        <View style={[s.container]}>
+        <View style={[s.container, isLoading ? ES.dNone : null]}>
           <View style={[s.card]}>
             <View style={[s.imageContainer]}>
               <Image
@@ -162,7 +167,7 @@ const UpdateAccount = ({navigation}) => {
             </View>
 
             <TextInput
-              style={[s.input]}
+              style={[s.input, ES.mt2]}
               placeholder="Name"
               value={name}
               onChangeText={text => setName(text)}
@@ -173,32 +178,36 @@ const UpdateAccount = ({navigation}) => {
               value={mobileNo.toString()}
               onChangeText={text => setMobileNo(text)}
             />
-            <TextInput
+            {/*   <TextInput
               style={[s.input]}
               placeholder="Email"
               keyboardType="email-address"
               value={email}
-            />
-            {storageLocations.length > 0 && (
-              <View style={[s.input]}>
-                <Picker
-                  selectedValue={storageLocation}
-                  onValueChange={setStorageLocation}>
-                  <Picker.Item label={'Select Location'} />
-                  {storageLocations.map(item => (
-                    <Picker.Item
-                      key={item._id}
-                      label={item.name}
-                      value={item._id}
-                    />
-                  ))}
-                </Picker>
-              </View>
-            )}
-
+            /> */}
+            {/*    {storageLocations.length > 0 &&
+              currentUser.role_type.value == 'super_admin' && (
+                <View style={[s.input]}>
+                  <Picker
+                    selectedValue={storageLocation}
+                    onValueChange={setStorageLocation}>
+                    <Picker.Item label={'Select Location'} />
+                    {storageLocations.map(item => (
+                      <Picker.Item
+                        key={item._id}
+                        label={item.name}
+                        value={item._id}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              )} */}
+            {/* 
             {roles.length > 0 && (
               <View style={[s.input]}>
-                <Picker selectedValue={role} onValueChange={setRole}>
+                <Picker
+                  disabled={true}
+                  selectedValue={role}
+                  onValueChange={setRole}>
                   <Picker.Item label={'Select Role'} />
                   {roles.map(item => (
                     <Picker.Item
@@ -209,13 +218,16 @@ const UpdateAccount = ({navigation}) => {
                   ))}
                 </Picker>
               </View>
-            )}
-            <View style={[ES.flexRow, ES.gap2]}>
+            )} */}
+            <View style={[ES.flexRow, ES.gap2, ES.mt1]}>
               <Btn method={handleUpdateUser} px={10} width={'50%'}>
                 <Text>Update</Text>
               </Btn>
             </View>
           </View>
+        </View>
+        <View style={[ES.fx1, isLoading ? null : ES.dNone]}>
+          <Loading />
         </View>
       </KeyboardAvoidingComponent>
     </>
@@ -237,6 +249,7 @@ const s = StyleSheet.create({
     ES.w90,
     ES.px1,
     ES.f16,
+    ES.mt1,
   ]),
 
   button: StyleSheet.flatten([

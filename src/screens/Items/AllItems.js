@@ -8,6 +8,8 @@ import {
   ToastAndroid,
   Image,
   Modal,
+  Touchable,
+  TouchableOpacity,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import axiosClient from '../../../axiosClient';
@@ -18,12 +20,13 @@ import {headerBackgroundColor, primaryColor} from '../../Constants/Colours';
 import Loading from '../../Constants/Loading';
 import {useDispatch, useSelector} from 'react-redux';
 import {addAllItems, addIAlltems} from '../../Redux/actions/itemActions';
-import {noDataImage} from '../../Constants/imagesAndIcons';
+import {addIcon, noDataImage} from '../../Constants/imagesAndIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import ModalComponent from '../../Components/ModalComponent';
 import Btn from '../../Components/Btn';
+import AddButton from '../../Components/AddButton';
 
-const AllItems = () => {
+const AllItems = ({navigation}) => {
   const reduxItems = useSelector(state => state.items);
   const [items, setItems] = useState([]);
   const [originalItems, setOriginalItems] = useState([]);
@@ -178,6 +181,9 @@ const AllItems = () => {
     setModalVisible(true);
   };
 
+  const navigateToAddNewItem = () => {
+    navigation.navigate('newItem');
+  };
   return (
     <>
       {/*  <Modal visible={true} transparent={true} animationType="slide">
@@ -219,11 +225,7 @@ const AllItems = () => {
       </ModalComponent>
 
       <View style={[ES.fx1]}>
-        <View style={[ES.py1]}>
-          <HeadingText center>All Items</HeadingText>
-        </View>
-
-        <View style={[s.header]}>
+        <View style={[s.header, ES.mt1]}>
           <TextInput
             style={[s.textInput]}
             placeholder="Search"
@@ -236,7 +238,7 @@ const AllItems = () => {
           <View style={[ES.w100, ES.fx1]}>
             <FlatList
               data={items}
-              contentContainerStyle={[ES.px1, ES.gap2, ES.mt1, ES.pb5]}
+              contentContainerStyle={[s.userList]}
               renderItem={({item}) => (
                 <ItemCard
                   item={item}
@@ -251,6 +253,8 @@ const AllItems = () => {
             />
           </View>
         )}
+
+        <AddButton method={() => navigation.navigate('newItem')} />
 
         <View
           style={[
@@ -303,4 +307,5 @@ const s = StyleSheet.create({
     ES.pt06,
     ES.pe06,
   ]),
+  userList: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 150}]),
 });

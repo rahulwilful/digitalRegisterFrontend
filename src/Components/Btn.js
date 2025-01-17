@@ -3,7 +3,7 @@ import React from 'react';
 import ES from '../styles/ES';
 import LinearGradient from 'react-native-linear-gradient';
 
-const Btn = ({children, method, color, px, width, bgColor}) => {
+const Btn = ({children, method, color, px, width, bgColor, size}) => {
   return (
     <TouchableOpacity
       onPress={method}
@@ -16,8 +16,8 @@ const Btn = ({children, method, color, px, width, bgColor}) => {
         <Text
           style={[
             color ? {color: color} : ES.textLight,
+            size ? {fontSize: size} : ES.f18,
             ES.fw700,
-            ES.f18,
             ES.textCenter,
             ES.centerItems,
           ]}>

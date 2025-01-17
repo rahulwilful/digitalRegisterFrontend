@@ -28,6 +28,8 @@ import HeadingText from '../../Components/HeadingText';
 import Loading from '../../Constants/Loading';
 import LinearGradient from 'react-native-linear-gradient';
 import Btn from '../../Components/Btn';
+import {addUser} from '../../Redux/actions/userActions';
+import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
 
 const screenHeight = Dimensions.get('window').height;
 
@@ -68,6 +70,7 @@ const SignIn = ({navigation}) => {
       //console.log('login response: ', res.data.result.name);
       await AsyncStorage.setItem('token', res.data.token);
       showToast('Login Successfull');
+      dispatch(addUser(res.data.result));
       dispatch(toggleLogin(true));
     } catch (error) {
       console.log('error: ', error);
@@ -83,50 +86,54 @@ const SignIn = ({navigation}) => {
 
   return (
     <>
-      <Background>
-        <View style={[s.container]}>
-          <View style={[s.card]}>
-            <HeadingText size={36}> Sign In</HeadingText>
+      <KeyboardAvoidingComponent>
+        <View style={[{height: screenHeight}, ES.w100]}>
+          <Background>
+            <View style={[s.container]}>
+              <View style={[s.card]}>
+                <HeadingText size={36}> Sign In</HeadingText>
 
-            <View style={[s.inputContainer]}>
-              <TextInput
-                style={[s.input]}
-                placeholder="Email"
-                keyboardType="default"
-                value={email}
-                secureTextEntry={false}
-                onChangeText={value => setEmail(value)}
-              />
-              <TextInput
-                style={[s.input]}
-                placeholder="Password"
-                secureTextEntry={true}
-                value={password}
-                onChangeText={value => setPassword(value)}
-              />
-            </View>
-
-            <Btn method={handleLogin}>
-              {isLoading ? (
-                <View style={[isLoading ? ES.dBlock : ES.dNone, ES.hs30]}>
-                  <Loading size={'small'} color={'#fff'} />
+                <View style={[s.inputContainer]}>
+                  <TextInput
+                    style={[s.input]}
+                    placeholder="Email"
+                    keyboardType="default"
+                    value={email}
+                    secureTextEntry={false}
+                    onChangeText={value => setEmail(value)}
+                  />
+                  <TextInput
+                    style={[s.input]}
+                    placeholder="Password"
+                    secureTextEntry={true}
+                    value={password}
+                    onChangeText={value => setPassword(value)}
+                  />
                 </View>
-              ) : (
-                <Text
-                  style={[
-                    isLoading ? ES.dNone : ES.dBlock,
-                    ES.textLight,
-                    ES.fw700,
-                    ES.f20,
-                    ES.textCenter,
-                  ]}>
-                  Login
-                </Text>
-              )}
-            </Btn>
-          </View>
+
+                <Btn method={handleLogin}>
+                  {isLoading ? (
+                    <View style={[isLoading ? ES.dBlock : ES.dNone, ES.hs30]}>
+                      <Loading size={'small'} color={'#fff'} />
+                    </View>
+                  ) : (
+                    <Text
+                      style={[
+                        isLoading ? ES.dNone : ES.dBlock,
+                        ES.textLight,
+                        ES.fw700,
+                        ES.f20,
+                        ES.textCenter,
+                      ]}>
+                      Login
+                    </Text>
+                  )}
+                </Btn>
+              </View>
+            </View>
+          </Background>
         </View>
-      </Background>
+      </KeyboardAvoidingComponent>
     </>
   );
 };
@@ -136,7 +143,6 @@ export default SignIn;
 const s = StyleSheet.create({
   container: StyleSheet.flatten([
     {height: screenHeight},
-    ES.tempBorder,
 
     ES.justifyContentEnd,
     ES.alignItemsCenter,

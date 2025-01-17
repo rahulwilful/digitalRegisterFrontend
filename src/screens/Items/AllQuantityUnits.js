@@ -7,6 +7,7 @@ import {
   ScrollView,
   ToastAndroid,
   Image,
+  Modal,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import axiosClient from '../../../axiosClient';
@@ -17,25 +18,22 @@ import {headerBackgroundColor, primaryColor} from '../../Constants/Colours';
 import Loading from '../../Constants/Loading';
 import {useDispatch, useSelector} from 'react-redux';
 import {addAllItems, addIAlltems} from '../../Redux/actions/itemActions';
-import {allUsersIcon, noDataImage} from '../../Constants/imagesAndIcons';
-import UserCard from '../../Components/UserCard';
+import {noDataImage} from '../../Constants/imagesAndIcons';
+import LinearGradient from 'react-native-linear-gradient';
 import ModalComponent from '../../Components/ModalComponent';
 import Btn from '../../Components/Btn';
+import QuantityUnitCard from '../../Components/QuantityUnitCard';
 import AddButton from '../../Components/AddButton';
 
-const AllUsers = ({navigation}) => {
+const AllQuantityUnits = ({navigation}) => {
   const reduxItems = useSelector(state => state.items);
-  const [items, setItems] = useState([]);
-  const [originalItems, setOriginalItems] = useState([]);
-
-  const [users, setUsers] = useState([]);
-  const [originalUsers, setOriginalUsers] = useState([]);
-
+  const [QuantityUnits, setQuantityUnits] = useState([]);
+  const [originalQuantityUnits, setOriginalQuantityUnits] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [renderKey, setRenderKey] = useState(0);
-
+  const [searchQuery, setSearchQuery] = useState('');
   const [isModalVisible, setModalVisible] = useState(false);
-  const [userToDeleteRestore, setUserToDeleteRestore] = useState({});
+  const [itemToDeleteRestore, setItemToDeleteRestore] = useState({});
 
   const dispatch = useDispatch();
 
@@ -47,8 +45,9 @@ const AllUsers = ({navigation}) => {
     );
   };
 
-  const getUsersByName = async name => {
+  const getItemsByName = async name => {
     setIsLoading(true);
+    setSearchQuery(name);
 
     let form = {
       item_name: name,
@@ -56,7 +55,7 @@ const AllUsers = ({navigation}) => {
     console.log('name: ', form);
 
     if (name.length === 0) {
-      setItems(originalItems);
+      setQuantityUnits(originalQuantityUnits);
       setIsLoading(false);
       return;
     }
@@ -64,43 +63,46 @@ const AllUsers = ({navigation}) => {
     try {
       const res = await axiosClient.post(`/item/get/by/name`, form);
 
-      console.log('AllItems res: ', res);
-      setItems(res.data.result);
+      // console.log('AllItems res: ', res.data.result.length);
+      setQuantityUnits(res.data.result);
     } catch (error) {
       if (error.response.data.message) {
         showToast(error.response.data.message);
       } else {
         showToast('Something went wrong');
       }
+      setQuantityUnits([]);
       console.log('error: ', error);
     }
     setIsLoading(false);
   };
 
-  const handleDeleteUser = async id => {
-    console.log('handleDeleteUser: ', id);
+  const handleDeleteItem = async id => {
+    console.log('handleDeleteItem: ', id);
 
     try {
-      const res = await axiosClient.delete(`/user/delete/${id}`);
+      const res = await axiosClient.delete(`/quantity_unit/delete/${id}`);
       if (res) {
-        showToast(res.data.message);
+        showToast('item deleted');
       }
 
-      let temp = users;
+      console.log('res.data: ', res.data);
+
+      let temp = QuantityUnits;
       for (let i in temp) {
         if (temp[i]._id === id) {
           temp[i].is_delete = true;
         }
       }
 
-      setUsers(temp);
-      let temp2 = originalUsers;
+      setQuantityUnits(temp);
+      let temp2 = originalQuantityUnits;
       for (let i in temp2) {
         if (temp2[i]._id === id) {
           temp2[i].is_delete = true;
         }
       }
-      setOriginalUsers(temp2);
+      setOriginalQuantityUnits(temp2);
       setRenderKey(renderKey + 1);
     } catch (error) {
       if (error.response.data.message) {
@@ -113,30 +115,31 @@ const AllUsers = ({navigation}) => {
     setModalVisible(false);
   };
 
-  const handleRestoreUser = async id => {
-    console.log('handleRestoreUser: ', id);
+  const handleRestoreItem = async id => {
+    console.log('handleRestoreItem: ', id);
 
     try {
-      const res = await axiosClient.put(`/user/restore/${id}`);
+      const res = await axiosClient.put(`/quantity_unit/restore/${id}`);
       if (res) {
-        showToast(res.data.message);
+        showToast('item restored');
       }
 
-      let temp = users;
+      console.log('res.data: ', res.data);
+      let temp = QuantityUnits;
       for (let i in temp) {
         if (temp[i]._id === id) {
           temp[i].is_delete = false;
         }
       }
 
-      setUsers(temp);
-      let temp2 = originalUsers;
+      setQuantityUnits(temp);
+      let temp2 = originalQuantityUnits;
       for (let i in temp2) {
         if (temp2[i]._id === id) {
           temp2[i].is_delete = false;
         }
       }
-      setOriginalUsers(temp2);
+      setOriginalQuantityUnits(temp2);
       setRenderKey(renderKey + 1);
     } catch (error) {
       if (error.response.data.message) {
@@ -149,16 +152,16 @@ const AllUsers = ({navigation}) => {
     setModalVisible(false);
   };
 
-  const getUsers = async () => {
-    console.log('getUsers: ');
+  const getQuantityUnits = async () => {
+    console.log('getQuantityUnits: ');
+    setSearchQuery('');
     setIsLoading(true);
-
     try {
-      const res = await axiosClient.get(`/user/getall`);
-
-      //console.log('res: ', res.data.result);
-      setUsers(res.data.result);
-      setOriginalUsers(res.data.result);
+      const res = await axiosClient.get(`/quantity_unit/getall`);
+      console.log('AllQuantityUnits res: ', res.data.result);
+      setQuantityUnits(res.data.result);
+      setOriginalQuantityUnits(res.data.result);
+      useDispatch(addAllItems(res.data.result));
     } catch (error) {
       console.log('error: ', error);
     }
@@ -166,31 +169,15 @@ const AllUsers = ({navigation}) => {
   };
 
   useEffect(() => {
-    getUsers();
+    getQuantityUnits();
   }, []);
-
-  const handleSearchFilter = text => {
-    if (text.length === 0) {
-      setItems(originalItems);
-    }
-    {
-      const newData = originalItems.filter(item => {
-        const itemData = item.item_name
-          ? item.item_name.toUpperCase()
-          : ''.toUpperCase();
-        const textData = text.toUpperCase();
-        return itemData.indexOf(textData) > -1;
-      });
-      setItems(newData);
-    }
-  };
 
   const closeModal = () => {
     setModalVisible(false);
   };
 
-  const openModal = user => {
-    setUserToDeleteRestore(user);
+  const openModal = item => {
+    setItemToDeleteRestore(item);
     setModalVisible(true);
   };
 
@@ -203,19 +190,19 @@ const AllUsers = ({navigation}) => {
         <View style={[ES.justifyContentSpaceEvenly, ES.fx1, ES.gap1]}>
           <View style={[ES.centerItems]}>
             <HeadingText>
-              <Text>{userToDeleteRestore.name}</Text>
+              <Text>{itemToDeleteRestore.name}</Text>
             </HeadingText>
           </View>
           <View style={[ES.centerItems]}>
             <Btn
               width={'50%'}
               method={() =>
-                userToDeleteRestore.is_delete
-                  ? handleRestoreUser(userToDeleteRestore._id)
-                  : handleDeleteUser(userToDeleteRestore._id)
+                itemToDeleteRestore.is_delete
+                  ? handleRestoreItem(itemToDeleteRestore._id)
+                  : handleDeleteItem(itemToDeleteRestore._id)
               }>
               <Text>
-                {userToDeleteRestore.is_delete ? 'Restore' : 'Delete'}
+                {itemToDeleteRestore.is_delete ? 'Restore' : 'Delete'}
               </Text>
             </Btn>
           </View>
@@ -223,43 +210,43 @@ const AllUsers = ({navigation}) => {
       </ModalComponent>
 
       <View style={[ES.fx1]}>
-        {/*  <View style={[ES.py1]}>
-          <HeadingText center>All Users</HeadingText>
-        </View> */}
-
         <View style={[s.header, ES.mt1]}>
           <TextInput
             style={[s.textInput]}
             placeholder="Search"
-            onChangeText={text => getUsersByName(text)}
+            value={searchQuery}
+            onChangeText={text => getItemsByName(text)}
           />
         </View>
 
-        {isLoading == false && users.length > 0 && (
+        {isLoading == false && QuantityUnits.length > 0 && (
           <View style={[ES.w100, ES.fx1]}>
             <FlatList
-              data={users}
-              contentContainerStyle={[s.userList]}
+              data={QuantityUnits}
+              contentContainerStyle={[s.list]}
               renderItem={({item}) => (
-                <UserCard
+                <QuantityUnitCard
                   item={item}
-                  handleDeleteUser={handleDeleteUser}
-                  handleRestoreUser={handleRestoreUser}
+                  handleDeleteItem={handleDeleteItem}
+                  handleRestoreItem={handleRestoreItem}
                   openModal={openModal}
                 />
               )}
               refreshing={isLoading}
-              onRefresh={getUsers}
+              onRefresh={getQuantityUnits}
               maxToRenderPerBatch={20}
             />
           </View>
         )}
-
-        <AddButton method={() => navigation.navigate('newUser')} />
+        <AddButton
+          method={() => navigation.navigate('stackAddQuantityUnits')}
+        />
 
         <View
           style={[
-            isLoading == false && users.length == 0 ? ES.dBlock : ES.dNone,
+            isLoading == false && QuantityUnits.length == 0
+              ? ES.dBlock
+              : ES.dNone,
             ES.fx1,
             ES.gap2,
           ]}>
@@ -282,7 +269,7 @@ const AllUsers = ({navigation}) => {
   );
 };
 
-export default AllUsers;
+export default AllQuantityUnits;
 
 const s = StyleSheet.create({
   header: StyleSheet.flatten([ES.px1, ES.flexRow, ES.centerItems, ES.w100]),
@@ -293,5 +280,20 @@ const s = StyleSheet.create({
     ES.px1,
     ES.f16,
   ]),
-  userList: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 150}]),
+  modal: StyleSheet.flatten([
+    ES.w90,
+    ES.h90,
+    ES.bgLight,
+    ES.bRadius10,
+    ES.shadow10,
+    {borderWidth: 0.5, borderColor: '#000'},
+  ]),
+  modalClose: StyleSheet.flatten([
+    ES.fx0,
+    ES.alignItemsEnd,
+    ES.w100,
+    ES.pt06,
+    ES.pe06,
+  ]),
+  list: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 150}]),
 });
