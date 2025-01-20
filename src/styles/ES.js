@@ -111,6 +111,41 @@ const ES = StyleSheet.create({
   },
 
   /* ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+  opacity0: {
+    opacity: 0,
+  },
+  opacity10: {
+    opacity: 0.1,
+  },
+  opacity20: {
+    opacity: 0.2,
+  },
+  opacity30: {
+    opacity: 0.3,
+  },
+  opacity40: {
+    opacity: 0.4,
+  },
+  opacity50: {
+    opacity: 0.5,
+  },
+  opacity60: {
+    opacity: 0.6,
+  },
+  opacity70: {
+    opacity: 0.7,
+  },
+  opacity80: {
+    opacity: 0.8,
+  },
+  opacity90: {
+    opacity: 0.9,
+  },
+  opacity100: {
+    opacity: 1,
+  },
+
+  /* ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
   drop_shadow: {
     elevation: 4,

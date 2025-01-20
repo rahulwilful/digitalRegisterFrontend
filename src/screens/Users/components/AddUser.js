@@ -13,31 +13,33 @@ import {
   Dimensions,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import ES from '../../styles/ES';
+import ES from '../../../styles/ES';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
-import {backgroundColor, primaryColor} from '../../Constants/Colours';
-import axiosClient from '../../../axiosClient';
-import {toggleLogin} from '../../Redux/actions/action';
+import {backgroundColor, primaryColor} from '../../../Constants/Colours';
+import axiosClient from '../../../../axiosClient';
+import {toggleLogin} from '../../../Redux/actions/action';
 import {Picker} from '@react-native-picker/picker';
-import HeadingText from '../../Components/HeadingText';
-import Btn from '../../Components/Btn';
+import HeadingText from '../../../Components/HeadingText';
+import Btn from '../../../Components/Btn';
 
-import {userIconOrange} from '../../Constants/imagesAndIcons';
-import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
-import Loading from '../../Constants/Loading';
+import {userIconOrange} from '../../../Constants/imagesAndIcons';
+import KeyboardAvoidingComponent from '../../../Components/KeyboardAvoidingComponent';
+import Loading from '../../../Constants/Loading';
+import {useNavigation} from '@react-navigation/native';
+import FullModalComponent from '../../../Components/FullModalComponent';
 
-const AddUser = ({navigation}) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [mobileNo, setMobileNo] = useState('');
+const AddUser = ({addModal, closeModal, handleAddUserToList}) => {
+  const navigation = useNavigation();
+  const [name, setName] = useState('pickup');
+
+  const [email, setEmail] = useState('pickup@gmail.com');
+  const [password, setPassword] = useState('111111');
+  const [mobileNo, setMobileNo] = useState('12345678');
   const [storageLocation, setStorageLocation] = useState('');
   const [role, setRole] = useState('');
 
   const screenHeight = Dimensions.get('window').height;
-
-  console.log('screen hight: ', screenHeight);
 
   const [storageLocations, setStorageLocations] = useState([]);
   const [roles, setRoles] = useState([]);
@@ -55,7 +57,7 @@ const AddUser = ({navigation}) => {
     try {
       const storageRes = await axiosClient.get('/storage/location/getall');
       setStorageLocations(storageRes.data.result);
-      console.log('storageRes: ', storageRes.data.result);
+      //console.log('storageRes: ', storageRes.data.result);
     } catch (error) {
       console.log('Error fetching storage locations:', error);
     }
@@ -93,9 +95,9 @@ const AddUser = ({navigation}) => {
       dispatch(toggleLogin(true));
       if (res) {
         showToast('User added successfully');
-        setTimeout(() => {
-          navigation.goBack();
-        }, 1000);
+        handleAddUserToList(res.data.result);
+
+        closeModal();
       }
     } catch (error) {
       if (error.response?.status === 409) {
@@ -105,6 +107,7 @@ const AddUser = ({navigation}) => {
       } else {
         console.log('Unexpected error:', error);
       }
+      closeModal();
     }
   };
 
@@ -152,82 +155,82 @@ const AddUser = ({navigation}) => {
 
   return (
     <>
-      <KeyboardAvoidingComponent>
-        <View style={[s.container, ES.my5, isLoading ? ES.dNone : null]}>
-          <View style={[s.card]}>
-            <View style={[s.imageContainer]}>
-              <Image
-                source={userIconOrange}
-                style={[ES.hs100, ES.objectFitContain]}
+      <FullModalComponent
+        height={'60%'}
+        isModalVisible={addModal}
+        closeModal={closeModal}>
+        <KeyboardAvoidingComponent bg={false}>
+          <View style={[s.container, isLoading ? ES.dNone : null]}>
+            <View style={[s.card]}>
+              <TextInput
+                style={[s.input]}
+                placeholder="Name"
+                value={name}
+                onChangeText={setName}
               />
+              <TextInput
+                style={[s.input]}
+                placeholder="Mobile Number"
+                keyboardType="phone-pad"
+                value={mobileNo}
+                onChangeText={setMobileNo}
+              />
+              <TextInput
+                style={[s.input]}
+                placeholder="Email"
+                keyboardType="email-address"
+                value={email}
+                onChangeText={setEmail}
+              />
+              <TextInput
+                style={[s.input]}
+                placeholder="Password"
+                secureTextEntry
+                value={password}
+                onChangeText={setPassword}
+              />
+              {storageLocations.length > 0 && (
+                <View style={[s.input]}>
+                  <Picker
+                    selectedValue={storageLocation}
+                    onValueChange={setStorageLocation}>
+                    <Picker.Item label={'Select Location'} />
+                    {storageLocations.map(item => (
+                      <Picker.Item
+                        key={item._id}
+                        label={item.name}
+                        value={item._id}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              )}
+              {roles.length > 0 && (
+                <View style={[s.input]}>
+                  <Picker selectedValue={role} onValueChange={setRole}>
+                    <Picker.Item label={'Select Role'} />
+                    {roles.map(item => (
+                      <Picker.Item
+                        key={item._id}
+                        label={item.name}
+                        value={item._id}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              )}
+              <View style={[ES.mt2, ES.w100]}>
+                <Btn width={'100%'} method={handleAddUser}>
+                  <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
+                </Btn>
+              </View>
             </View>
-
-            <TextInput
-              style={[s.input]}
-              placeholder="Name"
-              value={name}
-              onChangeText={setName}
-            />
-            <TextInput
-              style={[s.input]}
-              placeholder="Mobile Number"
-              keyboardType="phone-pad"
-              value={mobileNo}
-              onChangeText={setMobileNo}
-            />
-            <TextInput
-              style={[s.input]}
-              placeholder="Email"
-              keyboardType="email-address"
-              value={email}
-              onChangeText={setEmail}
-            />
-            <TextInput
-              style={[s.input]}
-              placeholder="Password"
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-            />
-            {storageLocations.length > 0 && (
-              <View style={[s.input]}>
-                <Picker
-                  selectedValue={storageLocation}
-                  onValueChange={setStorageLocation}>
-                  <Picker.Item label={'Select Location'} />
-                  {storageLocations.map(item => (
-                    <Picker.Item
-                      key={item._id}
-                      label={item.name}
-                      value={item._id}
-                    />
-                  ))}
-                </Picker>
-              </View>
-            )}
-            {roles.length > 0 && (
-              <View style={[s.input]}>
-                <Picker selectedValue={role} onValueChange={setRole}>
-                  <Picker.Item label={'Select Role'} />
-                  {roles.map(item => (
-                    <Picker.Item
-                      key={item._id}
-                      label={item.name}
-                      value={item._id}
-                    />
-                  ))}
-                </Picker>
-              </View>
-            )}
-            <Btn method={handleAddUser}>
-              <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
-            </Btn>
           </View>
-        </View>
-        <View style={[ES.fx1, isLoading ? null : ES.dNone]}>
-          <Loading />
-        </View>
-      </KeyboardAvoidingComponent>
+          <View style={[ES.fx1, isLoading ? null : ES.dNone]}>
+            <Loading />
+          </View>
+        </KeyboardAvoidingComponent>
+      </FullModalComponent>
     </>
   );
 };
@@ -235,10 +238,10 @@ const AddUser = ({navigation}) => {
 export default AddUser;
 
 const s = StyleSheet.create({
-  container: StyleSheet.flatten([ES.centerItems, ES.w100, {backgroundColor}]),
+  container: StyleSheet.flatten([ES.centerItems, ES.w100]),
   input: StyleSheet.flatten([
     {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
-    ES.w90,
+    ES.w100,
     ES.px1,
     ES.f16,
   ]),
@@ -251,21 +254,13 @@ const s = StyleSheet.create({
     ES.shadow1,
   ]),
   card: StyleSheet.flatten([
-    ES.w80,
-    ES.fx0,
+    ES.w97,
     ES.centerItems,
     ES.gap2,
     ES.px1,
     ES.bRadius10,
-    ES.shadow7,
-
     ES.pb3,
-    {
-      backgroundColor,
-      borderTopRightRadius: 100,
-      borderTopLeftRadius: 100,
-      paddingTop: 70,
-    },
+
     ES.relative,
   ]),
   userIcon: StyleSheet.flatten([ES.hs100, ES.objectFitContain]),

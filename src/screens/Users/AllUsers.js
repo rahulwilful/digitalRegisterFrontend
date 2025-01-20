@@ -7,33 +7,44 @@ import {
   ScrollView,
   ToastAndroid,
   Image,
+  Dimensions,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import axiosClient from '../../../axiosClient';
 import HeadingText from '../../Components/HeadingText';
 import ES from '../../styles/ES';
-import ItemCard from '../../Components/ItemCard';
+import ItemCard from '../Items/components/ItemCard';
 import {headerBackgroundColor, primaryColor} from '../../Constants/Colours';
 import Loading from '../../Constants/Loading';
 import {useDispatch, useSelector} from 'react-redux';
 import {addAllItems, addIAlltems} from '../../Redux/actions/itemActions';
 import {allUsersIcon, noDataImage} from '../../Constants/imagesAndIcons';
-import UserCard from '../../Components/UserCard';
+import UserCard from './components/UserCard';
 import ModalComponent from '../../Components/ModalComponent';
 import Btn from '../../Components/Btn';
 import AddButton from '../../Components/AddButton';
+import FullModalComponent from '../../Components/FullModalComponent';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {toggleLogin} from '../../Redux/actions/action';
+import AddUser from './components/AddUser';
+import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
+import UpdateUser from './components/UpdateUser';
 
 const AllUsers = ({navigation}) => {
   const reduxItems = useSelector(state => state.items);
+
   const [items, setItems] = useState([]);
   const [originalItems, setOriginalItems] = useState([]);
 
   const [users, setUsers] = useState([]);
+  const [updateUser, setUpdateUser] = useState({});
   const [originalUsers, setOriginalUsers] = useState([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [renderKey, setRenderKey] = useState(0);
 
+  const [addModal, setAddModal] = useState(false);
+  const [updateModal, setUpdateModal] = useState(false);
   const [isModalVisible, setModalVisible] = useState(false);
   const [userToDeleteRestore, setUserToDeleteRestore] = useState({});
 
@@ -194,8 +205,35 @@ const AllUsers = ({navigation}) => {
     setModalVisible(true);
   };
 
+  const handleAddUserToList = user => {
+    let temp = originalUsers;
+    temp.push(user);
+    setOriginalUsers(temp);
+    setUsers(temp);
+  };
+
+  const handleSetUpadateUserList = userData => {
+    console.log('userData: ', userData);
+    let temp = originalUsers;
+    for (let i in temp) {
+      if (temp[i]._id === userData._id) {
+        temp[i] = userData;
+        break;
+      }
+    }
+    setOriginalUsers(temp);
+    setUsers(temp);
+    setRenderKey(renderKey + 1);
+  };
+
   return (
     <>
+      <AddUser
+        addModal={addModal}
+        closeModal={() => setAddModal(false)}
+        handleAddUserToList={handleAddUserToList}
+      />
+
       <ModalComponent
         isModalVisible={isModalVisible}
         closeModal={closeModal}
@@ -222,11 +260,7 @@ const AllUsers = ({navigation}) => {
         </View>
       </ModalComponent>
 
-      <View style={[ES.fx1]}>
-        {/*  <View style={[ES.py1]}>
-          <HeadingText center>All Users</HeadingText>
-        </View> */}
-
+      <View style={[ES.fx1, ES.w100]}>
         <View style={[s.header, ES.mt1]}>
           <TextInput
             style={[s.textInput]}
@@ -236,26 +270,30 @@ const AllUsers = ({navigation}) => {
         </View>
 
         {isLoading == false && users.length > 0 && (
-          <View style={[ES.w100, ES.fx1]}>
-            <FlatList
-              data={users}
-              contentContainerStyle={[s.userList]}
-              renderItem={({item}) => (
-                <UserCard
-                  item={item}
-                  handleDeleteUser={handleDeleteUser}
-                  handleRestoreUser={handleRestoreUser}
-                  openModal={openModal}
-                />
-              )}
-              refreshing={isLoading}
-              onRefresh={getUsers}
-              maxToRenderPerBatch={20}
-            />
-          </View>
+          <KeyboardAvoidingComponent>
+            <View style={[ES.w100, ES.fx1]} key={renderKey}>
+              <FlatList
+                data={users}
+                contentContainerStyle={[s.list]}
+                renderItem={({item}) => (
+                  <UserCard
+                    item={item}
+                    handleDeleteUser={handleDeleteUser}
+                    handleRestoreUser={handleRestoreUser}
+                    openModal={openModal}
+                    handleSetUpadateUserList={handleSetUpadateUserList}
+                  />
+                )}
+                refreshing={isLoading}
+                onRefresh={getUsers}
+                maxToRenderPerBatch={20}
+              />
+            </View>
+          </KeyboardAvoidingComponent>
         )}
 
-        <AddButton method={() => navigation.navigate('newUser')} />
+        {/*   <AddButton method={() => navigation.navigate('newUser')} /> */}
+        <AddButton method={() => setAddModal(true)} />
 
         <View
           style={[
@@ -293,5 +331,5 @@ const s = StyleSheet.create({
     ES.px1,
     ES.f16,
   ]),
-  userList: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 150}]),
+  list: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 100}]),
 });

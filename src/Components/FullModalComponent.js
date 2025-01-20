@@ -6,7 +6,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   TouchableWithoutFeedback,
-  BackHandler,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import ES from '../styles/ES';
@@ -19,11 +18,11 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import {cancelIcon} from '../Constants/imagesAndIcons';
 
-const ModalComponent = ({children, isModalVisible, closeModal, height}) => {
+const FullModalComponent = ({children, isModalVisible, closeModal, height}) => {
   return (
     <>
       <Modal visible={isModalVisible} transparent={true} animationType="slide">
-        <TouchableWithoutFeedback onPress={closeModal}>
+        <TouchableWithoutFeedback onPress={() => closeModal()}>
           <View style={[ES.fx1, ES.centerItems, ES.p1]}>
             <TouchableWithoutFeedback onPress={() => {}}>
               <LinearGradient
@@ -33,7 +32,7 @@ const ModalComponent = ({children, isModalVisible, closeModal, height}) => {
                 style={[s.modal, height ? {height: height} : ES.h90]}>
                 <View style={[ES.fx1, ES.p06]}>{children}</View>
                 <View style={[s.modalClose]}>
-                  <TouchableOpacity onPress={closeModal} style={[]}>
+                  <TouchableOpacity onPress={() => closeModal()} style={[]}>
                     <Image
                       source={cancelIcon}
                       style={[ES.hs30, ES.ws30, ES.objectFitContain]}
@@ -49,7 +48,7 @@ const ModalComponent = ({children, isModalVisible, closeModal, height}) => {
   );
 };
 
-export default ModalComponent;
+export default FullModalComponent;
 
 const s = StyleSheet.create({
   header: StyleSheet.flatten([ES.px1, ES.flexRow, ES.centerItems, ES.w100]),

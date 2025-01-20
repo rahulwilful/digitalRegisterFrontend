@@ -61,7 +61,7 @@ const Routes = () => {
         <GestureHandlerRootView
           style={[isLoading ? ES.dNone : ES.dBlock, {flex: 1}]}>
           <NavigationContainer>
-            <Tabs />
+            <DrawerNav />
           </NavigationContainer>
         </GestureHandlerRootView>
       ) : (

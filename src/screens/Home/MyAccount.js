@@ -7,6 +7,7 @@ import {
   ToastAndroid,
   ScrollView,
   Image,
+  Dimensions,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import ES from '../../styles/ES';
@@ -26,6 +27,9 @@ import {
 } from '../../Constants/imagesAndIcons';
 import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
 import Loading from '../../Constants/Loading';
+import Header from '../../Components/Header';
+
+const screenHeight = Dimensions.get('window').height;
 
 const MyAccount = ({navigation}) => {
   const [name, setName] = useState('rahul');
@@ -170,64 +174,67 @@ const MyAccount = ({navigation}) => {
   return (
     <>
       <KeyboardAvoidingComponent py={0}>
-        <View style={[s.container, isLoading ? ES.dNone : null]}>
-          <View style={[s.card]}>
-            <View style={[s.imageContainer]}>
-              <Image
-                source={userIconOrange}
-                style={[ES.hs100, ES.objectFitContain]}
-              />
-            </View>
+        <View style={[ES.fx1, ES.h100, ES.w100, {height: screenHeight}]}>
+          <Header>My Account</Header>
+          <View style={[s.container, isLoading ? ES.dNone : null]}>
+            <View style={[s.card]}>
+              <View style={[s.imageContainer]}>
+                <Image
+                  source={userIconOrange}
+                  style={[ES.hs100, ES.objectFitContain]}
+                />
+              </View>
 
-            <TextInput style={[s.input]} placeholder="Name" value={name} />
-            <TextInput
-              style={[s.input]}
-              placeholder="Mobile Number"
-              value={mobileNo.toString()}
-            />
-            <TextInput
-              style={[s.input]}
-              placeholder="Email"
-              keyboardType="email-address"
-              value={email}
-            />
-            <TextInput
-              style={[s.input]}
-              placeholder="Storage Location"
-              keyboardType="email-address"
-              value={storageLocation}
-            />
-            <TextInput
-              style={[s.input]}
-              placeholder="Role"
-              keyboardType="email-address"
-              value={role}
-            />
-            <View style={[ES.flexRow, ES.gap2]}>
-              <Btn
-                method={() => navigation.navigate('stackUpdateAccount')}
-                px={10}
-                width={'30%'}>
-                <View style={[ES.h100]}>
-                  <Image
-                    source={whitePenIcon}
-                    style={[ES.hs22, ES.ws22, ES.objectFitContain]}
-                  />
-                </View>
-              </Btn>
-              <Btn method={handleLogOut} px={10} width={'30%'}>
-                <View style={[ES.h100]}>
-                  <Image
-                    source={logOutIcon}
-                    style={[ES.hs22, ES.ws22, ES.objectFitContain]}
-                  />
-                </View>
-              </Btn>
+              <TextInput style={[s.input]} placeholder="Name" value={name} />
+              <TextInput
+                style={[s.input]}
+                placeholder="Mobile Number"
+                value={mobileNo.toString()}
+              />
+              <TextInput
+                style={[s.input]}
+                placeholder="Email"
+                keyboardType="email-address"
+                value={email}
+              />
+              <TextInput
+                style={[s.input]}
+                placeholder="Storage Location"
+                keyboardType="email-address"
+                value={storageLocation}
+              />
+              <TextInput
+                style={[s.input]}
+                placeholder="Role"
+                keyboardType="email-address"
+                value={role}
+              />
+              <View style={[ES.flexRow, ES.gap2]}>
+                <Btn
+                  method={() => navigation.navigate('stackUpdateAccount')}
+                  px={10}
+                  width={'30%'}>
+                  <View style={[ES.h100]}>
+                    <Image
+                      source={whitePenIcon}
+                      style={[ES.hs22, ES.ws22, ES.objectFitContain]}
+                    />
+                  </View>
+                </Btn>
+                <Btn method={handleLogOut} px={10} width={'30%'}>
+                  <View style={[ES.h100]}>
+                    <Image
+                      source={logOutIcon}
+                      style={[ES.hs22, ES.ws22, ES.objectFitContain]}
+                    />
+                  </View>
+                </Btn>
+              </View>
             </View>
           </View>
-        </View>
-        <View style={[ES.fx1, isLoading ? null : ES.dNone]}>
-          <Loading />
+          <View style={[ES.fx1, isLoading ? null : ES.dNone]}>
+            <Loading />
+          </View>
         </View>
       </KeyboardAvoidingComponent>
     </>

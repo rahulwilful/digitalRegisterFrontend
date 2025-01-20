@@ -16,9 +16,17 @@ import React, {useEffect, useState} from 'react';
 import ES from '../styles/ES';
 import {backgroundColor} from '../Constants/Colours';
 
-const KeyboardAvoidingComponent = ({children, py, tempBorder}) => {
+const KeyboardAvoidingComponent = ({children, py, tempBorder, bg}) => {
   return (
-    <KeyboardAvoidingView style={[ES.fx1, {backgroundColor}]}>
+    <KeyboardAvoidingView
+      style={[
+        ES.fx1,
+        bg === false
+          ? null
+          : bg
+          ? {backgroundColor: bg}
+          : {backgroundColor: backgroundColor},
+      ]}>
       <View style={[ES.fx1, ES.centerItems]}>
         <View style={[ES.w100, py ? {paddingVertical: py} : null]}>
           <ScrollView

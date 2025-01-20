@@ -24,7 +24,7 @@ const AddButton = ({
       <TouchableOpacity onPress={method ? method : null}>
         <Image
           source={addIcon}
-          style={[ES.hs55, ES.ws55, ES.objectFitContain]}
+          style={[ES.hs40, ES.ws40, ES.objectFitContain]}
         />
       </TouchableOpacity>
     </View>

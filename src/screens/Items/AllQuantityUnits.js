@@ -13,7 +13,7 @@ import React, {useEffect, useState} from 'react';
 import axiosClient from '../../../axiosClient';
 import HeadingText from '../../Components/HeadingText';
 import ES from '../../styles/ES';
-import ItemCard from '../../Components/ItemCard';
+import ItemCard from './components/ItemCard';
 import {headerBackgroundColor, primaryColor} from '../../Constants/Colours';
 import Loading from '../../Constants/Loading';
 import {useDispatch, useSelector} from 'react-redux';
@@ -295,5 +295,5 @@ const s = StyleSheet.create({
     ES.pt06,
     ES.pe06,
   ]),
-  list: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 150}]),
+  list: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 100}]),
 });

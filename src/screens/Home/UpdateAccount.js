@@ -8,6 +8,7 @@ import {
   ScrollView,
   Image,
   Keyboard,
+  Dimensions,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import ES from '../../styles/ES';
@@ -28,6 +29,9 @@ import {
 } from '../../Constants/imagesAndIcons';
 import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
 import Loading from '../../Constants/Loading';
+import Header from '../../Components/Header';
+
+const screenHeight = Dimensions.get('window').height;
 
 const UpdateAccount = ({navigation}) => {
   const [name, setName] = useState('rahul');
@@ -157,39 +161,41 @@ const UpdateAccount = ({navigation}) => {
   return (
     <>
       <KeyboardAvoidingComponent>
-        <View style={[s.container, isLoading ? ES.dNone : null]}>
-          <View style={[s.card]}>
-            <View style={[s.imageContainer]}>
-              <Image
-                source={editUserIcon}
-                style={[ES.hs65, ES.objectFitContain]}
-              />
-            </View>
+        <View style={[ES.fx1, ES.h100, ES.w100, {height: screenHeight}]}>
+          <Header>Update Account</Header>
+          <View style={[s.container, isLoading ? ES.dNone : null]}>
+            <View style={[s.card]}>
+              <View style={[s.imageContainer]}>
+                <Image
+                  source={editUserIcon}
+                  style={[ES.hs65, ES.objectFitContain]}
+                />
+              </View>
 
-            <TextInput
-              style={[s.input, ES.mt2]}
-              placeholder="Name"
-              value={name}
-              onChangeText={text => setName(text)}
-            />
-            <TextInput
-              style={[s.input]}
-              placeholder="Mobile Number"
-              value={mobileNo.toString()}
-              onChangeText={text => setMobileNo(text)}
-            />
-            {/*   <TextInput
+              <TextInput
+                style={[s.input, ES.mt2]}
+                placeholder="Name"
+                value={name}
+                onChangeText={text => setName(text)}
+              />
+              <TextInput
+                style={[s.input]}
+                placeholder="Mobile Number"
+                value={mobileNo.toString()}
+                onChangeText={text => setMobileNo(text)}
+              />
+              {/*   <TextInput
               style={[s.input]}
               placeholder="Email"
               keyboardType="email-address"
               value={email}
-            /> */}
-            {/*    {storageLocations.length > 0 &&
+              /> */}
+              {/*    {storageLocations.length > 0 &&
               currentUser.role_type.value == 'super_admin' && (
                 <View style={[s.input]}>
-                  <Picker
-                    selectedValue={storageLocation}
-                    onValueChange={setStorageLocation}>
+                <Picker
+                selectedValue={storageLocation}
+                onValueChange={setStorageLocation}>
                     <Picker.Item label={'Select Location'} />
                     {storageLocations.map(item => (
                       <Picker.Item
@@ -201,7 +207,7 @@ const UpdateAccount = ({navigation}) => {
                   </Picker>
                 </View>
               )} */}
-            {/* 
+              {/* 
             {roles.length > 0 && (
               <View style={[s.input]}>
                 <Picker
@@ -215,19 +221,20 @@ const UpdateAccount = ({navigation}) => {
                       label={item.name}
                       value={item._id}
                     />
-                  ))}
+                    ))}
                 </Picker>
-              </View>
+                </View>
             )} */}
-            <View style={[ES.flexRow, ES.gap2, ES.mt1]}>
-              <Btn method={handleUpdateUser} px={10} width={'50%'}>
-                <Text>Update</Text>
-              </Btn>
+              <View style={[ES.flexRow, ES.gap2, ES.mt1]}>
+                <Btn method={handleUpdateUser} px={10} width={'50%'}>
+                  <Text>Update</Text>
+                </Btn>
+              </View>
             </View>
           </View>
-        </View>
-        <View style={[ES.fx1, isLoading ? null : ES.dNone]}>
-          <Loading />
+          <View style={[ES.fx1, isLoading ? null : ES.dNone]}>
+            <Loading />
+          </View>
         </View>
       </KeyboardAvoidingComponent>
     </>

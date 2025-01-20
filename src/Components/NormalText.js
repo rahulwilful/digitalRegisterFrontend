@@ -7,13 +7,14 @@ import {
   primaryTextColor,
 } from '../Constants/Colours';
 
-const NormalText = ({children, color, size, capitalize}) => {
+const NormalText = ({children, color, size, capitalize, textCenter}) => {
   return (
     <Text
       style={[
         size ? {fontSize: size} : null,
         ES.fw700,
         color ? {color: color} : {color: lightTextColor},
+        textCenter ? ES.textCenter : null,
         capitalize ? ES.capitalize : null,
       ]}>
       {children}

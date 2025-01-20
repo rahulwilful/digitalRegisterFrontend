@@ -17,6 +17,7 @@ import {
 import ES from '../../styles/ES';
 import axiosClient from '../../../axiosClient';
 import {
+  backArrowIcon,
   image,
   locationIcon,
   wareHouseIcon,
@@ -60,10 +61,9 @@ const WareHouses = ({navigation}) => {
   const handleSearchFilter = text => {
     if (text.length === 0) {
       setLocations(orginalLocations);
-    }
-    {
+    } else {
       const newData = orginalLocations.filter(item => {
-        const itemData = item.name ? item.name.toUpperCase() : ''.toUpperCase();
+        const itemData = item.name ? item.name.toUpperCase() : '';
         const textData = text.toUpperCase();
         return itemData.indexOf(textData) > -1;
       });
@@ -75,6 +75,12 @@ const WareHouses = ({navigation}) => {
     <ScrollView style={[ES.w100]}>
       <View style={[ES.minScreenHeight, {backgroundColor: '#efefef'}]}>
         <View style={[s.header]}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={backArrowIcon}
+              style={[ES.hs17, ES.ws17, ES.objectFitContain]}
+            />
+          </TouchableOpacity>
           <TextInput
             style={[s.textInput]}
             placeholder="Search"
@@ -143,19 +149,19 @@ const s = StyleSheet.create({
 
   header: StyleSheet.flatten([
     ES.fx0,
-    ES.gap4,
+    ES.gap3,
     ES.px1,
     ES.flexRow,
     ES.alignItemsCenter,
     ES.w100,
-
+    ES.py1,
     {backgroundColor: headerBackgroundColor},
-    {flex: 0.1},
+
     ES.shadow10,
   ]),
   textInput: StyleSheet.flatten([
     ES.px1,
-    ES.py1,
+    ES.py06,
     ES.bRadius8,
     ES.bgWhite,
     ES.fx1,

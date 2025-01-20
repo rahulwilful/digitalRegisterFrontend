@@ -15,16 +15,28 @@ import React, {useEffect, useState} from 'react';
 import axiosClient from '../../../axiosClient';
 import HeadingText from '../../Components/HeadingText';
 import ES from '../../styles/ES';
-import ItemCard from '../../Components/ItemCard';
-import {headerBackgroundColor, primaryColor} from '../../Constants/Colours';
+import ItemCard from './components/ItemCard';
+import {
+  backgroundColor,
+  headerBackgroundColor,
+  primaryColor,
+  primaryTextColor,
+  whiteButton,
+} from '../../Constants/Colours';
 import Loading from '../../Constants/Loading';
 import {useDispatch, useSelector} from 'react-redux';
 import {addAllItems, addIAlltems} from '../../Redux/actions/itemActions';
-import {addIcon, noDataImage} from '../../Constants/imagesAndIcons';
+import {
+  addIcon,
+  downArrowIcon,
+  noDataImage,
+} from '../../Constants/imagesAndIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import ModalComponent from '../../Components/ModalComponent';
 import Btn from '../../Components/Btn';
 import AddButton from '../../Components/AddButton';
+import NormalText from '../../Components/NormalText';
+import UpdateItem from './components/UpdateItem';
 
 const AllItems = ({navigation}) => {
   const reduxItems = useSelector(state => state.items);
@@ -33,7 +45,16 @@ const AllItems = ({navigation}) => {
   const [isLoading, setIsLoading] = useState(true);
   const [renderKey, setRenderKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const [itemName, setItemName] = useState('');
+  const [quantityUnit, setQuantityUnit] = useState('');
+  const [quantityUnits, setQuantityUnits] = useState([]);
+
   const [isModalVisible, setModalVisible] = useState(false);
+  const [addModal, setAddModal] = useState(false);
+  const [updateModal, setUpdateModal] = useState(false);
+  const [quantityModal, setQuantityModal] = useState(false);
+
   const [itemToDeleteRestore, setItemToDeleteRestore] = useState({});
 
   const dispatch = useDispatch();
@@ -170,6 +191,7 @@ const AllItems = ({navigation}) => {
 
   useEffect(() => {
     getItems();
+    getQuantityUnits();
   }, []);
 
   const closeModal = () => {
@@ -184,19 +206,133 @@ const AllItems = ({navigation}) => {
   const navigateToAddNewItem = () => {
     navigation.navigate('newItem');
   };
+
+  const verifyInputs = () => {
+    if (!itemName) {
+      showToast('Please enter item name');
+      return false;
+    }
+
+    if (!quantityUnit) {
+      showToast('Please enter quantity unit');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleAddItem = async () => {
+    if (!verifyInputs()) return;
+
+    try {
+      const form = {
+        item_name: itemName,
+        quantity_unit: quantityUnit,
+      };
+
+      const res = await axiosClient.post('/item/add', form);
+
+      if (res) {
+        showToast('Item added successfully');
+        let tempItems = originalItems;
+        tempItems.push(res.data.result);
+        setItems(tempItems);
+        setOriginalItems(tempItems);
+      }
+    } catch (error) {
+      if (error.response?.status === 409) {
+        showToast(error.response.data.message);
+      } else if (error.response?.status === 403) {
+        showToast(error.response.data.message);
+      } else {
+        showToast('Something went wrong');
+        console.log('Unexpected error:', error);
+      }
+    }
+    setAddModal(false);
+  };
+
+  const getQuantityUnits = async () => {
+    setIsLoading(true);
+    try {
+      const quantityUnitRes = await axiosClient.get('/quantity_unit/getall');
+      setQuantityUnits(quantityUnitRes.data.result);
+    } catch (error) {
+      console.log('Error fetching storage locations:', error);
+    }
+    setIsLoading(false);
+  };
+
+  const handleUpdateItemList = itemData => {
+    console.log('handleUpdateItemList: ', itemData);
+    let temp = originalItems;
+    for (let i in temp) {
+      if (temp[i]._id === itemData._id) {
+        temp[i] = itemData;
+        break;
+      }
+    }
+    setItems(temp);
+    setOriginalItems(temp);
+    setRenderKey(renderKey + 1);
+  };
+
   return (
     <>
-      {/*  <Modal visible={true} transparent={true} animationType="slide">
-        <View style={[ES.fx1, ES.centerItems, ES.p1]}>
-          <LinearGradient
-            colors={['#fff', '#fff4ed']} // Gradient colors
-            start={{x: 0, y: 0}} // Gradient starting point
-            end={{x: 1, y: 1}}
-            style={[s.modal]}>
-
-            </LinearGradient>
+      <ModalComponent
+        height={'70%'}
+        isModalVisible={quantityModal}
+        closeModal={() => setQuantityModal(false)}>
+        <View style={[ES.fx1, ES.py2]}>
+          <View style={[ES.fx1, isLoading ? ES.dNone : null]}>
+            <View style={[ES.fx1, s.modalListContainer]}>
+              <Btn
+                method={() => {
+                  setQuantityUnit(''), setQuantityModal(false);
+                }}
+                width={'95%'}
+                bgColor={whiteButton}
+                color={primaryTextColor}>
+                <Text> None</Text>
+              </Btn>
+            </View>
+            <FlatList
+              data={quantityUnits}
+              contentContainerStyle={[ES.pb1, ES.w100]}
+              refreshing={isLoading}
+              onRefresh={() => getQuantityUnits()}
+              renderItem={({item}) => (
+                <View style={[s.modalListContainer]}>
+                  {quantityUnit != item.name ? (
+                    <Btn
+                      method={() => {
+                        setQuantityUnit(item.name), setQuantityModal(false);
+                      }}
+                      width={'95%'}
+                      bgColor={whiteButton}
+                      color={primaryTextColor}>
+                      <Text style={[ES.capitalize]}>
+                        {' '}
+                        {item.name.slice(0, 9)}
+                      </Text>
+                    </Btn>
+                  ) : (
+                    <Btn width={'95%'}>
+                      <Text style={[ES.capitalize]}>
+                        {' '}
+                        {item.name.slice(0, 9)}{' '}
+                      </Text>
+                    </Btn>
+                  )}
+                </View>
+              )}
+            />
+          </View>
+          <View style={[ES.fx1, isLoading ? null : ES.dNone]}>
+            <Loading />
+          </View>
         </View>
-      </Modal> */}
+      </ModalComponent>
 
       <ModalComponent
         isModalVisible={isModalVisible}
@@ -224,6 +360,59 @@ const AllItems = ({navigation}) => {
         </View>
       </ModalComponent>
 
+      <ModalComponent
+        isModalVisible={addModal}
+        closeModal={() => setAddModal(false)}
+        height={'35%'}>
+        <View style={[ES.justifyContentSpaceEvenly, ES.fx1, ES.gap1]}>
+          <View style={[s.card]}>
+            <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
+              Add Item
+            </HeadingText>
+
+            <TextInput
+              style={[s.input]}
+              placeholder="Item Name"
+              value={itemName}
+              onChangeText={setItemName}
+            />
+            <View style={[ES.w100]}>
+              <View style={[ES.w100, ES.fx0, ES.centerItems]}>
+                <TouchableOpacity
+                  onPress={() => setQuantityModal(true)}
+                  style={[
+                    ES.flexRow,
+                    ES.justifyContentSpaceBetween,
+                    ES.alignItemsCenter,
+                    ES.py06,
+                    ES.ps06,
+                    ES.bRadius5,
+                    s.input,
+                  ]}>
+                  <NormalText color={'rgb(68, 64, 64)'}>
+                    <Text
+                      style={[
+                        !quantityUnit ? ES.placeHolderText : null,
+                        ES.capitalize,
+                      ]}>
+                      {quantityUnit ? quantityUnit : 'Select Quantity Unit'}
+                    </Text>
+                  </NormalText>
+                  <Image
+                    source={downArrowIcon}
+                    style={[ES.hs11, ES.objectFitContain]}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <Btn width={'90%'} method={handleAddItem}>
+              <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
+            </Btn>
+          </View>
+        </View>
+      </ModalComponent>
+
       <View style={[ES.fx1]}>
         <View style={[s.header, ES.mt1]}>
           <TextInput
@@ -235,16 +424,17 @@ const AllItems = ({navigation}) => {
         </View>
 
         {isLoading == false && items.length > 0 && (
-          <View style={[ES.w100, ES.fx1]}>
+          <View style={[ES.w100, ES.fx1]} key={renderKey}>
             <FlatList
               data={items}
-              contentContainerStyle={[s.userList]}
+              contentContainerStyle={[s.list]}
               renderItem={({item}) => (
                 <ItemCard
                   item={item}
                   handleDeleteItem={handleDeleteItem}
                   handleRestoreItem={handleRestoreItem}
                   openModal={openModal}
+                  handleUpdateItemList={handleUpdateItemList}
                 />
               )}
               refreshing={isLoading}
@@ -254,7 +444,7 @@ const AllItems = ({navigation}) => {
           </View>
         )}
 
-        <AddButton method={() => navigation.navigate('newItem')} />
+        <AddButton method={() => setAddModal(true)} />
 
         <View
           style={[
@@ -307,5 +497,28 @@ const s = StyleSheet.create({
     ES.pt06,
     ES.pe06,
   ]),
-  userList: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 150}]),
+  list: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 100}]),
+  input: StyleSheet.flatten([
+    {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
+    ES.w90,
+    ES.f16,
+  ]),
+  button: StyleSheet.flatten([
+    ES.tempBorder,
+    ES.bgPrimary,
+    ES.px3,
+    ES.bRadius5,
+    ES.py04,
+    ES.shadow1,
+  ]),
+  card: StyleSheet.flatten([
+    ES.fx1,
+    ES.centerItems,
+    ES.gap5,
+    ES.px1,
+    ES.bRadius10,
+
+    ES.py1,
+  ]),
+  modalListContainer: StyleSheet.flatten([ES.fx0, ES.px2, ES.mt06]),
 });

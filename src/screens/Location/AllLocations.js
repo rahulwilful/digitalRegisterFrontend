@@ -13,7 +13,7 @@ import React, {useEffect, useState} from 'react';
 import axiosClient from '../../../axiosClient';
 import HeadingText from '../../Components/HeadingText';
 import ES from '../../styles/ES';
-import ItemCard from '../../Components/ItemCard';
+import ItemCard from '../Items/components/ItemCard';
 import {headerBackgroundColor, primaryColor} from '../../Constants/Colours';
 import Loading from '../../Constants/Loading';
 import {useDispatch, useSelector} from 'react-redux';
@@ -214,13 +214,9 @@ const AllLocations = ({navigation}) => {
       </ModalComponent>
 
       <View style={[ES.fx1]}>
-        <View style={[ES.py1]}>
-          <HeadingText center>All Locatations</HeadingText>
-        </View>
-
         <View style={[s.header]}>
           <TextInput
-            style={[s.textInput]}
+            style={[s.textInput, ES.mt1]}
             placeholder="Search"
             value={searchQuery}
             onChangeText={text => getItemsByName(text)}
@@ -301,5 +297,5 @@ const s = StyleSheet.create({
     ES.pt06,
     ES.pe06,
   ]),
-  list: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 150}]),
+  list: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 100}]),
 });

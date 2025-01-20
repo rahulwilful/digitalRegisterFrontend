@@ -1,4 +1,4 @@
-import {View, Text} from 'react-native';
+import {View, Text, Image, TouchableOpacity} from 'react-native';
 import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Register from '../screens/WareHouse/Register';
@@ -6,9 +6,9 @@ import Home from '../screens/Home/Home';
 import Tabs from './Tabs';
 import DrawerNav from './DrawerNav';
 import Records from '../screens/WareHouse/Records';
-import UpdateItem from '../screens/Items/UpdateItem';
+import UpdateItem from '../screens/Items/components/UpdateItem';
 import UpdateAccount from '../screens/Home/UpdateAccount';
-import UpdateUser from '../screens/Users/UpdateUser';
+import UpdateUser from '../screens/Users/components/UpdateUser';
 import AddRecord from '../screens/WareHouse/AddRecord';
 import AllItems from '../screens/Items/AllItems';
 import AddItem from '../screens/Items/AddItem';
@@ -16,7 +16,7 @@ import AllUsers from '../screens/Users/AllUsers';
 import MyAccount from '../screens/Home/MyAccount';
 import {headerBackgroundColor} from '../Constants/Colours';
 import WareHouses from '../screens/WareHouse/WareHouses';
-import AddUser from '../screens/Users/AddUser';
+import AddUser from '../screens/Users/components/AddUser';
 import RecordDetails from '../screens/WareHouse/RecordDetails';
 import AddWareHouse from '../screens/WareHouse/AddWareHouse';
 import AddLocation from '../screens/Location/AddLocation';
@@ -25,10 +25,13 @@ import AllQuantityUnits from '../screens/Items/AllQuantityUnits';
 import AddQuentityUnit from '../screens/Items/AddQuentityUnit';
 import UpdateQuantityUnit from '../screens/Items/UpdateQuantityUnit';
 import UpdateLocation from '../screens/Location/UpdateLocation';
+import {backArrowIcon, menuIcon} from '../Constants/imagesAndIcons';
+import ES from '../styles/ES';
+import {DrawerActions} from '@react-navigation/native';
 
 const Stack = createNativeStackNavigator();
 
-export const HomeStack = () => {
+export const HomeStack = ({navigation}) => {
   return (
     <Stack.Navigator
       initialRouteName="stackHome"
@@ -45,34 +48,40 @@ export const HomeStack = () => {
       <Stack.Screen
         name="stackHome"
         component={Home}
-        options={{headerShown: true}}
+        options={{
+          headerLeft: () => {
+            return (
+              <View style={[]}>
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.dispatch(DrawerActions.openDrawer())
+                  }>
+                  <Image source={menuIcon} style={[ES.hs20, ES.ws20, ES.me2]} />
+                </TouchableOpacity>
+              </View>
+            );
+          },
+        }}
       />
+
       <Stack.Screen
         name="stackRecord"
         component={Records}
-        options={{
-          headerTitle: '',
-        }}
+        options={{headerShown: false}}
       />
+
       <Stack.Screen
         name="stackAddRecord"
         component={AddRecord}
-        options={{
-          headerTitle: '',
-        }}
-      />
-      <Stack.Screen
-        name="stackDrawerNav"
-        component={DrawerNav}
         options={{headerShown: false}}
       />
+
       <Stack.Screen
         name="stackWareHouses"
         component={WareHouses}
-        options={{
-          headerTitle: 'Warehouses',
-        }}
+        options={{headerShown: false}}
       />
+
       <Stack.Screen
         name="newUser"
         component={AddUser}
@@ -80,6 +89,7 @@ export const HomeStack = () => {
           headerTitle: '',
         }}
       />
+
       <Stack.Screen
         name="allUsers"
         component={AllUsers}
@@ -87,6 +97,7 @@ export const HomeStack = () => {
           headerTitle: 'All Users',
         }}
       />
+
       <Stack.Screen
         name="stackUpdateUser"
         component={UpdateUser}
@@ -94,6 +105,7 @@ export const HomeStack = () => {
           headerTitle: 'Update User',
         }}
       />
+
       <Stack.Screen
         name="newItem"
         component={AddItem}
@@ -101,6 +113,7 @@ export const HomeStack = () => {
           headerTitle: 'Add Item',
         }}
       />
+
       <Stack.Screen
         name="allItems"
         component={AllItems}
@@ -108,6 +121,7 @@ export const HomeStack = () => {
           headerTitle: 'All Items',
         }}
       />
+
       <Stack.Screen
         name="stackUpdateItem"
         component={UpdateItem}
@@ -139,6 +153,7 @@ export const HomeStack = () => {
           headerTitle: 'All Locations',
         }}
       />
+
       <Stack.Screen
         name="stackUpdateLocation"
         component={UpdateLocation}
@@ -146,6 +161,7 @@ export const HomeStack = () => {
           headerTitle: 'Update Location',
         }}
       />
+
       <Stack.Screen
         name="stackAllQuantityUnits"
         component={AllQuantityUnits}
@@ -153,6 +169,7 @@ export const HomeStack = () => {
           headerTitle: 'All Quantity Units',
         }}
       />
+
       <Stack.Screen
         name="stackAddQuantityUnits"
         component={AddQuentityUnit}
@@ -160,6 +177,7 @@ export const HomeStack = () => {
           headerTitle: 'Add Quantity Unit',
         }}
       />
+
       <Stack.Screen
         name="stackUpdateQuantityUnit"
         component={UpdateQuantityUnit}
@@ -292,12 +310,12 @@ export const AccountStack = () => {
       <Stack.Screen
         name="stackMyAccount"
         component={MyAccount}
-        options={{headerTitle: 'My Account'}}
+        options={{headerShown: false}}
       />
       <Stack.Screen
         name="stackUpdateAccount"
         component={UpdateAccount}
-        options={{headerTitle: 'Update Account'}}
+        options={{headerShown: false}}
       />
     </Stack.Navigator>
   );

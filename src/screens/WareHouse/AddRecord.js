@@ -35,6 +35,7 @@ import HeadingText from '../../Components/HeadingText';
 import NormalText from '../../Components/NormalText';
 import ModalComponent from '../../Components/ModalComponent';
 import Loading from '../../Constants/Loading';
+import Header from '../../Components/Header';
 
 const AddRecord = ({navigation}) => {
   const [name, setName] = useState('rahul');
@@ -417,11 +418,8 @@ const AddRecord = ({navigation}) => {
       </ModalComponent>
 
       <View style={[s.container, isLoading ? ES.dNone : null]}>
+        <Header>Add Record</Header>
         <View style={[s.inputContainer]} key={renderKey}>
-          <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
-            Add Record
-          </HeadingText>
-
           <View style={[ES.w100, ES.relative]}>
             <View style={[]}>
               <TouchableOpacity
@@ -448,7 +446,7 @@ const AddRecord = ({navigation}) => {
             </View>
           </View>
 
-          <View style={[ES.w100, ES.relative]}>
+          <View style={[ES.w100, ES.relative, ES.mt1]}>
             {items.length > 0 && selectedItem == null && (
               <View style={[]}>
                 <TouchableOpacity
@@ -527,12 +525,6 @@ const AddRecord = ({navigation}) => {
               </View>
             </View>
           )}
-
-          <View style={[ES.w100, ES.fx0, ES.centerItems, ES.mt2]}>
-            <Btn method={handleAddRecord}>
-              <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add Record </Text>
-            </Btn>
-          </View>
         </View>
 
         <View style={[ES.w100, ES.fx1, ES.mt1, ES.relative, ES.z1]}>
@@ -541,7 +533,7 @@ const AddRecord = ({navigation}) => {
               <FlatList
                 data={item_list}
                 keyExtractor={(subItem, index) => index.toString()}
-                contentContainerStyle={[ES.fx0, ES.px04, ES.pb4]}
+                contentContainerStyle={[s.contentContainerStyle]}
                 renderItem={({item: subItem}) => (
                   <View style={[s.itemContainer]}>
                     <View style={[ES.fx0, ES.centerItems]}>
@@ -602,6 +594,20 @@ const AddRecord = ({navigation}) => {
               />
             </View>
           )}
+        </View>
+        <View
+          style={[
+            ES.w100,
+            ES.fx0,
+            ES.centerItems,
+            ES.mt2,
+            ES.absolute,
+            ES.bottom2,
+            ES.z1,
+          ]}>
+          <Btn method={handleAddRecord}>
+            <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add Record </Text>
+          </Btn>
         </View>
       </View>
 
@@ -668,7 +674,7 @@ const s = StyleSheet.create({
     ES.w100,
     ES.fx0,
     ES.centerItems,
-    ES.gap4,
+    ES.gap1,
     ES.px1,
 
     ES.shadow7,
@@ -686,5 +692,10 @@ const s = StyleSheet.create({
     ES.w100,
     ES.pt06,
     ES.pe06,
+  ]),
+  contentContainerStyle: StyleSheet.flatten([
+    ES.fx0,
+    ES.px04,
+    {paddingBottom: 70},
   ]),
 });

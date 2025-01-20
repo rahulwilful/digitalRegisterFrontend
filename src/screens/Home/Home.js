@@ -128,42 +128,11 @@ const Home = ({navigation}) => {
                   onPress={() => navigation.navigate('stackAddRecord')}>
                   <Card image={newRecordIcon}>New Record</Card>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('newItem')}>
-                  <Card image={newItemIcon}>New Item</Card>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('allItems')}>
-                  <Card image={allItemsIcon}>All Items</Card>
-                </TouchableOpacity>
               </View>
             )}
 
             {displaySuperAdminOptions && (
               <View style={[ES.w100, ES.fx0, ES.gap2]}>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('newUser')}>
-                  <Card image={newUserIcon}>New User</Card>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('allUsers')}>
-                  <Card image={allUsersIcon}>All Users</Card>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('stackAddLocation')}>
-                  <Card image={locationOrangeIcon}>Add Location</Card>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('stackAllLocations')}>
-                  <Card image={allLocationsIcon}>All Locations</Card>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('stackAddQuantityUnits')}>
-                  <Card image={kgIcon}>Add Quantity Unit</Card>
-                </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => navigation.navigate('stackAllQuantityUnits')}>
                   <Card image={kgIcon}>All Quantity Units</Card>

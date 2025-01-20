@@ -27,6 +27,7 @@ import axiosClient from '../../../axiosClient';
 import RecordCard from '../../Components/RecordCard';
 import DatePicker from 'react-native-date-picker';
 import {
+  backArrowIcon,
   filterIcon,
   noDataImage,
   resetIcon,
@@ -40,15 +41,7 @@ import ModalComponent from '../../Components/ModalComponent';
 import Btn from '../../Components/Btn';
 import NormalText from '../../Components/NormalText';
 
-const renderLoader = () => {
-  return (
-    <View>
-      <ActivityIndicator size={'large'} color={headerBackgroundColor} />
-    </View>
-  );
-};
-
-const Records = ({route}) => {
+const Records = ({route, navigation}) => {
   const dispatch = useDispatch();
 
   const [records, setRecords] = useState([]);
@@ -85,6 +78,14 @@ const Records = ({route}) => {
 
   const user = useSelector(state => state.user);
 
+  const showToast = message => {
+    ToastAndroid.showWithGravity(
+      message,
+      ToastAndroid.SHORT,
+      ToastAndroid.CENTER,
+    );
+  };
+
   useEffect(() => {
     console.log('rout.params.locationId', route.params.locationId);
   }, [route]);
@@ -105,11 +106,12 @@ const Records = ({route}) => {
     console.log('Records handleLoadMoreRecords: ', lastDate);
 
     try {
-      const recordRes = await axiosClient
-        .get(`/register/get/by/location/${locationId}/and/${lastDate}`)
-        .catch(err => {
+      const recordRes = await axiosClient.get(
+        `/register/get/by/location/${locationId}/and/${lastDate}`,
+      );
+      /*  .catch(err => {
           setFooterLoader(false);
-        });
+        }); */
 
       console.log(
         'recordRes.data.result.length: ',
@@ -122,7 +124,15 @@ const Records = ({route}) => {
       setOriginalRecords([...originalRecords, ...recordRes.data.result]);
       setLocation(recordRes.data.result[0].storage_location_id.name);
     } catch (error) {
-      console.log('error', error);
+      if (error.response.status == 404) {
+        setLoadMore(false);
+      }
+      if (error.response.data.message) {
+        showToast(error.response.data.message);
+      } else {
+        showToast('some thing went wrong');
+      }
+      console.log('error', error, error.response.status);
     }
     setFooterLoader(false);
 
@@ -295,11 +305,11 @@ const Records = ({route}) => {
                       width={'95%'}
                       bgColor={whiteButton}
                       color={primaryTextColor}>
-                      <Text> {item.name }</Text>
+                      <Text> {item.name}</Text>
                     </Btn>
                   ) : (
                     <Btn size={16} px={2} width={'95%'}>
-                      <Text> {item.name } </Text>
+                      <Text> {item.name} </Text>
                     </Btn>
                   )}
                 </View>
@@ -342,11 +352,11 @@ const Records = ({route}) => {
                       width={'95%'}
                       bgColor={whiteButton}
                       color={primaryTextColor}>
-                      <Text> {item.name }</Text>
+                      <Text> {item.name}</Text>
                     </Btn>
                   ) : (
                     <Btn size={16} px={2} width={'95%'}>
-                      <Text> {item.name } </Text>
+                      <Text> {item.name} </Text>
                     </Btn>
                   )}
                 </View>
@@ -418,6 +428,12 @@ const Records = ({route}) => {
 
       <View style={[s.header]}>
         <View style={[s.searchContainer]}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={backArrowIcon}
+              style={[ES.hs17, ES.ws17, ES.objectFitContain]}
+            />
+          </TouchableOpacity>
           <TextInput
             style={[s.textInput, ES.fx1]}
             placeholder="Search"
@@ -546,7 +562,7 @@ const s = StyleSheet.create({
   ]),
 
   header: StyleSheet.flatten([
-    ES.py2,
+    ES.py06,
     ES.w100,
     ES.justifyContentSpaceAround,
     ES.gap2,
@@ -560,7 +576,7 @@ const s = StyleSheet.create({
   contentContainer: StyleSheet.flatten([{flex: 0.85}]),
   searchContainer: StyleSheet.flatten([
     ES.fx0,
-    ES.gap1,
+    ES.gap3,
     ES.px1,
     ES.flexRow,
     ES.alignItemsCenter,
@@ -573,7 +589,7 @@ const s = StyleSheet.create({
   ]),
   textInput: StyleSheet.flatten([
     ES.px1,
-    ES.py1,
+    ES.py06,
     ES.bRadius8,
     ES.bgWhite,
     ES.fx1,

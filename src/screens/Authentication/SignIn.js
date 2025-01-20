@@ -67,7 +67,7 @@ const SignIn = ({navigation}) => {
         password: password,
       };
       const res = await axiosClient.post('/user/login', form);
-      //console.log('login response: ', res.data.result.name);
+      console.log('login response: ', res.data.result.name);
       await AsyncStorage.setItem('token', res.data.token);
       showToast('Login Successfull');
       dispatch(addUser(res.data.result));
@@ -76,9 +76,10 @@ const SignIn = ({navigation}) => {
       console.log('error: ', error);
       if (error.response?.status === 404) {
         showToast(error.response.data.message);
-      }
-      if (error.response?.status === 400) {
+      } else if (error.response?.status === 400) {
         showToast(error.response.data.message);
+      } else {
+        showToast('Something went wrong');
       }
     }
     setIsLoading(false);

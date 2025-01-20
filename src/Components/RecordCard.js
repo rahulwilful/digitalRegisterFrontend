@@ -13,13 +13,20 @@ import React, {useEffect, useState} from 'react';
 import ES from '../styles/ES';
 
 import {
+  adminIcon,
   calanderIcon,
   image,
   pickupPersonIcon,
   recordIcon,
+  watchIcon,
 } from '../Constants/imagesAndIcons';
 
-import {backgroundColor, primaryTextColor} from '../Constants/Colours';
+import {
+  backgroundColor,
+  lightTextColor,
+  primaryTextColor,
+  whiteTextColor,
+} from '../Constants/Colours';
 import NormalText from './NormalText';
 import LinearGradient from 'react-native-linear-gradient';
 import HeadingText from './HeadingText';
@@ -29,101 +36,120 @@ const RecordCard = props => {
   const navigation = useNavigation();
   return (
     <View style={[ES.w100]}>
-      <TouchableOpacity
-        disabled={props.item.item_list.length > 3 ? false : true}
-        onPress={() =>
-          navigation.navigate('stackRecordDetails', {
-            record_id: props.item._id,
-          })
-        }
-        style={[ES.w100]}>
+      <View style={[ES.w100]}>
         <LinearGradient
           colors={['#fff', '#fffaf7']}
           start={{x: 0, y: 0}} // Gradient starting point
           end={{x: 1, y: 1}}
           style={[s.card]}>
           <View style={[s.listConatinerHeaer]}>
-            <View style={[ES.hs70, ES.ws70, ES.overflowHidden, ES.bRadius5]}>
-              <Image source={recordIcon} style={[ES.hs70, ES.ws70]} />
+            <View style={[ES.hs65, ES.ws65, ES.overflowHidden, ES.bRadius5]}>
+              <Image source={recordIcon} style={[ES.hs65, ES.ws65]} />
             </View>
 
             <View style={[ES.fx1, ES.justifyContentCenter, ES.gap1]}>
-              <HeadingText
-                size={20}
-                capitalize
-                style={[ES.f20, ES.fw500, ES.capitalize, ES.fx1]}>
-                {props.item.warehouse_admin.name}
-              </HeadingText>
-              <View style={[ES.fx0, ES.flexRow, ES.gap2, ES.alignItemsCenter]}>
-                <NormalText size={13}>
-                  <Text style={[ES.tempBorder]}>
-                    <Image
-                      source={pickupPersonIcon}
-                      style={[ES.ws19, ES.hs19, ES.objectFitContain]}
-                    />
-                    <Text>
-                      {' '}
-                      :{' '}
-                      {props.item.pickup_person.name.length <= 13
-                        ? props.item.pickup_person.name
-                        : props.item.pickup_person.name.slice(0, 13) + '...'}
+              <View
+                style={[ES.flexRow, ES.fx0, ES.gap2, ES.alignItemsBaseline]}>
+                <View style={[ES.fx1]}>
+                  <HeadingText size={15}>
+                    <Text style={[ES.tempBorder]}>
+                      <Image
+                        source={adminIcon}
+                        style={[ES.ws19, ES.hs19, ES.objectFitContain]}
+                      />
+                      <Text>
+                        {' '}
+                        :{' '}
+                        {props.item.warehouse_admin.name.length <= 10
+                          ? props.item.warehouse_admin.name
+                          : props.item.warehouse_admin.name.slice(0, 10) +
+                            '...'}
+                      </Text>
                     </Text>
-                  </Text>
-                </NormalText>
-
-                <NormalText size={13}>
-                  <Text style={[ES.tempBorder]}>
-                    <Image
-                      source={calanderIcon}
-                      style={[ES.ws19, ES.hs19, ES.objectFitContain]}
-                    />
-                    <Text> : {props.item.createdAt.slice(0, 10)}</Text>
-                  </Text>
-                </NormalText>
+                  </HeadingText>
+                </View>
+                <View style={[ES.fx1]}>
+                  <HeadingText size={15}>
+                    <Text style={[ES.tempBorder]}>
+                      <Image
+                        source={pickupPersonIcon}
+                        style={[ES.ws19, ES.hs19, ES.objectFitContain]}
+                      />
+                      <Text>
+                        {' '}
+                        :{' '}
+                        {props.item.pickup_person.name.length <= 10
+                          ? props.item.pickup_person.name
+                          : props.item.pickup_person.name.slice(0, 10) + '...'}
+                      </Text>
+                    </Text>
+                  </HeadingText>
+                </View>
+              </View>
+              <View style={[ES.fx0, ES.flexRow, ES.gap2, ES.alignItemsCenter]}>
+                <View style={[ES.fx1]}>
+                  <NormalText size={13}>
+                    <Text style={[]}>
+                      <Image
+                        source={calanderIcon}
+                        style={[ES.ws19, ES.hs19, ES.objectFitContain]}
+                      />
+                      <Text> : {props.item.createdAt.slice(0, 10)}</Text>
+                    </Text>
+                  </NormalText>
+                </View>
+                <View style={[ES.fx1]}>
+                  <NormalText size={13}>
+                    <Text style={[]}>
+                      <Image
+                        source={watchIcon}
+                        style={[ES.ws19, ES.hs19, ES.objectFitContain]}
+                      />
+                      <Text> : {props.item.createdAt.slice(11, 16)}</Text>
+                    </Text>
+                  </NormalText>
+                </View>
               </View>
             </View>
           </View>
           <View style={[ES.fx1]}>
             <FlatList
+              horizontal
               data={
-                props.item.item_list.length > 3
-                  ? props.item.item_list.slice(0, 4)
+                props.item.item_list.length > 10
+                  ? props.item.item_list.slice(0, 10)
                   : props.item.item_list
               }
               keyExtractor={(subItem, index) => index.toString()}
               renderItem={({item: subItem, index}) => (
-                <View
-                  style={[
-                    s.itemContainer,
-                    index < props.item.item_list.length - 1 ||
-                    props.item.item_list.length > 3
-                      ? s.borderBottom
-                      : null,
-                  ]}>
-                  <View style={[ES.fx3]}>
-                    <NormalText size={17} capitalize color={primaryTextColor}>
+                <View style={[s.itemContainer]}>
+                  <View style={[]}>
+                    <NormalText color={whiteTextColor} size={11} capitalize>
                       {subItem.item_id.item_name}
                     </NormalText>
                   </View>
-                  <View style={[ES.fx2]}>
-                    <Text style={[ES.f16, ES.fw500, ES.px08, ES.capitalize]}>
-                      qty:
-                      <NormalText>
-                        {subItem.quantity} {subItem.item_id.quantity_unit}
-                      </NormalText>
-                    </Text>
+                  <View style={[]}>
+                    <NormalText color={whiteTextColor} size={11}>
+                      : {subItem.quantity} {subItem.item_id.quantity_unit}
+                    </NormalText>
                   </View>
                 </View>
               )}
             />
           </View>
-          {props.item.item_list.length > 3 && (
-            <View style={[ES.fx1, ES.centerItems]}>
-              <NormalText>see all {props.item.item_list.length}</NormalText>
-            </View>
-          )}
+
+          <View style={[ES.fx1, ES.centerItems, ES.mt1]}>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('stackRecordDetails', {
+                  record_id: props.item._id,
+                })
+              }>
+              <NormalText>see all </NormalText>
+            </TouchableOpacity>
+          </View>
         </LinearGradient>
-      </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -216,11 +242,13 @@ const s = StyleSheet.create({
     ES.textSecondary,
   ]),
   itemContainer: StyleSheet.flatten([
-    ES.mt06,
-    ES.w100,
+    ES.me06,
+    ES.fx0,
+    ES.centerItems,
     ES.flexRow,
     ES.px08,
     ES.pb04,
+    {backgroundColor: 'rgb(78, 240, 115)', borderRadius: 20},
   ]),
   borderBottom: {
     borderBottomWidth: 0.4,

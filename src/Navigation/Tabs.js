@@ -132,7 +132,7 @@ const Tabs = () => {
         </>
       )}
 
-      <Tab.Screen
+      {/*  <Tab.Screen
         name="tabMyAccount"
         options={{
           headerShown: false,
@@ -148,7 +148,7 @@ const Tabs = () => {
           ),
         }}
         component={AccountStack}
-      />
+      /> */}
     </Tab.Navigator>
   );
 };
