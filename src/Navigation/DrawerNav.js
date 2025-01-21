@@ -1,4 +1,4 @@
-import {View, Text, Image, Dimensions} from 'react-native';
+import {View, Text, Image, Dimensions, StyleSheet} from 'react-native';
 import React, {useEffect} from 'react';
 import {
   createDrawerNavigator,
@@ -9,6 +9,7 @@ import {
   darkTextColor,
   headerBackgroundColor,
   lightDarkColor,
+  primaryColor,
 } from '../Constants/Colours';
 import {
   allItemsIcon,
@@ -44,6 +45,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import PrivacyPolicy from '../screens/Home/PrivacyPolicy';
 import TearmsAndConditions from '../screens/Home/TearmsAndConditions';
 import ContactUs from '../screens/Home/ContactUs';
+import Icons from 'react-native-vector-icons/MaterialIcons';
+import {LockVectoreIcon, UserVectoreIcon} from '../Constants/VectoreIcons';
 
 const Drawer = createDrawerNavigator();
 const screenHeight = Dimensions.get('window').height;
@@ -52,6 +55,8 @@ const DrawerContent = ({}) => {
   const navigation = useNavigation();
   const user = useSelector(state => state.user);
   const dispatch = useDispatch();
+  const fontSize = 15;
+  const iconSize = 34;
 
   const handleLogOut = async () => {
     await AsyncStorage.removeItem('token');
@@ -67,35 +72,33 @@ const DrawerContent = ({}) => {
               ES.flexRow,
               ES.gap2,
               ES.pb06,
-              {borderBottomWidth: 1, borderColor: 'rgba(0,0,0,0.3)'},
+              ES.mb1,
+              ES.alignItemsCenter,
+              {borderBottomWidth: 1, borderColor: 'rgba(0,0,0,0.1)'},
             ]}>
             <TouchableOpacity onPress={() => navigation.navigate('account')}>
-              <Image
+              {/*  <Image
                 source={userIcon}
-                style={[ES.hs50, ES.ws50, ES.objectFitContain]}
-              />
+                style={[ES.hs40, ES.ws40, ES.objectFitContain]}
+              /> */}
+              <UserVectoreIcon />
             </TouchableOpacity>
-            <View style={[]}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('account')}
+              style={[]}>
               <HeadingText size={17}>{user?.name}</HeadingText>
               <NormalText>{user?.email}</NormalText>
-            </View>
+            </TouchableOpacity>
           </View>
           <View style={[]}></View>
           <View style={[]}>
             <TouchableOpacity
               onPress={() => navigation.navigate('privacyPolicy')}>
-              <View style={[ES.py1]}>
+              <View style={[ES.py04]}>
                 <View style={[ES.flexRow, ES.gap3, ES.alignItemsCenter]}>
-                  <Image
-                    source={privacyPolicyIcon}
-                    style={[
-                      ES.hs39,
-                      ES.ws39,
-                      ES.objectFitContain,
-                      ES.opacity70,
-                    ]}
-                  />
-                  <NormalText textCenter color={lightDarkColor} size={18}>
+                  <LockVectoreIcon />
+                  {/* <Image source={privacyPolicyIcon} style={[s.icon]} /> */}
+                  <NormalText textCenter color={lightDarkColor} size={fontSize}>
                     Privacy Policy
                   </NormalText>
                 </View>
@@ -105,18 +108,10 @@ const DrawerContent = ({}) => {
           <View style={[]}>
             <TouchableOpacity
               onPress={() => navigation.navigate('tearmsAndConditions')}>
-              <View style={[ES.py1]}>
+              <View style={[ES.py04]}>
                 <View style={[ES.flexRow, ES.gap3, ES.alignItemsCenter]}>
-                  <Image
-                    source={tearmsAndConditionsIcon}
-                    style={[
-                      ES.hs39,
-                      ES.ws39,
-                      ES.objectFitContain,
-                      ES.opacity70,
-                    ]}
-                  />
-                  <NormalText textCenter color={lightDarkColor} size={18}>
+                  <Image source={tearmsAndConditionsIcon} style={[s.icon]} />
+                  <NormalText textCenter color={lightDarkColor} size={fontSize}>
                     Tearms & Conditions
                   </NormalText>
                 </View>
@@ -125,18 +120,10 @@ const DrawerContent = ({}) => {
           </View>
           <View style={[]}>
             <TouchableOpacity onPress={() => navigation.navigate('contactUs')}>
-              <View style={[ES.py1]}>
+              <View style={[ES.py04]}>
                 <View style={[ES.flexRow, ES.gap3, ES.alignItemsCenter]}>
-                  <Image
-                    source={contactUsIcon}
-                    style={[
-                      ES.hs39,
-                      ES.ws39,
-                      ES.objectFitContain,
-                      ES.opacity70,
-                    ]}
-                  />
-                  <NormalText textCenter color={lightDarkColor} size={18}>
+                  <Image source={contactUsIcon} style={[s.icon]} />
+                  <NormalText textCenter color={lightDarkColor} size={fontSize}>
                     Contact Us
                   </NormalText>
                 </View>
@@ -147,15 +134,15 @@ const DrawerContent = ({}) => {
       </DrawerContentScrollView>
       <View style={[ES.px1]}>
         <View
-          style={[ES.py1, {borderTopWidth: 1, borderColor: 'rgba(0,0,0,0.3)'}]}>
+          style={[ES.py1, {borderTopWidth: 1, borderColor: 'rgba(0,0,0,0.1)'}]}>
           <TouchableOpacity onPress={() => handleLogOut()} style={[]}>
             <View style={[, ES.flexRow, ES.gap1, ES.centerItems]}>
-              <NormalText textCenter color={lightDarkColor} size={18}>
+              <NormalText textCenter color={lightDarkColor} size={fontSize}>
                 Log out
               </NormalText>
               <Image
                 source={logOutDarkIcon}
-                style={[ES.hs29, ES.ws29, ES.objectFitContain, ES.opacity70]}
+                style={[ES.hs25, ES.ws25, ES.objectFitContain, ES.opacity70]}
               />
             </View>
           </TouchableOpacity>
@@ -217,3 +204,7 @@ const DrawerNav = () => {
 };
 
 export default DrawerNav;
+
+const s = StyleSheet.create({
+  icon: StyleSheet.flatten([ES.hs34, ES.ws34, ES.objectFitContain]),
+});

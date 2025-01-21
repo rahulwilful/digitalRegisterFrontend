@@ -109,9 +109,6 @@ const Records = ({route, navigation}) => {
       const recordRes = await axiosClient.get(
         `/register/get/by/location/${locationId}/and/${lastDate}`,
       );
-      /*  .catch(err => {
-          setFooterLoader(false);
-        }); */
 
       console.log(
         'recordRes.data.result.length: ',
@@ -426,125 +423,126 @@ const Records = ({route, navigation}) => {
         </View>
       </ModalComponent>
 
-      <View style={[s.header]}>
-        <View style={[s.searchContainer]}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image
-              source={backArrowIcon}
-              style={[ES.hs17, ES.ws17, ES.objectFitContain]}
+      <View style={[ES.fx1]}>
+        <View style={[s.header]}>
+          <View style={[s.searchContainer]}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Image
+                source={backArrowIcon}
+                style={[ES.hs17, ES.ws17, ES.objectFitContain]}
+              />
+            </TouchableOpacity>
+            <TextInput
+              style={[s.textInput, ES.fx1]}
+              placeholder="Search"
+              onChangeText={text => getSortedRecords(text)}
             />
-          </TouchableOpacity>
-          <TextInput
-            style={[s.textInput, ES.fx1]}
-            placeholder="Search"
-            onChangeText={text => getSortedRecords(text)}
+            <TouchableOpacity onPress={() => setFilterModal(true)}>
+              <Image
+                source={filterIcon}
+                style={[ES.hs50, ES.ws50, ES.objectFitContain]}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <DatePicker
+            modal
+            open={isFromDatePickerOpen}
+            date={fromDate}
+            mode="date"
+            onConfirm={date => {
+              setIsFromDatePickerOpen(false);
+              setFromDate(date);
+            }}
+            onCancel={() => {
+              setIsFromDatePickerOpen(false);
+            }}
           />
-          <TouchableOpacity onPress={() => setFilterModal(true)}>
-            <Image
-              source={filterIcon}
-              style={[ES.hs50, ES.ws50, ES.objectFitContain]}
-            />
-          </TouchableOpacity>
+
+          <DatePicker
+            modal
+            open={isToDatePickerOpen}
+            date={toDate}
+            mode="date"
+            onConfirm={date => {
+              setIsToDatePickerOpen(false);
+              setToDate(date);
+            }}
+            onCancel={() => {
+              setIsToDatePickerOpen(false);
+            }}
+          />
         </View>
 
-        <DatePicker
-          modal
-          open={isFromDatePickerOpen}
-          date={fromDate}
-          mode="date"
-          onConfirm={date => {
-            setIsFromDatePickerOpen(false);
-            setFromDate(date);
-          }}
-          onCancel={() => {
-            setIsFromDatePickerOpen(false);
-          }}
-        />
+        <View
+          style={[
+            ES.w100,
+            isLoading == true ? ES.dNone : ES.dBlock,
+            s.contentContainer,
+          ]}
+          key={isLoading}>
+          <View style={[ES.w100, ES.fx1, {backgroundColor: '#efefef'}]}>
+            <View style={[ES.my04, ES.centerItems]}>
+              <HeadingText capitalize size={19}>
+                <Text>{location}</Text>
+              </HeadingText>
+            </View>
 
-        <DatePicker
-          modal
-          open={isToDatePickerOpen}
-          date={toDate}
-          mode="date"
-          onConfirm={date => {
-            setIsToDatePickerOpen(false);
-            setToDate(date);
-          }}
-          onCancel={() => {
-            setIsToDatePickerOpen(false);
-          }}
-        />
-      </View>
-
-      <View
-        style={[
-          ES.w100,
-          isLoading == true ? ES.dNone : ES.dBlock,
-          s.contentContainer,
-        ]}
-        key={isLoading}>
-        <View style={[ES.w100, {backgroundColor: '#efefef'}]}>
-          <View style={[ES.mt1, ES.centerItems]}>
-            <HeadingText style={[ES.headingText, ES.textCenter]}>
-              <Text style={[ES.capitalize]}>{location}</Text>
-            </HeadingText>
-          </View>
-
-          <View
-            style={[
-              records.length > 0 ? ES.dBlock : ES.dNone,
-              s.recordsContainer,
-            ]}
-            key={renderKey}>
-            <FlatList
-              data={records}
-              keyExtractor={(item, index) => index.toString()}
-              contentContainerStyle={[s.flatList]}
-              renderItem={({item}) => <RecordCard item={item} />}
-              onEndReached={
-                loadMore && !isSorting && records.length >= 10
-                  ? handleLoadMoreRecords
-                  : null
-              }
-              onEndReachedThreshold={0.3}
-              maxToRenderPerBatch={20}
-              refreshing={isLoading}
-              onRefresh={getRecords}
-              ListFooterComponent={() => {
-                return (
-                  <View style={[footerLoader ? ES.dBlock : ES.dNone]}>
-                    <ActivityIndicator
-                      size={'large'}
-                      color={headerBackgroundColor}
-                    />
-                  </View>
-                );
-              }}
-            />
-          </View>
-
-          <View
-            style={[
-              records.length == 0 ? ES.dBlock : ES.dNone,
-              ES.h100,
-              ES.gap2,
-            ]}
-            key={records}>
-            <View style={[ES.w100, ES.h50, ES.alignItemsCenter]}>
-              <Image
-                source={noDataImage}
-                style={[ES.w70, ES.h100, ES.objectFitContain]}
+            <View
+              style={[
+                records.length > 0 ? ES.dBlock : ES.dNone,
+                s.recordsContainer,
+              ]}
+              key={renderKey}>
+              <FlatList
+                data={records}
+                keyExtractor={(item, index) => index.toString()}
+                contentContainerStyle={[s.flatList]}
+                renderItem={({item}) => <RecordCard item={item} />}
+                onEndReached={
+                  loadMore && !isSorting && records.length >= 10
+                    ? handleLoadMoreRecords
+                    : null
+                }
+                onEndReachedThreshold={0.3}
+                maxToRenderPerBatch={20}
+                refreshing={isLoading}
+                onRefresh={getRecords}
+                ListFooterComponent={() => {
+                  return (
+                    <View style={[footerLoader ? ES.dBlock : ES.dNone]}>
+                      <ActivityIndicator
+                        size={'large'}
+                        color={headerBackgroundColor}
+                      />
+                    </View>
+                  );
+                }}
               />
             </View>
-            <Text style={[ES.textCenter, ES.subHeadingText]}>
-              No Records Found
-            </Text>
+
+            <View
+              style={[
+                records.length == 0 ? ES.dBlock : ES.dNone,
+                ES.h100,
+                ES.gap2,
+              ]}
+              key={records}>
+              <View style={[ES.w100, ES.h50, ES.alignItemsCenter]}>
+                <Image
+                  source={noDataImage}
+                  style={[ES.w70, ES.h100, ES.objectFitContain]}
+                />
+              </View>
+              <Text style={[ES.textCenter, ES.subHeadingText]}>
+                No Records Found
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
-
-      <View style={[isLoading ? ES.dBlock : ES.dNone, ES.fx1]}>
-        <Loading />
+        <View style={[isLoading ? ES.dBlock : ES.dNone, ES.fx1]}>
+          <Loading />
+        </View>
       </View>
     </>
   );
@@ -573,7 +571,7 @@ const s = StyleSheet.create({
       borderBottomRightRadius: 20, */
     },
   ]),
-  contentContainer: StyleSheet.flatten([{flex: 0.85}]),
+  contentContainer: StyleSheet.flatten([{flex: 1}]),
   searchContainer: StyleSheet.flatten([
     ES.fx0,
     ES.gap3,
@@ -616,12 +614,12 @@ const s = StyleSheet.create({
 
   flatList: StyleSheet.flatten([
     ES.gap2,
-    ES.py2,
+    ES.pb2,
     ES.w100,
     ES.fx0,
     ES.alignItemsCenter,
   ]),
-  recordsContainer: StyleSheet.flatten([ES.fx0, ES.gap2, ES.px08, ,]),
+  recordsContainer: StyleSheet.flatten([ES.fx1, ES.px08]),
 
   subInfo: StyleSheet.flatten([
     ES.f18,

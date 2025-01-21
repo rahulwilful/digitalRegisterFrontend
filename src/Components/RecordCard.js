@@ -24,6 +24,7 @@ import {
 import {
   backgroundColor,
   lightTextColor,
+  primaryColorGreen,
   primaryTextColor,
   whiteTextColor,
 } from '../Constants/Colours';
@@ -43,15 +44,17 @@ const RecordCard = props => {
           end={{x: 1, y: 1}}
           style={[s.card]}>
           <View style={[s.listConatinerHeaer]}>
+            {/* 
             <View style={[ES.hs65, ES.ws65, ES.overflowHidden, ES.bRadius5]}>
               <Image source={recordIcon} style={[ES.hs65, ES.ws65]} />
             </View>
+              */}
 
             <View style={[ES.fx1, ES.justifyContentCenter, ES.gap1]}>
               <View
                 style={[ES.flexRow, ES.fx0, ES.gap2, ES.alignItemsBaseline]}>
                 <View style={[ES.fx1]}>
-                  <HeadingText size={15}>
+                  <HeadingText capitalize fw={500} size={15}>
                     <Text style={[ES.tempBorder]}>
                       <Image
                         source={adminIcon}
@@ -69,7 +72,7 @@ const RecordCard = props => {
                   </HeadingText>
                 </View>
                 <View style={[ES.fx1]}>
-                  <HeadingText size={15}>
+                  <HeadingText capitalize fw={500} size={15}>
                     <Text style={[ES.tempBorder]}>
                       <Image
                         source={pickupPersonIcon}
@@ -112,27 +115,26 @@ const RecordCard = props => {
               </View>
             </View>
           </View>
-          <View style={[ES.fx1]}>
+          <View style={[ES.fx1, ES.px1]}>
             <FlatList
               horizontal
+              showsHorizontalScrollIndicator={false}
               data={
                 props.item.item_list.length > 10
                   ? props.item.item_list.slice(0, 10)
                   : props.item.item_list
               }
+              contentContainerStyle={[]}
               keyExtractor={(subItem, index) => index.toString()}
               renderItem={({item: subItem, index}) => (
                 <View style={[s.itemContainer]}>
-                  <View style={[]}>
-                    <NormalText color={whiteTextColor} size={11} capitalize>
-                      {subItem.item_id.item_name}
-                    </NormalText>
-                  </View>
-                  <View style={[]}>
-                    <NormalText color={whiteTextColor} size={11}>
-                      : {subItem.quantity} {subItem.item_id.quantity_unit}
-                    </NormalText>
-                  </View>
+                  <NormalText color={whiteTextColor} size={12} capitalize>
+                    {subItem.item_id.item_name}
+                  </NormalText>
+
+                  <NormalText color={whiteTextColor} size={12}>
+                    : {subItem.quantity} {subItem.item_id.quantity_unit}
+                  </NormalText>
                 </View>
               )}
             />
@@ -145,7 +147,9 @@ const RecordCard = props => {
                   record_id: props.item._id,
                 })
               }>
-              <NormalText>see all </NormalText>
+              <NormalText>
+                {props.item.item_list.length < 5 ? 'View' : 'View All'}{' '}
+              </NormalText>
             </TouchableOpacity>
           </View>
         </LinearGradient>
@@ -247,8 +251,8 @@ const s = StyleSheet.create({
     ES.centerItems,
     ES.flexRow,
     ES.px08,
-    ES.pb04,
-    {backgroundColor: 'rgb(78, 240, 115)', borderRadius: 20},
+
+    {backgroundColor: primaryColorGreen, borderRadius: 20, paddingVertical: 1},
   ]),
   borderBottom: {
     borderBottomWidth: 0.4,

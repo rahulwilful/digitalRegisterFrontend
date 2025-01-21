@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 
 import React, {useEffect, useState} from 'react';
-import ES from '../../styles/ES';
+import ES from '../../../styles/ES';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
 import {
@@ -18,20 +18,21 @@ import {
   primaryColor,
   primaryTextColor,
   whiteButton,
-} from '../../Constants/Colours';
-import axiosClient from '../../../axiosClient';
-import {toggleLogin} from '../../Redux/actions/action';
+} from '../../../Constants/Colours';
+import axiosClient from '../../../../axiosClient';
+import {toggleLogin} from '../../../Redux/actions/action';
 import {Picker} from '@react-native-picker/picker';
-import Btn from '../../Components/Btn';
-import HeadingText from '../../Components/HeadingText';
-import {addAllItems, addItem} from '../../Redux/actions/itemActions';
-import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
-import ModalComponent from '../../Components/ModalComponent';
-import Loading from '../../Constants/Loading';
-import NormalText from '../../Components/NormalText';
-import {downArrowIcon} from '../../Constants/imagesAndIcons';
+import Btn from '../../../Components/Btn';
+import HeadingText from '../../../Components/HeadingText';
+import {addAllItems, addItem} from '../../../Redux/actions/itemActions';
+import KeyboardAvoidingComponent from '../../../Components/KeyboardAvoidingComponent';
+import ModalComponent from '../../../Components/ModalComponent';
+import Loading from '../../../Constants/Loading';
+import NormalText from '../../../Components/NormalText';
+import {downArrowIcon} from '../../../Constants/imagesAndIcons';
+import FullModalComponent from '../../../Components/FullModalComponent';
 
-const AddQuentityUnit = ({navigation}) => {
+const AddQuentityUnit = ({addModal, closeModal, handleUpdateList}) => {
   const [itemName, setItemName] = useState('');
   const [name, setName] = useState('');
 
@@ -71,14 +72,9 @@ const AddQuentityUnit = ({navigation}) => {
 
       const res = await axiosClient.post('/quantity_unit/add', form);
 
-      let tempItems = items;
-
       if (res) {
-        dispatch(addItem(res.data.result));
+        handleUpdateList(res.data.result);
         showToast('Quantity unit added successfully');
-        setTimeout(() => {
-          navigation.goBack();
-        }, 1000);
       }
     } catch (error) {
       if (error.response?.status === 409) {
@@ -90,6 +86,7 @@ const AddQuentityUnit = ({navigation}) => {
         console.log('Unexpected error:', error);
       }
     }
+    closeModal();
   };
 
   const verifyInputs = () => {
@@ -111,28 +108,33 @@ const AddQuentityUnit = ({navigation}) => {
 
   return (
     <>
-      
+      <FullModalComponent
+        height={'30%'}
+        isModalVisible={addModal}
+        closeModal={closeModal}>
+        <KeyboardAvoidingComponent bg={false}>
+          <View style={[s.container]}>
+            <View style={[s.card]}>
+              <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
+                Add Unit
+              </HeadingText>
 
-      <KeyboardAvoidingComponent>
-        <View style={[s.container]}>
-          <View style={[s.card]}>
-            <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
-              Add Unit
-            </HeadingText>
+              <TextInput
+                style={[s.input]}
+                placeholder="Unit Name"
+                value={name}
+                onChangeText={setName}
+              />
 
-            <TextInput
-              style={[s.input]}
-              placeholder="Unit Name"
-              value={name}
-              onChangeText={setName}
-            />
-
-            <Btn method={handleAddQuantityUnit}>
-              <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
-            </Btn>
+              <View style={[ES.w90]}>
+                <Btn width={'100%'} method={handleAddQuantityUnit}>
+                  <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
+                </Btn>
+              </View>
+            </View>
           </View>
-        </View>
-      </KeyboardAvoidingComponent>
+        </KeyboardAvoidingComponent>
+      </FullModalComponent>
     </>
   );
 };
@@ -140,13 +142,7 @@ const AddQuentityUnit = ({navigation}) => {
 export default AddQuentityUnit;
 
 const s = StyleSheet.create({
-  container: StyleSheet.flatten([
-    ES.fx1,
-    ES.centerItems,
-    ES.my2,
-    ES.w100,
-    {backgroundColor},
-  ]),
+  container: StyleSheet.flatten([ES.centerItems, ES.w100]),
   input: StyleSheet.flatten([
     {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
     ES.w90,
@@ -161,15 +157,14 @@ const s = StyleSheet.create({
     ES.shadow1,
   ]),
   card: StyleSheet.flatten([
-    ES.w80,
+    ES.w90,
     ES.fx0,
     ES.centerItems,
     ES.gap5,
     ES.px1,
     ES.bRadius10,
-    ES.shadow7,
+
     ES.py3,
-    {backgroundColor},
   ]),
   modalListContainer: StyleSheet.flatten([ES.fx0, ES.px2, ES.mt06]),
 });

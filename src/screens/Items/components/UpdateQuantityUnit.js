@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 
 import React, {useEffect, useState} from 'react';
-import ES from '../../styles/ES';
+import ES from '../../../styles/ES';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
 import {
@@ -18,20 +18,26 @@ import {
   primaryColor,
   primaryTextColor,
   whiteButton,
-} from '../../Constants/Colours';
-import axiosClient from '../../../axiosClient';
-import {toggleLogin} from '../../Redux/actions/action';
+} from '../../../Constants/Colours';
+import axiosClient from '../../../../axiosClient';
+import {toggleLogin} from '../../../Redux/actions/action';
 import {Picker} from '@react-native-picker/picker';
-import Btn from '../../Components/Btn';
-import HeadingText from '../../Components/HeadingText';
-import {addAllItems, addItem} from '../../Redux/actions/itemActions';
-import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
-import ModalComponent from '../../Components/ModalComponent';
-import Loading from '../../Constants/Loading';
-import NormalText from '../../Components/NormalText';
-import {downArrowIcon} from '../../Constants/imagesAndIcons';
+import Btn from '../../../Components/Btn';
+import HeadingText from '../../../Components/HeadingText';
+import {addAllItems, addItem} from '../../../Redux/actions/itemActions';
+import KeyboardAvoidingComponent from '../../../Components/KeyboardAvoidingComponent';
+import ModalComponent from '../../../Components/ModalComponent';
+import Loading from '../../../Constants/Loading';
+import NormalText from '../../../Components/NormalText';
+import {downArrowIcon} from '../../../Constants/imagesAndIcons';
+import FullModalComponent from '../../../Components/FullModalComponent';
 
-const UpdateQuantityUnit = ({navigation, route}) => {
+const UpdateQuantityUnit = ({
+  updateModal,
+  closeModal,
+  handleUpdateList,
+  unit,
+}) => {
   const [itemName, setItemName] = useState('');
   const [name, setName] = useState('');
 
@@ -48,11 +54,11 @@ const UpdateQuantityUnit = ({navigation, route}) => {
   const isLoggedIn = useSelector(state => state.auth);
   const dispatch = useDispatch();
 
-  console.log('UpdateQuantityUnit : route.params.id', route.params.id);
+  //console.log('UpdateQuantityUnit : route.params.id', route.params.id);
 
   useEffect(() => {
-    console.log('items.length', items.length);
-  }, [items]);
+    setName(unit?.name);
+  }, [unit]);
 
   const checkLogin = async () => {
     const token = await AsyncStorage.getItem('token');
@@ -86,7 +92,7 @@ const UpdateQuantityUnit = ({navigation, route}) => {
       };
 
       const res = await axiosClient.put(
-        `/quantity_unit/update/${route.params.id}`,
+        `/quantity_unit/update/${unit?._id}`,
         form,
       );
 
@@ -94,9 +100,7 @@ const UpdateQuantityUnit = ({navigation, route}) => {
 
       if (res) {
         showToast('Quantity unit updated');
-        setTimeout(() => {
-          navigation.goBack();
-        }, 1000);
+        handleUpdateList(res.data.result);
       }
     } catch (error) {
       if (error.response?.status === 409) {
@@ -129,29 +133,36 @@ const UpdateQuantityUnit = ({navigation, route}) => {
 
   return (
     <>
-      <KeyboardAvoidingComponent>
-        <View style={[s.container, isLoading ? ES.dNone : null]}>
-          <View style={[s.card]}>
-            <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
-              Add Unit
-            </HeadingText>
+      <FullModalComponent
+        height={'30%'}
+        isModalVisible={updateModal}
+        closeModal={closeModal}>
+        <KeyboardAvoidingComponent bg={false}>
+          <View style={[s.container, isLoading ? ES.dNone : null]}>
+            <View style={[s.card]}>
+              <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
+                Add Unit
+              </HeadingText>
 
-            <TextInput
-              style={[s.input]}
-              placeholder="Unit Name"
-              value={name}
-              onChangeText={setName}
-            />
+              <TextInput
+                style={[s.input]}
+                placeholder="Unit Name"
+                value={name}
+                onChangeText={setName}
+              />
 
-            <Btn method={handleUpdateQuantityUnit}>
-              <Text style={[ES.textLight, ES.fw700, ES.f20]}>Update </Text>
-            </Btn>
+              <View style={[ES.w90]}>
+                <Btn width={'100%'} method={handleUpdateQuantityUnit}>
+                  <Text style={[ES.textLight, ES.fw700, ES.f20]}>Update</Text>
+                </Btn>
+              </View>
+            </View>
           </View>
-        </View>
-        <View style={[ES.fx1, isLoading ? null : ES.dNone]}>
-          <Loading />
-        </View>
-      </KeyboardAvoidingComponent>
+          <View style={[ES.fx1, isLoading ? null : ES.dNone]}>
+            <Loading />
+          </View>
+        </KeyboardAvoidingComponent>
+      </FullModalComponent>
     </>
   );
 };
@@ -159,13 +170,7 @@ const UpdateQuantityUnit = ({navigation, route}) => {
 export default UpdateQuantityUnit;
 
 const s = StyleSheet.create({
-  container: StyleSheet.flatten([
-    ES.fx1,
-    ES.centerItems,
-    ES.my2,
-    ES.w100,
-    {backgroundColor},
-  ]),
+  container: StyleSheet.flatten([ES.fx1, ES.centerItems, ES.w100]),
   input: StyleSheet.flatten([
     {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
     ES.w90,
@@ -180,15 +185,13 @@ const s = StyleSheet.create({
     ES.shadow1,
   ]),
   card: StyleSheet.flatten([
-    ES.w80,
+    ES.w90,
     ES.fx0,
     ES.centerItems,
     ES.gap5,
     ES.px1,
     ES.bRadius10,
-    ES.shadow7,
     ES.py3,
-    {backgroundColor},
   ]),
   modalListContainer: StyleSheet.flatten([ES.fx0, ES.px2, ES.mt06]),
 });

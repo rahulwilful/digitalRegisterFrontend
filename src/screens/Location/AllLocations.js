@@ -26,8 +26,9 @@ import {
 
 import ModalComponent from '../../Components/ModalComponent';
 import Btn from '../../Components/Btn';
-import LocationCard from '../../Components/LocationCard';
+import LocationCard from './components/LocationCard';
 import AddButton from '../../Components/AddButton';
+import AddLocation from './components/AddLocation';
 
 const AllLocations = ({navigation}) => {
   const reduxItems = useSelector(state => state.items);
@@ -39,6 +40,7 @@ const AllLocations = ({navigation}) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [itemToDeleteRestore, setItemToDeleteRestore] = useState({});
   const [locations, setLocations] = useState([]);
+  const [addModal, setAddModal] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -185,8 +187,30 @@ const AllLocations = ({navigation}) => {
     setModalVisible(true);
   };
 
+  const handleUpdateLocationList = location => {
+    let temp = originaLocations;
+    for (let i in temp) {
+      if (temp[i]._id === location._id) {
+        temp[i] = location;
+        setLocations(temp);
+        setOriginaLocations(temp);
+        setRenderKey(renderKey + 1);
+        return;
+      }
+    }
+
+    temp.push(location);
+    setLocations(temp);
+    setOriginaLocations(temp);
+  };
+
   return (
     <>
+      <AddLocation
+        addModal={addModal}
+        closeModal={() => setAddModal(false)}
+        handleUpdateLocationList={handleUpdateLocationList}
+      />
       <ModalComponent
         isModalVisible={isModalVisible}
         closeModal={closeModal}
@@ -235,6 +259,7 @@ const AllLocations = ({navigation}) => {
                   handleDeleteItem={handleDeleteItem}
                   handleRestoreItem={handleRestoreItem}
                   openModal={openModal}
+                  handleUpdateLocationList={handleUpdateLocationList}
                 />
               )}
               refreshing={isLoading}
@@ -244,7 +269,7 @@ const AllLocations = ({navigation}) => {
           </View>
         )}
 
-        <AddButton method={() => navigation.navigate('stackAddLocation')} />
+        <AddButton method={() => setAddModal(true)} />
 
         <View
           style={[

@@ -20,6 +20,7 @@ import {
   backgroundColor,
   headerBackgroundColor,
   primaryColor,
+  primaryDarkColor,
   primaryTextColor,
   whiteButton,
 } from '../../Constants/Colours';
@@ -363,7 +364,7 @@ const AllItems = ({navigation}) => {
       <ModalComponent
         isModalVisible={addModal}
         closeModal={() => setAddModal(false)}
-        height={'35%'}>
+        height={'40%'}>
         <View style={[ES.justifyContentSpaceEvenly, ES.fx1, ES.gap1]}>
           <View style={[s.card]}>
             <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
@@ -477,7 +478,7 @@ const s = StyleSheet.create({
   header: StyleSheet.flatten([ES.px1, ES.flexRow, ES.centerItems, ES.w100]),
 
   textInput: StyleSheet.flatten([
-    {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
+    {borderBottomWidth: 1, borderColor: primaryDarkColor, borderRadius: 5},
     ES.w90,
     ES.px1,
     ES.f16,
@@ -499,7 +500,7 @@ const s = StyleSheet.create({
   ]),
   list: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 100}]),
   input: StyleSheet.flatten([
-    {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
+    {borderBottomWidth: 1, borderColor: primaryDarkColor, borderRadius: 5},
     ES.w90,
     ES.f16,
   ]),

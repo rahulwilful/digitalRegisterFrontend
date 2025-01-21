@@ -7,15 +7,29 @@ import {
   primaryTextColor,
 } from '../Constants/Colours';
 
-const NormalText = ({children, color, size, capitalize, textCenter}) => {
+const NormalText = ({
+  children,
+  color,
+  size,
+  capitalize,
+  textCenter,
+  baseLine,
+  centerItems,
+  tempBorder,
+}) => {
   return (
     <Text
       style={[
+        ES.fx0,
+        tempBorder ? ES.tempBorder : null,
         size ? {fontSize: size} : null,
-        ES.fw700,
+        ES.fw500,
         color ? {color: color} : {color: lightTextColor},
         textCenter ? ES.textCenter : null,
         capitalize ? ES.capitalize : null,
+        baseLine ? ES.alignItemsBaseline : null,
+        centerItems ? ES.centerItems : null,
+        {fontFamily: 'Lato-Thin'},
       ]}>
       {children}
     </Text>

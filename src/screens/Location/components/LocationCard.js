@@ -3,43 +3,44 @@ import React, {useState} from 'react';
 import {
   deleteIcon,
   itemIcon,
-  locationPinIcon,
   penIcon,
-  pickupPersonIcon,
   restoreIcon,
-  userIconOrange,
+  wareHouseIcon,
+  wareHouseIcon3,
 } from '../../../Constants/imagesAndIcons';
-import {
-  MapMarkerVectoreIcon,
-  PenVectoreIcon,
-  RestoreVectoreIcon,
-  TrashVectoreIcon,
-} from '../../../Constants/VectoreIcons';
-
 import ES from '../../../styles/ES';
 import NormalText from '../../../Components/NormalText';
 import HeadingText from '../../../Components/HeadingText';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {useNavigation} from '@react-navigation/native';
 import {Screen} from 'react-native-screens';
-import UpdateUser from './UpdateUser';
+import UpdateLocation from './UpdateLocation';
+import {
+  PenVectoreIcon,
+  RestoreVectoreIcon,
+  TrashVectoreIcon,
+} from '../../../Constants/VectoreIcons';
 
-const UserCard = ({item, handleSetUpadateUserList, openModal}) => {
+const LocationCard = ({
+  item,
+  handleDeleteItem,
+  handleRestoreItem,
+  openModal,
+  image,
+  handleUpdateLocationList,
+}) => {
   const navigation = useNavigation();
   const [updateModal, setUpdateModal] = useState(false);
-  const [updateUser, setUpdateUser] = useState({});
-  const updateList = user => {
-    console.log('updateList: ', user);
-    handleSetUpadateUserList(user);
-  };
+
   return (
     <>
-      <UpdateUser
-        userData={item}
+      <UpdateLocation
         updateModal={updateModal}
+        item={item}
+        handleUpdateLocationList={handleUpdateLocationList}
         closeModal={() => setUpdateModal(false)}
-        handleSetUpadateUserList={updateList}
       />
+      
       <View
         style={[
           ES.w100,
@@ -53,31 +54,13 @@ const UserCard = ({item, handleSetUpadateUserList, openModal}) => {
         ]}
         key={item.is_delete}>
         <View style={[ES.fx0, ES.centerItems]}>
-          <Image
-            source={
-              item.role_type.value == 'pickup_boy'
-                ? pickupPersonIcon
-                : userIconOrange
-            }
-            style={[ES.hs50, ES.ws50]}
-          />
+          <Image source={wareHouseIcon3} style={[ES.hs50, ES.ws50]} />
         </View>
         <View style={[ES.flexColumn, ES.justifyContentCenter, ES.fx1]}>
-          <HeadingText size={18}>{item.name}</HeadingText>
-          <View style={[ES.fx0, ES.flexRow, ES.gap1]}>
-            <View style={[ES.fx1]}>
-              <NormalText style={[]}>Role: {item.role_type.name}</NormalText>
-            </View>
-            <View style={[ES.fx1]}>
-              <NormalText style={[]}>
-                {' '}
-                <MapMarkerVectoreIcon size={14} />:{' '}
-                {item.storage_location_id.name.length > 10
-                  ? item.storage_location_id.name.slice(0, 9) + '...'
-                  : item.storage_location_id.name}
-              </NormalText>
-            </View>
-          </View>
+          <HeadingText capitalize size={18}>
+            {item.name}
+          </HeadingText>
+          <NormalText capitalize>City: {item.city}</NormalText>
         </View>
         <View style={[ES.flexRow, ES.gap3, ES.fx0, ES.centerItems]}>
           <TouchableOpacity onPress={() => setUpdateModal(true)}>
@@ -95,4 +78,15 @@ const UserCard = ({item, handleSetUpadateUserList, openModal}) => {
   );
 };
 
-export default UserCard;
+export default LocationCard;
+{
+  /* <Image
+                source={restoreIcon}
+                style={[ES.hs30, ES.ws30, ES.objectFitContain]}
+              /> 
+              
+              <Image
+                source={deleteIcon}
+                style={[ES.hs30, ES.ws25, ES.objectFitContain]}
+              />*/
+}

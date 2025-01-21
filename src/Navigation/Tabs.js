@@ -22,6 +22,13 @@ import {headerBackgroundColor} from '../Constants/Colours';
 import AllUsers from '../screens/Users/AllUsers';
 import {useSelector} from 'react-redux';
 import AllItems from '../screens/Items/AllItems';
+import {
+  HomeVectoreIcon,
+  ItemsVectoreIcon,
+  ItemVectoreIcon,
+  MapMarkerVectoreIcon,
+  UsersVectoreIcon,
+} from '../Constants/VectoreIcons';
 
 const Tab = createBottomTabNavigator();
 
@@ -59,15 +66,7 @@ const Tabs = () => {
         options={{
           headerShown: false,
           title: '',
-          tabBarIcon: ({focused}) => (
-            <Image
-              source={homeIcon}
-              style={{
-                width: 30,
-                height: 30,
-              }}
-            />
-          ),
+          tabBarIcon: ({focused}) => <HomeVectoreIcon />,
         }}
         component={HomeStack}
       />
@@ -78,15 +77,7 @@ const Tabs = () => {
           options={{
             headerShown: false,
             title: '',
-            tabBarIcon: ({focused}) => (
-              <Image
-                source={allItemsIcon}
-                style={{
-                  width: 33,
-                  height: 33,
-                }}
-              />
-            ),
+            tabBarIcon: ({focused}) => <ItemVectoreIcon />,
           }}
           component={ItemStack}
         />
@@ -99,15 +90,7 @@ const Tabs = () => {
             options={{
               headerShown: false,
               title: '',
-              tabBarIcon: ({focused}) => (
-                <Image
-                  source={allUsersIcon}
-                  style={{
-                    width: 33,
-                    height: 33,
-                  }}
-                />
-              ),
+              tabBarIcon: ({focused}) => <UsersVectoreIcon />,
             }}
             component={UserStack}
           />
@@ -117,15 +100,7 @@ const Tabs = () => {
             options={{
               headerShown: false,
               title: '',
-              tabBarIcon: ({focused}) => (
-                <Image
-                  source={allLocationsIcon}
-                  style={{
-                    width: 33,
-                    height: 33,
-                  }}
-                />
-              ),
+              tabBarIcon: ({focused}) => <MapMarkerVectoreIcon />,
             }}
             component={LocationStack}
           />

@@ -10,17 +10,19 @@ const HeadingText = ({
   center,
   capitalize,
   uppercase,
+  fw,
 }) => {
   return (
     <View>
       <Text
         style={[
           size ? {fontSize: size} : {fontSize: 26},
-          ES.fw700,
+          fw ? {fontWeight: fw} : ES.fw700,
           color ? {color: color} : {color: primaryTextColor},
           center ? ES.textCenter : null,
           capitalize ? ES.capitalize : null,
           uppercase ? ES.uppercase : null,
+          {fontFamily: 'Lato-Bold'},
         ]}>
         {children}
       </Text>

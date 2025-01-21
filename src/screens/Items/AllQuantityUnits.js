@@ -22,8 +22,10 @@ import {noDataImage} from '../../Constants/imagesAndIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import ModalComponent from '../../Components/ModalComponent';
 import Btn from '../../Components/Btn';
-import QuantityUnitCard from '../../Components/QuantityUnitCard';
+import QuantityUnitCard from './components/QuantityUnitCard';
 import AddButton from '../../Components/AddButton';
+import AddQuentityUnit from './components/AddQuentityUnit';
+import UpdateQuantityUnit from './components/UpdateQuantityUnit';
 
 const AllQuantityUnits = ({navigation}) => {
   const reduxItems = useSelector(state => state.items);
@@ -34,6 +36,9 @@ const AllQuantityUnits = ({navigation}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalVisible, setModalVisible] = useState(false);
   const [itemToDeleteRestore, setItemToDeleteRestore] = useState({});
+  const [addModal, setAddModal] = useState(false);
+  const [updateModal, setUpdateModal] = useState(false);
+  const [unit, setUnit] = useState({});
 
   const dispatch = useDispatch();
 
@@ -127,7 +132,7 @@ const AllQuantityUnits = ({navigation}) => {
       console.log('res.data: ', res.data);
       let temp = QuantityUnits;
       for (let i in temp) {
-        if (temp[i]._id === id) {
+        if (temp[i]._id == id) {
           temp[i].is_delete = false;
         }
       }
@@ -161,7 +166,6 @@ const AllQuantityUnits = ({navigation}) => {
       console.log('AllQuantityUnits res: ', res.data.result);
       setQuantityUnits(res.data.result);
       setOriginalQuantityUnits(res.data.result);
-      useDispatch(addAllItems(res.data.result));
     } catch (error) {
       console.log('error: ', error);
     }
@@ -181,8 +185,39 @@ const AllQuantityUnits = ({navigation}) => {
     setModalVisible(true);
   };
 
+  const handleUpdateList = unit => {
+    console.log('AllQuantityUnits handleUpdateList unit: ', unit);
+    let temp = originalQuantityUnits;
+
+    for (let i in temp) {
+      if (temp[i]._id == unit._id) {
+        temp[i] = unit;
+        setQuantityUnits(temp);
+        setOriginalQuantityUnits(temp);
+        setRenderKey(renderKey + 1);
+        return;
+      }
+    }
+    temp.push(unit);
+    setQuantityUnits(temp);
+    setOriginalQuantityUnits(temp);
+  };
+
   return (
     <>
+      <AddQuentityUnit
+        addModal={addModal}
+        closeModal={() => setAddModal(false)}
+        handleUpdateList={handleUpdateList}
+      />
+
+      {/*   <UpdateQuantityUnit
+        unit={unit}
+        updateModal={updateModal}
+        closeModal={() => setUpdateModal(false)}
+        handleUpdateList={handleUpdateList}
+      /> */}
+
       <ModalComponent
         isModalVisible={isModalVisible}
         closeModal={closeModal}
@@ -220,7 +255,7 @@ const AllQuantityUnits = ({navigation}) => {
         </View>
 
         {isLoading == false && QuantityUnits.length > 0 && (
-          <View style={[ES.w100, ES.fx1]}>
+          <View style={[ES.w100, ES.fx1]} key={renderKey}>
             <FlatList
               data={QuantityUnits}
               contentContainerStyle={[s.list]}
@@ -230,6 +265,7 @@ const AllQuantityUnits = ({navigation}) => {
                   handleDeleteItem={handleDeleteItem}
                   handleRestoreItem={handleRestoreItem}
                   openModal={openModal}
+                  handleUpdateList={handleUpdateList}
                 />
               )}
               refreshing={isLoading}
@@ -238,9 +274,7 @@ const AllQuantityUnits = ({navigation}) => {
             />
           </View>
         )}
-        <AddButton
-          method={() => navigation.navigate('stackAddQuantityUnits')}
-        />
+        <AddButton method={() => setAddModal(true)} />
 
         <View
           style={[

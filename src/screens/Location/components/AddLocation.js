@@ -13,20 +13,21 @@ import {
   Dimensions,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import ES from '../../styles/ES';
+import ES from '../../../styles/ES';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
-import {backgroundColor, primaryColor} from '../../Constants/Colours';
-import axiosClient from '../../../axiosClient';
-import {toggleLogin} from '../../Redux/actions/action';
+import {backgroundColor, primaryColor} from '../../../Constants/Colours';
+import axiosClient from '../../../../axiosClient';
+import {toggleLogin} from '../../../Redux/actions/action';
 import {Picker} from '@react-native-picker/picker';
-import HeadingText from '../../Components/HeadingText';
-import Btn from '../../Components/Btn';
+import HeadingText from '../../../Components/HeadingText';
+import Btn from '../../../Components/Btn';
 
-import {locationIcon, userIconOrange} from '../../Constants/imagesAndIcons';
-import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
+import {locationIcon, userIconOrange} from '../../../Constants/imagesAndIcons';
+import KeyboardAvoidingComponent from '../../../Components/KeyboardAvoidingComponent';
+import FullModalComponent from '../../../Components/FullModalComponent';
 
-const AddLocation = ({navigation}) => {
+const AddLocation = ({addModal, closeModal, handleUpdateLocationList}) => {
   const [name, setName] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
@@ -88,10 +89,9 @@ const AddLocation = ({navigation}) => {
       dispatch(toggleLogin(true));
       if (res) {
         showToast('Location added successfully');
-        setTimeout(() => {
-          navigation.goBack();
-        }, 1000);
+        handleUpdateLocationList(res.data.result);
       }
+      closeModal();
     } catch (error) {
       if (error.response?.status === 409) {
         showToast(error.response.data.message);
@@ -142,55 +142,60 @@ const AddLocation = ({navigation}) => {
 
   return (
     <>
-      <KeyboardAvoidingComponent>
-        <View style={[s.container, ES.my5]}>
-          <View style={[s.card]}>
-            <View style={[s.imageContainer]}>
-              <Image
-                source={locationIcon}
-                style={[ES.hs100, ES.objectFitContain]}
-              />
-            </View>
+      <FullModalComponent
+        height={'60%'}
+        isModalVisible={addModal}
+        closeModal={closeModal}>
+        <KeyboardAvoidingComponent bg={false}>
+          <View style={[s.container]}>
+            <View style={[s.card]}>
+              {/*  <View style={[s.imageContainer]}>
+                <Image
+                  source={locationIcon}
+                  style={[ES.hs100, ES.objectFitContain]}
+                />
+              </View> */}
 
-            <TextInput
-              style={[s.input]}
-              placeholder="Warehouse Name"
-              value={name}
-              onChangeText={setName}
-            />
-            <TextInput
-              style={[s.input]}
-              placeholder="City"
-              value={city}
-              onChangeText={setCity}
-            />
-            <TextInput
-              style={[s.input]}
-              placeholder="State"
-              value={state}
-              onChangeText={setState}
-            />
-            <TextInput
-              style={[s.input]}
-              placeholder="Address"
-              value={address}
-              onChangeText={setAddress}
-            />
-            <TextInput
-              style={[s.input]}
-              placeholder="Pin Code"
-              keyboardType="phone-pad"
-              value={pinCode}
-              onChangeText={setPinCode}
-            />
-            <View style={[ES.w100, ES.fx0, ES.centerItems, ES.mt1]}>
-              <Btn method={handleAddLocation}>
-                <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
-              </Btn>
+              <TextInput
+                style={[s.input]}
+                placeholder="Warehouse Name"
+                value={name}
+                onChangeText={setName}
+              />
+              <TextInput
+                style={[s.input]}
+                placeholder="City"
+                value={city}
+                onChangeText={setCity}
+              />
+              <TextInput
+                style={[s.input]}
+                placeholder="State"
+                value={state}
+                onChangeText={setState}
+              />
+              <TextInput
+                style={[s.input]}
+                placeholder="Address"
+                value={address}
+                onChangeText={setAddress}
+              />
+              <TextInput
+                style={[s.input]}
+                placeholder="Pin Code"
+                keyboardType="phone-pad"
+                value={pinCode}
+                onChangeText={setPinCode}
+              />
+              <View style={[ES.w100, ES.fx0, ES.centerItems, ES.mt2]}>
+                <Btn width={'90%'} method={handleAddLocation}>
+                  <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
+                </Btn>
+              </View>
             </View>
           </View>
-        </View>
-      </KeyboardAvoidingComponent>
+        </KeyboardAvoidingComponent>
+      </FullModalComponent>
     </>
   );
 };
@@ -198,7 +203,7 @@ const AddLocation = ({navigation}) => {
 export default AddLocation;
 
 const s = StyleSheet.create({
-  container: StyleSheet.flatten([ES.centerItems, ES.w100, {backgroundColor}]),
+  container: StyleSheet.flatten([ES.centerItems, ES.w100]),
   input: StyleSheet.flatten([
     {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
     ES.w90,
@@ -214,21 +219,15 @@ const s = StyleSheet.create({
     ES.shadow1,
   ]),
   card: StyleSheet.flatten([
-    ES.w80,
+    ES.w100,
     ES.fx0,
     ES.centerItems,
     ES.gap3,
     ES.px1,
     ES.bRadius10,
-    ES.shadow7,
 
     ES.pb3,
-    {
-      backgroundColor,
-      borderTopRightRadius: 100,
-      borderTopLeftRadius: 100,
-      paddingTop: 70,
-    },
+    {},
     ES.relative,
   ]),
   userIcon: StyleSheet.flatten([ES.hs100, ES.objectFitContain]),

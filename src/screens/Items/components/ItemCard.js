@@ -14,6 +14,15 @@ import {useNavigation} from '@react-navigation/native';
 import {Screen} from 'react-native-screens';
 import UpdateItem from './UpdateItem';
 
+import {
+  ItemsVectoreIcon,
+  ItemVectoreIcon,
+  MapMarkerVectoreIcon,
+  PenVectoreIcon,
+  RestoreVectoreIcon,
+  TrashVectoreIcon,
+} from '../../../Constants/VectoreIcons';
+
 const ItemCard = ({
   item,
   handleDeleteItem,
@@ -47,7 +56,8 @@ const ItemCard = ({
         ]}
         key={item.is_delete}>
         <View style={[ES.fx0, ES.centerItems]}>
-          <Image source={image ? image : itemIcon} style={[ES.hs50, ES.ws50]} />
+          {/*  <Image source={image ? image : itemIcon} style={[ES.hs50, ES.ws50]} /> */}
+          <ItemVectoreIcon />
         </View>
         <View style={[ES.flexColumn, ES.justifyContentCenter, ES.fx1]}>
           <HeadingText capitalize size={18}>
@@ -55,28 +65,15 @@ const ItemCard = ({
           </HeadingText>
           <NormalText capitalize>Unit: {item.quantity_unit}</NormalText>
         </View>
-        <View style={[ES.flexRow, ES.gap1, ES.fx0, ES.centerItems]}>
+        <View style={[ES.flexRow, ES.gap3, ES.fx0, ES.centerItems]}>
           <TouchableOpacity onPress={() => setUpdateModal(true)}>
-            <Image
-              source={penIcon}
-              style={[ES.hs30, ES.ws30, ES.objectFitContain]}
-            />
+            <PenVectoreIcon />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
               item.is_delete ? openModal(item) : openModal(item);
             }}>
-            {item.is_delete ? (
-              <Image
-                source={restoreIcon}
-                style={[ES.hs30, ES.ws30, ES.objectFitContain]}
-              />
-            ) : (
-              <Image
-                source={deleteIcon}
-                style={[ES.hs30, ES.ws25, ES.objectFitContain]}
-              />
-            )}
+            {item.is_delete ? <RestoreVectoreIcon /> : <TrashVectoreIcon />}
           </TouchableOpacity>
         </View>
       </View>

@@ -13,33 +13,38 @@ import {
   Dimensions,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import ES from '../../styles/ES';
+import ES from '../../../styles/ES';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
-import {backgroundColor, primaryColor} from '../../Constants/Colours';
-import axiosClient from '../../../axiosClient';
-import {toggleLogin} from '../../Redux/actions/action';
+import {backgroundColor, primaryColor} from '../../../Constants/Colours';
+import axiosClient from '../../../../axiosClient';
+import {toggleLogin} from '../../../Redux/actions/action';
 import {Picker} from '@react-native-picker/picker';
-import HeadingText from '../../Components/HeadingText';
-import Btn from '../../Components/Btn';
+import HeadingText from '../../../Components/HeadingText';
+import Btn from '../../../Components/Btn';
 
-import {locationIcon, userIconOrange} from '../../Constants/imagesAndIcons';
-import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
-import Loading from '../../Constants/Loading';
+import {locationIcon, userIconOrange} from '../../../Constants/imagesAndIcons';
+import KeyboardAvoidingComponent from '../../../Components/KeyboardAvoidingComponent';
+import Loading from '../../../Constants/Loading';
+import FullModalComponent from '../../../Components/FullModalComponent';
 
-const UpdateLocation = ({navigation, route}) => {
+const UpdateLocation = ({
+  navigation,
+  route,
+  updateModal,
+  handleUpdateLocationList,
+  item,
+  closeModal,
+}) => {
   const [name, setName] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [address, setAddress] = useState('');
   const [pinCode, setPinCode] = useState('');
-  const [storageLocation, setStorageLocation] = useState('');
-  const [role, setRole] = useState('');
 
-  const screenHeight = Dimensions.get('window').height;
   const [storageLocations, setStorageLocations] = useState([]);
   const [roles, setRoles] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const isLoggedIn = useSelector(state => state.auth);
   const dispatch = useDispatch();
@@ -77,9 +82,12 @@ const UpdateLocation = ({navigation, route}) => {
   };
 
   useEffect(() => {
-    checkLogin();
-    getStorageLocationById();
-  }, []);
+    setName(item?.name);
+    setCity(item?.city);
+    setState(item?.state);
+    setPinCode(item?.pin_code);
+    setAddress(item?.address);
+  }, [item]);
 
   const handleUpdateLocation = async () => {
     if (!verifyInputs()) return;
@@ -96,22 +104,19 @@ const UpdateLocation = ({navigation, route}) => {
       const token = await AsyncStorage.getItem('token');
 
       const res = await axiosClient.put(
-        `/storage/location/update/${route.params.id}`,
+        `/storage/location/update/${item._id}`,
         form,
       );
-      dispatch(toggleLogin(true));
       if (res) {
         showToast('Location updated successfully');
-        setTimeout(() => {
-          navigation.goBack();
-        }, 1000);
+        handleUpdateLocationList(res.data.result);
       }
+      closeModal();
     } catch (error) {
-      if (error.response?.status === 409) {
-        showToast(error.response.data.message);
-      } else if (error.response?.status === 403) {
+      if (error.response.data.message) {
         showToast(error.response.data.message);
       } else {
+        showToast('Something went wrong');
         console.log('Unexpected error:', error);
       }
     }
@@ -156,58 +161,63 @@ const UpdateLocation = ({navigation, route}) => {
 
   return (
     <>
-      <KeyboardAvoidingComponent>
-        <View style={[s.container, ES.my5, isLoading ? ES.dNone : null]}>
-          <View style={[s.card]}>
-            <View style={[s.imageContainer]}>
-              <Image
-                source={locationIcon}
-                style={[ES.hs100, ES.objectFitContain]}
-              />
-            </View>
+      <FullModalComponent
+        height={'60%'}
+        isModalVisible={updateModal}
+        closeModal={closeModal}>
+        <KeyboardAvoidingComponent bg={false}>
+          <View style={[s.container, isLoading ? ES.dNone : null]}>
+            <View style={[s.card]}>
+              {/*  <View style={[s.imageContainer]}>
+                <Image
+                  source={locationIcon}
+                  style={[ES.hs100, ES.objectFitContain]}
+                />
+              </View> */}
 
-            <TextInput
-              style={[s.input]}
-              placeholder="Warehouse Name"
-              value={name}
-              onChangeText={setName}
-            />
-            <TextInput
-              style={[s.input]}
-              placeholder="City"
-              value={city}
-              onChangeText={setCity}
-            />
-            <TextInput
-              style={[s.input]}
-              placeholder="State"
-              value={state}
-              onChangeText={setState}
-            />
-            <TextInput
-              style={[s.input]}
-              placeholder="Address"
-              value={address}
-              onChangeText={setAddress}
-            />
-            <TextInput
-              style={[s.input]}
-              placeholder="Pin Code"
-              keyboardType="phone-pad"
-              value={pinCode.toString()}
-              onChangeText={setPinCode}
-            />
-            <View style={[ES.w100, ES.fx0, ES.centerItems, ES.mt1]}>
-              <Btn method={handleUpdateLocation}>
-                <Text style={[ES.textLight, ES.fw700, ES.f20]}>Update </Text>
-              </Btn>
+              <TextInput
+                style={[s.input]}
+                placeholder="Warehouse Name"
+                value={name}
+                onChangeText={setName}
+              />
+              <TextInput
+                style={[s.input]}
+                placeholder="City"
+                value={city}
+                onChangeText={setCity}
+              />
+              <TextInput
+                style={[s.input]}
+                placeholder="State"
+                value={state}
+                onChangeText={setState}
+              />
+              <TextInput
+                style={[s.input]}
+                placeholder="Address"
+                value={address}
+                onChangeText={setAddress}
+              />
+              <TextInput
+                style={[s.input]}
+                placeholder="Pin Code"
+                keyboardType="phone-pad"
+                value={pinCode.toString()}
+                onChangeText={setPinCode}
+              />
+              <View style={[ES.w100, ES.fx0, ES.centerItems, ES.mt2]}>
+                <Btn width={'90%'} method={handleUpdateLocation}>
+                  <Text style={[ES.textLight, ES.fw700, ES.f20]}>Update </Text>
+                </Btn>
+              </View>
             </View>
           </View>
-        </View>
-        <View style={[ES.fx1, isLoading ? null : ES.dNone]}>
-          <Loading />
-        </View>
-      </KeyboardAvoidingComponent>
+          <View style={[ES.fx1, isLoading ? null : ES.dNone]}>
+            <Loading />
+          </View>
+        </KeyboardAvoidingComponent>
+      </FullModalComponent>
     </>
   );
 };
@@ -215,7 +225,7 @@ const UpdateLocation = ({navigation, route}) => {
 export default UpdateLocation;
 
 const s = StyleSheet.create({
-  container: StyleSheet.flatten([ES.centerItems, ES.w100, {backgroundColor}]),
+  container: StyleSheet.flatten([ES.centerItems, ES.w100]),
   input: StyleSheet.flatten([
     {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
     ES.w90,
@@ -231,21 +241,15 @@ const s = StyleSheet.create({
     ES.shadow1,
   ]),
   card: StyleSheet.flatten([
-    ES.w80,
+    ES.w100,
     ES.fx0,
     ES.centerItems,
     ES.gap3,
     ES.px1,
     ES.bRadius10,
-    ES.shadow7,
 
     ES.pb3,
-    {
-      backgroundColor,
-      borderTopRightRadius: 100,
-      borderTopLeftRadius: 100,
-      paddingTop: 70,
-    },
+
     ES.relative,
   ]),
   userIcon: StyleSheet.flatten([ES.hs100, ES.objectFitContain]),
