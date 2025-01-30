@@ -18,6 +18,7 @@ import {
   backgroundColor,
   lightTextColor,
   primaryColor,
+  primaryInputBorderColor,
   primaryLightTextColor,
   primaryTextColor,
   whiteButton,
@@ -36,6 +37,14 @@ import NormalText from '../../Components/NormalText';
 import ModalComponent from '../../Components/ModalComponent';
 import Loading from '../../Constants/Loading';
 import Header from '../../Components/Header';
+import {
+  CrossVectoreIcon,
+  DownArrowVectoreIcon,
+  ItemVectoreIcon,
+  PenVectoreIcon,
+} from '../../Constants/VectoreIcons';
+
+import {Dropdown} from 'react-native-element-dropdown';
 
 const AddRecord = ({navigation}) => {
   const [name, setName] = useState('rahul');
@@ -63,6 +72,8 @@ const AddRecord = ({navigation}) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [buttonLoading, setButtonLoading] = useState(false);
+
   const user = useSelector(state => state.user);
 
   const dispatch = useDispatch();
@@ -76,8 +87,17 @@ const AddRecord = ({navigation}) => {
       );
 
       console.log('pickupRes: ', pickupRes.data.result);
+      const temp = pickupRes.data.result;
+      let temp2 = [];
+      for (let i = 0; i < temp.length; i++) {
+        temp2.push({
+          label: temp[i].name,
+          value: temp[i].name,
+          _id: temp[i]._id,
+        });
+      }
 
-      setPickupPersons(pickupRes.data.result);
+      setPickupPersons(temp2);
       setRenderKey(renderKey + 1);
     } catch (error) {
       console.log('unique-warehouse-admins error: ', error);
@@ -109,71 +129,6 @@ const AddRecord = ({navigation}) => {
     }
   }, [user]);
 
-  const handleAddUser = async () => {
-    if (!verifyInputs()) return;
-
-    try {
-      const form = {
-        name,
-        mobile_no: mobileNo,
-        email,
-        password,
-        storage_location_id: storageLocation,
-        role_type: role,
-      };
-
-      const token = await AsyncStorage.getItem('token');
-
-      const res = await axiosClient.post('/user/create', form);
-      dispatch(toggleLogin(true));
-      if (res) {
-        showToast('User added successfully');
-      }
-    } catch (error) {
-      if (error.response?.status === 409) {
-        showToast(error.response.data.message);
-      } else if (error.response?.status === 403) {
-        showToast(error.response.data.message);
-      } else {
-        console.log('Unexpected error:', error);
-      }
-    }
-  };
-
-  const verifyInputs = () => {
-    if (!name) {
-      showToast('Please enter name');
-      return false;
-    }
-
-    if (!mobileNo) {
-      showToast('Please enter mobile number');
-      return false;
-    }
-
-    if (!email) {
-      showToast('Please enter email');
-      return false;
-    }
-
-    if (!password) {
-      showToast('Please enter password');
-      return false;
-    }
-
-    if (!storageLocation) {
-      showToast('Please select storage location');
-      return false;
-    }
-
-    if (!role) {
-      showToast('Please select role');
-      return false;
-    }
-
-    return true;
-  };
-
   const showToast = message => {
     ToastAndroid.showWithGravity(
       message,
@@ -196,6 +151,7 @@ const AddRecord = ({navigation}) => {
       return false;
     }
 
+    setButtonLoading(true);
     try {
       const form = {
         storage_location_id: user.storage_location_id,
@@ -206,7 +162,7 @@ const AddRecord = ({navigation}) => {
       console.log('form', form);
 
       const recordRes = await axiosClient.post(`/register/add`, form);
-      console.log('recordRes: ', recordRes);
+      //console.log('recordRes: ', recordRes);
 
       if (recordRes) {
         showToast('Record added successfully');
@@ -221,6 +177,7 @@ const AddRecord = ({navigation}) => {
     } catch (error) {
       console.log('error: ', error);
     }
+    setButtonLoading(false);
   };
 
   const handleAddItem = () => {
@@ -354,64 +311,16 @@ const AddRecord = ({navigation}) => {
                   <NormalText size={18} color={primaryTextColor}>
                     {item.item_name}{' '}
                     <Text style={[{color: lightTextColor}, ES.fw500, ES.f12]}>
-                      ({item.quantity_unit})
+                      ({item.quantity_unit.name})
                     </Text>
                   </NormalText>
                 </TouchableOpacity>
               )}
+              refreshing={isLoading}
+              onRefresh={() => getData()}
             />
           </View>
           <View style={[ES.fx1, isLoading ? ES.dBlock : ES.dNone]}>
-            <Loading />
-          </View>
-        </View>
-      </ModalComponent>
-
-      <ModalComponent
-        height={'70%'}
-        isModalVisible={pickPersonModal}
-        closeModal={() => setPickPersonModal(false)}>
-        <View style={[ES.fx1, ES.py2]}>
-          <View style={[ES.fx1, pickupModalLoading ? ES.dNone : null]}>
-            <View style={[ES.fx1, s.modalListContainer]}>
-              <Btn
-                size={16}
-                method={() => {
-                  setPickupPerson(''), setPickPersonModal(false);
-                }}
-                width={'95%'}
-                bgColor={whiteButton}
-                color={primaryTextColor}>
-                <Text> None</Text>
-              </Btn>
-            </View>
-            <FlatList
-              data={pickupPersons}
-              contentContainerStyle={[ES.pb1, ES.w100]}
-              renderItem={({item}) => (
-                <View style={[s.modalListContainer]}>
-                  {pickupPerson._id != item._id ? (
-                    <Btn
-                      size={16}
-                      px={2}
-                      method={() => {
-                        setPickupPerson(item), setPickPersonModal(false);
-                      }}
-                      width={'95%'}
-                      bgColor={whiteButton}
-                      color={primaryTextColor}>
-                      <Text> {item.name}</Text>
-                    </Btn>
-                  ) : (
-                    <Btn size={16} width={'95%'}>
-                      <Text> {item.name} </Text>
-                    </Btn>
-                  )}
-                </View>
-              )}
-            />
-          </View>
-          <View style={[ES.fx1, pickupModalLoading ? null : ES.dNone]}>
             <Loading />
           </View>
         </View>
@@ -421,33 +330,36 @@ const AddRecord = ({navigation}) => {
         <Header>Add Record</Header>
         <View style={[s.inputContainer]} key={renderKey}>
           <View style={[ES.w100, ES.relative]}>
-            <View style={[]}>
-              <TouchableOpacity
-                onPress={() => setPickPersonModal(true)}
+            <View style={[s.input]}>
+              <Dropdown
                 style={[
-                  ES.flexRow,
-                  ES.justifyContentSpaceBetween,
-                  ES.alignItemsCenter,
-                  ES.py06,
-                  ES.px2,
-                  ES.bRadius5,
-                  s.input,
-                ]}>
-                <NormalText color={'rgb(68, 64, 64)'}>
-                  <Text>
-                    {pickupPerson ? pickupPerson.name : 'Select Pickup Person'}
-                  </Text>
-                </NormalText>
-                <Image
-                  source={downArrowIcon}
-                  style={[ES.hs11, ES.objectFitContain]}
-                />
-              </TouchableOpacity>
+                  {
+                    marginBottom: 8,
+                    width: '100%',
+                    padding: 0,
+                  },
+                ]}
+                placeholderStyle={[ES.f16]}
+                selectedTextStyle={[ES.f16]}
+                inputSearchStyle={[ES.hs40, ES.f16]}
+                iconStyle={{width: 26, height: 26}}
+                data={pickupPersons}
+                search
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder="Select Pickup Person"
+                searchPlaceholder="Search..."
+                value={pickupPerson}
+                onChange={item => {
+                  setPickupPerson(item);
+                }}
+              />
             </View>
           </View>
 
           <View style={[ES.w100, ES.relative, ES.mt1]}>
-            {items.length > 0 && selectedItem == null && (
+            {selectedItem == null && (
               <View style={[]}>
                 <TouchableOpacity
                   onPress={() => setModalVisible(true)}
@@ -463,10 +375,7 @@ const AddRecord = ({navigation}) => {
                   <NormalText color={'rgb(68, 64, 64)'}>
                     <Text>Select Item</Text>
                   </NormalText>
-                  <Image
-                    source={downArrowIcon}
-                    style={[ES.hs11, ES.objectFitContain]}
-                  />
+                  <DownArrowVectoreIcon />
                 </TouchableOpacity>
               </View>
             )}
@@ -494,10 +403,7 @@ const AddRecord = ({navigation}) => {
                     setSelectedItem(null);
                     setQuantity(null);
                   }}>
-                  <Image
-                    source={cancelIcon}
-                    style={[ES.hs25, ES.ws25, ES.objectFitContain]}
-                  />
+                  <CrossVectoreIcon color={'#c9c9c9'} />
                 </TouchableOpacity>
               </View>
 
@@ -537,10 +443,7 @@ const AddRecord = ({navigation}) => {
                 renderItem={({item: subItem}) => (
                   <View style={[s.itemContainer]}>
                     <View style={[ES.fx0, ES.centerItems]}>
-                      <Image
-                        source={itemIcon}
-                        style={[ES.hs50, ES.ws50, ES.objectFitContain]}
-                      />
+                      <ItemVectoreIcon size={38} />
                     </View>
                     <View style={[ES.fx1]}>
                       <TouchableOpacity style={[]}>
@@ -568,7 +471,7 @@ const AddRecord = ({navigation}) => {
                           ]}>
                           qty:{' '}
                           <Text style={[s.lightText]}>
-                            {subItem.quantity} {subItem.quantity_unit}
+                            {subItem.quantity} {subItem.quantity_unit.name}
                           </Text>
                         </Text>
                       </TouchableOpacity>
@@ -576,18 +479,12 @@ const AddRecord = ({navigation}) => {
                     <TouchableOpacity
                       onPress={() => handleEditItem(subItem)}
                       style={[]}>
-                      <Image
-                        source={penIcon}
-                        style={[ES.hs35, ES.ws35, ES.objectFitContain]}
-                      />
+                      <PenVectoreIcon />
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => handleRemoveItem(subItem)}
                       style={[]}>
-                      <Image
-                        source={cancelIcon}
-                        style={[ES.hs27, ES.ws27, ES.objectFitContain]}
-                      />
+                      <CrossVectoreIcon />
                     </TouchableOpacity>
                   </View>
                 )}
@@ -595,17 +492,8 @@ const AddRecord = ({navigation}) => {
             </View>
           )}
         </View>
-        <View
-          style={[
-            ES.w100,
-            ES.fx0,
-            ES.centerItems,
-            ES.mt2,
-            ES.absolute,
-            ES.bottom2,
-            ES.z1,
-          ]}>
-          <Btn method={handleAddRecord}>
+        <View style={[s.addButton]}>
+          <Btn buttonLoading={buttonLoading} method={handleAddRecord}>
             <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add Record </Text>
           </Btn>
         </View>
@@ -639,7 +527,11 @@ const s = StyleSheet.create({
     {backgroundColor},
   ]),
   input: StyleSheet.flatten([
-    {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
+    {
+      borderBottomWidth: 1,
+      borderColor: primaryInputBorderColor,
+      borderRadius: 5,
+    },
     ES.w99,
     ES.px1,
     ES.f16,
@@ -696,6 +588,16 @@ const s = StyleSheet.create({
   contentContainerStyle: StyleSheet.flatten([
     ES.fx0,
     ES.px04,
-    {paddingBottom: 70},
+    {paddingBottom: 130},
+  ]),
+  addButton: StyleSheet.flatten([
+    ES.w100,
+    ES.fx0,
+    ES.centerItems,
+    ES.mt2,
+    ES.absolute,
+    ES.bottom9,
+    ES.z1,
+    ES.pb02,
   ]),
 });

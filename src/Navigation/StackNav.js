@@ -11,7 +11,7 @@ import UpdateAccount from '../screens/Home/UpdateAccount';
 import UpdateUser from '../screens/Users/components/UpdateUser';
 import AddRecord from '../screens/WareHouse/AddRecord';
 import AllItems from '../screens/Items/AllItems';
-import AddItem from '../screens/Items/AddItem';
+import AddItem from '../screens/Items/components/AddItem';
 import AllUsers from '../screens/Users/AllUsers';
 import MyAccount from '../screens/Home/MyAccount';
 import {headerBackgroundColor} from '../Constants/Colours';
@@ -28,6 +28,7 @@ import UpdateLocation from '../screens/Location/components/UpdateLocation';
 import {backArrowIcon, menuIcon} from '../Constants/imagesAndIcons';
 import ES from '../styles/ES';
 import {DrawerActions} from '@react-navigation/native';
+import ChangePassword from '../screens/Home/ChangePassword';
 
 const Stack = createNativeStackNavigator();
 
@@ -315,6 +316,11 @@ export const AccountStack = () => {
       <Stack.Screen
         name="stackUpdateAccount"
         component={UpdateAccount}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="stackChangePassword"
+        component={ChangePassword}
         options={{headerShown: false}}
       />
     </Stack.Navigator>

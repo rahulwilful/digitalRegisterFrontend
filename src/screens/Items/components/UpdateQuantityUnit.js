@@ -16,6 +16,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {
   backgroundColor,
   primaryColor,
+  primaryInputBorderColor,
   primaryTextColor,
   whiteButton,
 } from '../../../Constants/Colours';
@@ -49,42 +50,20 @@ const UpdateQuantityUnit = ({
   const [storageLocations, setStorageLocations] = useState([]);
   const [roles, setRoles] = useState([]);
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [buttonLoading, setButtonLoading] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const isLoggedIn = useSelector(state => state.auth);
   const dispatch = useDispatch();
-
-  //console.log('UpdateQuantityUnit : route.params.id', route.params.id);
 
   useEffect(() => {
     setName(unit?.name);
   }, [unit]);
 
-  const checkLogin = async () => {
-    const token = await AsyncStorage.getItem('token');
-    if (token) dispatch(toggleLogin(true));
-  };
-
-  const getQuantityUnit = async () => {
-    setIsLoading(true);
-    try {
-      const res = await axiosClient.get(
-        `/quantity_unit/get/${route.params.id}`,
-      );
-
-      setName(res.data.result.name);
-    } catch (error) {
-      console.log('error: ', error);
-    }
-    setIsLoading(false);
-  };
-  useEffect(() => {
-    checkLogin();
-    getQuantityUnit();
-  }, []);
-
   const handleUpdateQuantityUnit = async () => {
     if (!verifyInputs()) return;
+    setButtonLoading(true);
 
     try {
       const form = {
@@ -103,15 +82,14 @@ const UpdateQuantityUnit = ({
         handleUpdateList(res.data.result);
       }
     } catch (error) {
-      if (error.response?.status === 409) {
-        showToast(error.response.data.message);
-      } else if (error.response?.status === 403) {
+      if (error?.response?.data?.message) {
         showToast(error.response.data.message);
       } else {
         showToast('Something went wrong');
         console.log('Unexpected error:', error);
       }
     }
+    setButtonLoading(false);
   };
 
   const verifyInputs = () => {
@@ -147,12 +125,15 @@ const UpdateQuantityUnit = ({
               <TextInput
                 style={[s.input]}
                 placeholder="Unit Name"
-                value={name}
+                value={name ? name : ''}
                 onChangeText={setName}
               />
 
               <View style={[ES.w90]}>
-                <Btn width={'100%'} method={handleUpdateQuantityUnit}>
+                <Btn
+                  buttonLoading={buttonLoading}
+                  width={'100%'}
+                  method={handleUpdateQuantityUnit}>
                   <Text style={[ES.textLight, ES.fw700, ES.f20]}>Update</Text>
                 </Btn>
               </View>
@@ -172,7 +153,11 @@ export default UpdateQuantityUnit;
 const s = StyleSheet.create({
   container: StyleSheet.flatten([ES.fx1, ES.centerItems, ES.w100]),
   input: StyleSheet.flatten([
-    {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
+    {
+      borderBottomWidth: 1,
+      borderColor: primaryInputBorderColor,
+      borderRadius: 5,
+    },
     ES.w90,
     ES.f16,
   ]),

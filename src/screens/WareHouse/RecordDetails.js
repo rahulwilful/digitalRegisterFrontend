@@ -3,13 +3,16 @@ import React, {useEffect, useState} from 'react';
 import axiosClient from '../../../axiosClient';
 import ES from '../../styles/ES';
 import {
+  adminIcon,
   calanderIcon,
   pickupPersonIcon,
   recordIcon,
+  watchIcon,
 } from '../../Constants/imagesAndIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import {
   backgroundColor,
+  modalColor,
   primaryColor,
   primaryTextColor,
 } from '../../Constants/Colours';
@@ -57,64 +60,94 @@ const RecordDetails = ({route}) => {
   return (
     <>
       {record && (
-        <View
-          style={[
-            ES.w100,
-            ES.fx1,
-            isLoading ? ES.dNone : ES.dBlock,
-            ES.centerItems,
-            ES.py2,
-          ]}>
+        <View style={[ES.w100, ES.fx1, isLoading ? ES.dNone : ES.dBlock]}>
           <LinearGradient
-            colors={['#fff', '#fffaf7']}
+            colors={['#fff', '#fff']}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
             style={[s.card]}>
             <View style={[s.listConatinerHeaer]}>
+              {/*  
               <View style={[ES.hs70, ES.ws70, ES.overflowHidden, ES.bRadius5]}>
                 <Image source={recordIcon} style={[ES.hs70, ES.ws70]} />
               </View>
+               */}
 
               <View style={[ES.fx1, ES.justifyContentCenter, ES.gap1]}>
-                <HeadingText
+                {/*   <HeadingText
                   size={20}
                   capitalize
                   style={[ES.f20, ES.fw500, ES.capitalize, ES.fx1]}>
                   {record.warehouse_admin?.name}
-                </HeadingText>
+                </HeadingText> */}
+                <View
+                  style={[ES.flexRow, ES.fx0, ES.gap2, ES.alignItemsBaseline]}>
+                  <View style={[ES.fx1]}>
+                    <HeadingText capitalize fw={500} size={17}>
+                      <Text style={[ES.tempBorder]}>
+                        <Image
+                          source={adminIcon}
+                          style={[ES.ws22, ES.hs22, ES.objectFitContain]}
+                        />
+                        <Text>
+                          {' '}
+                          :{' '}
+                          {record.warehouse_admin.name.length <= 10
+                            ? record.warehouse_admin.name
+                            : record.warehouse_admin.name.slice(0, 10) + '...'}
+                        </Text>
+                      </Text>
+                    </HeadingText>
+                  </View>
+                  <View style={[ES.fx1]}>
+                    <HeadingText capitalize fw={500} size={17}>
+                      <Text style={[ES.tempBorder]}>
+                        <Image
+                          source={pickupPersonIcon}
+                          style={[ES.ws22, ES.hs22, ES.objectFitContain]}
+                        />
+                        <Text>
+                          {' '}
+                          :{' '}
+                          {record.pickup_person.name.length <= 10
+                            ? record.pickup_person.name
+                            : record.pickup_person.name.slice(0, 10) + '...'}
+                        </Text>
+                      </Text>
+                    </HeadingText>
+                  </View>
+                </View>
                 <View
                   style={[ES.fx0, ES.flexRow, ES.gap2, ES.alignItemsCenter]}>
-                  <NormalText size={13}>
-                    <Text style={[ES.tempBorder]}>
-                      <Image
-                        source={pickupPersonIcon}
-                        style={[ES.ws19, ES.hs19, ES.objectFitContain]}
-                      />
-                      <Text>
-                        {' '}
-                        :{' '}
-                        {record.pickup_person.name.length <= 13
-                          ? record.pickup_person.name
-                          : record.pickup_person.name.slice(0, 13) + '...'}
+                  <View style={[ES.fx1]}>
+                    <NormalText size={17}>
+                      <Text style={[]}>
+                        <Image
+                          source={calanderIcon}
+                          style={[ES.ws22, ES.hs22, ES.objectFitContain]}
+                        />
+                        <Text> : {record.createdAt.slice(0, 10)}</Text>
                       </Text>
-                    </Text>
-                  </NormalText>
-
-                  <NormalText size={13}>
-                    <Text style={[ES.tempBorder]}>
-                      <Image
-                        source={calanderIcon}
-                        style={[ES.ws19, ES.hs19, ES.objectFitContain]}
-                      />
-                      <Text> : {record.createdAt.slice(0, 10)}</Text>
-                    </Text>
-                  </NormalText>
+                    </NormalText>
+                  </View>
+                  <View style={[ES.fx1]}>
+                    <NormalText size={17}>
+                      <Text style={[]}>
+                        <Image
+                          source={watchIcon}
+                          style={[ES.ws22, ES.hs22, ES.objectFitContain]}
+                        />
+                        <Text> : {record.createdAt.slice(11, 16)}</Text>
+                      </Text>
+                    </NormalText>
+                  </View>
                 </View>
               </View>
             </View>
             <View style={[ES.fx1]}>
               <FlatList
                 data={record.item_list}
+                contentContainerStyle={{paddingBottom: 100}}
                 keyExtractor={(subItem, index) => index.toString()}
                 renderItem={({item: subItem}) => (
                   <View style={[s.itemContainer]}>
@@ -127,7 +160,8 @@ const RecordDetails = ({route}) => {
                       <Text style={[ES.f16, ES.fw500, ES.px08, ES.capitalize]}>
                         qty:
                         <NormalText>
-                          {subItem.quantity} {subItem.item_id.quantity_unit}
+                          {subItem.quantity}{' '}
+                          {subItem.item_id.quantity_unit.name}
                         </NormalText>
                       </Text>
                     </View>
@@ -150,11 +184,11 @@ export default RecordDetails;
 
 const s = StyleSheet.create({
   card: StyleSheet.flatten([
-    ES.w95,
+    ES.w100,
     ES.fx1,
     ES.bRadius12,
     ES.overflowHidden,
-    ES.shadow1,
+
     ES.pb1,
     ES.px04,
   ]),

@@ -16,7 +16,11 @@ import React, {useEffect, useState} from 'react';
 import ES from '../../../styles/ES';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
-import {backgroundColor, primaryColor} from '../../../Constants/Colours';
+import {
+  backgroundColor,
+  primaryColor,
+  primaryInputBorderColor,
+} from '../../../Constants/Colours';
 import axiosClient from '../../../../axiosClient';
 import {toggleLogin} from '../../../Redux/actions/action';
 import {Picker} from '@react-native-picker/picker';
@@ -48,6 +52,8 @@ const UpdateLocation = ({
 
   const isLoggedIn = useSelector(state => state.auth);
   const dispatch = useDispatch();
+
+  const [buttonLoading, setButtonLoading] = useState(false);
 
   const checkLogin = async () => {
     const token = await AsyncStorage.getItem('token');
@@ -91,7 +97,7 @@ const UpdateLocation = ({
 
   const handleUpdateLocation = async () => {
     if (!verifyInputs()) return;
-
+    setButtonLoading(true);
     try {
       const form = {
         name: name,
@@ -120,6 +126,7 @@ const UpdateLocation = ({
         console.log('Unexpected error:', error);
       }
     }
+    setButtonLoading(false);
   };
 
   const verifyInputs = () => {
@@ -148,6 +155,11 @@ const UpdateLocation = ({
       return false;
     }
 
+    if (pinCode.length < 6) {
+      showToast('Please enter valide pincode');
+      return false;
+    }
+
     return true;
   };
 
@@ -162,7 +174,7 @@ const UpdateLocation = ({
   return (
     <>
       <FullModalComponent
-        height={'60%'}
+        height={'53%'}
         isModalVisible={updateModal}
         closeModal={closeModal}>
         <KeyboardAvoidingComponent bg={false}>
@@ -207,7 +219,10 @@ const UpdateLocation = ({
                 onChangeText={setPinCode}
               />
               <View style={[ES.w100, ES.fx0, ES.centerItems, ES.mt2]}>
-                <Btn width={'90%'} method={handleUpdateLocation}>
+                <Btn
+                  buttonLoading={buttonLoading}
+                  width={'90%'}
+                  method={handleUpdateLocation}>
                   <Text style={[ES.textLight, ES.fw700, ES.f20]}>Update </Text>
                 </Btn>
               </View>
@@ -227,7 +242,11 @@ export default UpdateLocation;
 const s = StyleSheet.create({
   container: StyleSheet.flatten([ES.centerItems, ES.w100]),
   input: StyleSheet.flatten([
-    {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
+    {
+      borderBottomWidth: 1,
+      borderColor: primaryInputBorderColor,
+      borderRadius: 5,
+    },
     ES.w90,
     ES.px1,
     ES.f16,

@@ -16,36 +16,40 @@ import React, {useEffect, useState} from 'react';
 import ES from '../../../styles/ES';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
-import {backgroundColor, primaryColor} from '../../../Constants/Colours';
+import {
+  backgroundColor,
+  primaryColor,
+  primaryInputBorderColor,
+} from '../../../Constants/Colours';
 import axiosClient from '../../../../axiosClient';
 import {toggleLogin} from '../../../Redux/actions/action';
 import {Picker} from '@react-native-picker/picker';
-import HeadingText from '../../../Components/HeadingText';
 import Btn from '../../../Components/Btn';
 
+import HeadingText from '../../../Components/HeadingText';
 import {userIconOrange} from '../../../Constants/imagesAndIcons';
+
 import KeyboardAvoidingComponent from '../../../Components/KeyboardAvoidingComponent';
 import Loading from '../../../Constants/Loading';
 import {useNavigation} from '@react-navigation/native';
 import FullModalComponent from '../../../Components/FullModalComponent';
 
-const AddUser = ({addModal, closeModal, handleAddUserToList}) => {
+const AddUser = ({addModal, closeModal, handleSetUpadateUserList}) => {
   const navigation = useNavigation();
-  const [name, setName] = useState('pickup');
+  const [name, setName] = useState('');
 
-  const [email, setEmail] = useState('pickup@gmail.com');
-  const [password, setPassword] = useState('111111');
-  const [mobileNo, setMobileNo] = useState('12345678');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [mobileNo, setMobileNo] = useState('');
   const [storageLocation, setStorageLocation] = useState('');
   const [role, setRole] = useState('');
-
-  const screenHeight = Dimensions.get('window').height;
-
+  const [buttonLoading, setButtonLoading] = useState(false);
   const [storageLocations, setStorageLocations] = useState([]);
   const [roles, setRoles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const isLoggedIn = useSelector(state => state.auth);
   const dispatch = useDispatch();
+  const screenHeight = Dimensions.get('window').height;
 
   const checkLogin = async () => {
     const token = await AsyncStorage.getItem('token');
@@ -78,7 +82,7 @@ const AddUser = ({addModal, closeModal, handleAddUserToList}) => {
 
   const handleAddUser = async () => {
     if (!verifyInputs()) return;
-
+    setButtonLoading(true);
     try {
       const form = {
         name,
@@ -92,23 +96,31 @@ const AddUser = ({addModal, closeModal, handleAddUserToList}) => {
       const token = await AsyncStorage.getItem('token');
 
       const res = await axiosClient.post('/user/create', form);
-      dispatch(toggleLogin(true));
+
       if (res) {
         showToast('User added successfully');
-        handleAddUserToList(res.data.result);
+        handleSetUpadateUserList(res.data.result);
 
         closeModal();
+        setName('');
+        setEmail('');
+        setPassword('');
+        setMobileNo('');
+        setStorageLocation('');
+        setRole('');
       }
     } catch (error) {
-      if (error.response?.status === 409) {
-        showToast(error.response.data.message);
-      } else if (error.response?.status === 403) {
+      if (error?.response?.data?.message) {
         showToast(error.response.data.message);
       } else {
-        console.log('Unexpected error:', error);
+        showToast('something went wrong');
       }
+
+      console.log('Unexpected error:', error);
+
       closeModal();
     }
+    setButtonLoading(false);
   };
 
   const verifyInputs = () => {
@@ -156,6 +168,7 @@ const AddUser = ({addModal, closeModal, handleAddUserToList}) => {
   return (
     <>
       <FullModalComponent
+        fullHeight
         height={'60%'}
         isModalVisible={addModal}
         closeModal={closeModal}>
@@ -220,7 +233,10 @@ const AddUser = ({addModal, closeModal, handleAddUserToList}) => {
                 </View>
               )}
               <View style={[ES.mt2, ES.w100]}>
-                <Btn width={'100%'} method={handleAddUser}>
+                <Btn
+                  buttonLoading={buttonLoading}
+                  width={'100%'}
+                  method={handleAddUser}>
                   <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
                 </Btn>
               </View>
@@ -240,7 +256,11 @@ export default AddUser;
 const s = StyleSheet.create({
   container: StyleSheet.flatten([ES.centerItems, ES.w100]),
   input: StyleSheet.flatten([
-    {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
+    {
+      borderBottomWidth: 1,
+      borderColor: primaryInputBorderColor,
+      borderRadius: 5,
+    },
     ES.w100,
     ES.px1,
     ES.f16,

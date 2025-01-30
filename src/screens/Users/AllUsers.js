@@ -9,12 +9,19 @@ import {
   Image,
   Dimensions,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import axiosClient from '../../../axiosClient';
 import HeadingText from '../../Components/HeadingText';
 import ES from '../../styles/ES';
 import ItemCard from '../Items/components/ItemCard';
-import {headerBackgroundColor, primaryColor} from '../../Constants/Colours';
+import {
+  headerBackgroundColor,
+  primaryButtonColor,
+  primaryColor,
+  primaryInputBorderColor,
+  primaryTextColor,
+  whiteButton,
+} from '../../Constants/Colours';
 import Loading from '../../Constants/Loading';
 import {useDispatch, useSelector} from 'react-redux';
 import {addAllItems, addIAlltems} from '../../Redux/actions/itemActions';
@@ -29,6 +36,7 @@ import {toggleLogin} from '../../Redux/actions/action';
 import AddUser from './components/AddUser';
 import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponent';
 import UpdateUser from './components/UpdateUser';
+import {useFocusEffect} from '@react-navigation/native';
 
 const AllUsers = ({navigation}) => {
   const reduxItems = useSelector(state => state.items);
@@ -48,7 +56,21 @@ const AllUsers = ({navigation}) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const [userToDeleteRestore, setUserToDeleteRestore] = useState({});
 
-  const dispatch = useDispatch();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const [deleted, setDeleted] = useState(false);
+  const [activeUsers, setActiveUsers] = useState([]);
+  const [deletedUsers, setDeleteUsers] = useState([]);
+
+  const [buttonLoading, setButtonLoading] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      setDeleted(false);
+      setSearchQuery('');
+      getUsers();
+    }, []),
+  );
 
   const showToast = message => {
     ToastAndroid.showWithGravity(
@@ -62,21 +84,22 @@ const AllUsers = ({navigation}) => {
     setIsLoading(true);
 
     let form = {
-      item_name: name,
+      name: name,
     };
     console.log('name: ', form);
+    setSearchQuery(name);
 
     if (name.length === 0) {
-      setItems(originalItems);
+      setUsers(originalUsers);
       setIsLoading(false);
       return;
     }
 
     try {
-      const res = await axiosClient.post(`/item/get/by/name`, form);
+      const res = await axiosClient.post(`/user/get/by/name`, form);
 
-      console.log('AllItems res: ', res);
-      setItems(res.data.result);
+      //console.log('AllUsers res: ', res);
+      setUsers(res.data.result);
     } catch (error) {
       if (error.response.data.message) {
         showToast(error.response.data.message);
@@ -90,7 +113,7 @@ const AllUsers = ({navigation}) => {
 
   const handleDeleteUser = async id => {
     console.log('handleDeleteUser: ', id);
-
+    setButtonLoading(true);
     try {
       const res = await axiosClient.delete(`/user/delete/${id}`);
       if (res) {
@@ -98,14 +121,16 @@ const AllUsers = ({navigation}) => {
       }
 
       let temp = users;
+      let temp2 = originalUsers;
       for (let i in temp) {
         if (temp[i]._id === id) {
           temp[i].is_delete = true;
+          setDeleteUsers([...deletedUsers, temp[i]]);
+          setActiveUsers(activeUsers.filter(user => user.is_delete === false));
         }
       }
 
       setUsers(temp);
-      let temp2 = originalUsers;
       for (let i in temp2) {
         if (temp2[i]._id === id) {
           temp2[i].is_delete = true;
@@ -121,12 +146,13 @@ const AllUsers = ({navigation}) => {
       }
       console.log('error: ', error);
     }
+    setButtonLoading(false);
     setModalVisible(false);
   };
 
   const handleRestoreUser = async id => {
     console.log('handleRestoreUser: ', id);
-
+    setButtonLoading(true);
     try {
       const res = await axiosClient.put(`/user/restore/${id}`);
       if (res) {
@@ -137,6 +163,8 @@ const AllUsers = ({navigation}) => {
       for (let i in temp) {
         if (temp[i]._id === id) {
           temp[i].is_delete = false;
+          setActiveUsers([...activeUsers, temp[i]]);
+          setDeleteUsers(deletedUsers.filter(user => user.is_delete === true));
         }
       }
 
@@ -157,6 +185,7 @@ const AllUsers = ({navigation}) => {
       }
       console.log('error: ', error);
     }
+    setButtonLoading(false);
     setModalVisible(false);
   };
 
@@ -176,25 +205,24 @@ const AllUsers = ({navigation}) => {
     setIsLoading(false);
   };
 
+  const handleSortDeleted = itemsData => {
+    //console.log('itemsData: ', itemsData);
+    //if (itemsData.length <= 0) return;
+    const temp = itemsData.filter(item => !item.is_delete);
+    const temp2 = itemsData.filter(item => item.is_delete);
+
+    setActiveUsers(temp);
+    setDeleteUsers(temp2);
+    setRenderKey(renderKey + 1);
+  };
+
+  useEffect(() => {
+    handleSortDeleted(users);
+  }, [users]);
+
   useEffect(() => {
     getUsers();
   }, []);
-
-  const handleSearchFilter = text => {
-    if (text.length === 0) {
-      setItems(originalItems);
-    }
-    {
-      const newData = originalItems.filter(item => {
-        const itemData = item.item_name
-          ? item.item_name.toUpperCase()
-          : ''.toUpperCase();
-        const textData = text.toUpperCase();
-        return itemData.indexOf(textData) > -1;
-      });
-      setItems(newData);
-    }
-  };
 
   const closeModal = () => {
     setModalVisible(false);
@@ -213,16 +241,27 @@ const AllUsers = ({navigation}) => {
   };
 
   const handleSetUpadateUserList = userData => {
-    console.log('userData: ', userData);
+    console.log('handleSetUpadateUserList userData: ', userData);
     let temp = originalUsers;
+    let temp2 = users;
     for (let i in temp) {
       if (temp[i]._id === userData._id) {
         temp[i] = userData;
+        setOriginalUsers(temp);
         break;
       }
     }
-    setOriginalUsers(temp);
-    setUsers(temp);
+    for (let i in temp2) {
+      if (temp2[i]._id === userData._id) {
+        temp2[i] = userData;
+        setUsers(temp2);
+        handleSortDeleted(temp2);
+        return;
+      }
+    }
+    setOriginalUsers([...originalUsers, userData]);
+    setUsers([...users, userData]);
+    setActiveUsers([...activeUsers, userData]);
     setRenderKey(renderKey + 1);
   };
 
@@ -231,7 +270,7 @@ const AllUsers = ({navigation}) => {
       <AddUser
         addModal={addModal}
         closeModal={() => setAddModal(false)}
-        handleAddUserToList={handleAddUserToList}
+        handleSetUpadateUserList={handleSetUpadateUserList}
       />
 
       <ModalComponent
@@ -246,6 +285,7 @@ const AllUsers = ({navigation}) => {
           </View>
           <View style={[ES.centerItems]}>
             <Btn
+              buttonLoading={buttonLoading}
               width={'50%'}
               method={() =>
                 userToDeleteRestore.is_delete
@@ -260,28 +300,60 @@ const AllUsers = ({navigation}) => {
         </View>
       </ModalComponent>
 
-      <View style={[ES.fx1, ES.w100]}>
+      <View style={[ES.fx1]}>
         <View style={[s.header, ES.mt1]}>
           <TextInput
             style={[s.textInput]}
+            value={searchQuery}
             placeholder="Search"
             onChangeText={text => getUsersByName(text)}
           />
         </View>
+        <View
+          style={[
+            ES.w100,
+            ES.flexRow,
+            ES.gap2,
+            ES.px1,
+            ES.py04,
+            ES.centerItems,
+          ]}>
+          <Btn
+            width={'45%'}
+            color={deleted ? primaryTextColor : null}
+            bgColor={deleted ? whiteButton : primaryButtonColor}
+            method={() => {
+              setDeleted(false), setRenderKey(renderKey + 1);
+            }}>
+            Active
+          </Btn>
+          <Btn
+            width={'45%'}
+            color={deleted ? null : primaryTextColor}
+            bgColor={!deleted ? whiteButton : primaryButtonColor}
+            method={() => {
+              setDeleted(true), setRenderKey(renderKey + 1);
+            }}>
+            Deleted
+          </Btn>
+        </View>
 
-        {isLoading == false && users.length > 0 && (
-          <KeyboardAvoidingComponent>
+        {isLoading == false &&
+          ((deleted == false && activeUsers.length > 0) ||
+            (deleted == true && deletedUsers.length > 0)) && (
             <View style={[ES.w100, ES.fx1]} key={renderKey}>
               <FlatList
-                data={users}
+                removeClippedSubviews={false}
+                data={deleted ? deletedUsers : activeUsers}
                 contentContainerStyle={[s.list]}
-                renderItem={({item}) => (
+                renderItem={({item, index}) => (
                   <UserCard
                     item={item}
                     handleDeleteUser={handleDeleteUser}
                     handleRestoreUser={handleRestoreUser}
                     openModal={openModal}
                     handleSetUpadateUserList={handleSetUpadateUserList}
+                    index={index}
                   />
                 )}
                 refreshing={isLoading}
@@ -289,15 +361,15 @@ const AllUsers = ({navigation}) => {
                 maxToRenderPerBatch={20}
               />
             </View>
-          </KeyboardAvoidingComponent>
-        )}
-
-        {/*   <AddButton method={() => navigation.navigate('newUser')} /> */}
+          )}
         <AddButton method={() => setAddModal(true)} />
-
         <View
           style={[
-            isLoading == false && users.length == 0 ? ES.dBlock : ES.dNone,
+            isLoading == false &&
+            ((deleted == false && activeUsers.length <= 0) ||
+              (deleted == true && deletedUsers.length <= 0))
+              ? ES.dBlock
+              : ES.dNone,
             ES.fx1,
             ES.gap2,
           ]}>
@@ -324,12 +396,15 @@ export default AllUsers;
 
 const s = StyleSheet.create({
   header: StyleSheet.flatten([ES.px1, ES.flexRow, ES.centerItems, ES.w100]),
-
   textInput: StyleSheet.flatten([
-    {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
+    {
+      borderBottomWidth: 1,
+      borderColor: primaryInputBorderColor,
+      borderRadius: 5,
+    },
     ES.w90,
     ES.px1,
     ES.f16,
   ]),
-  list: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 100}]),
+  list: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 140}]),
 });

@@ -3,7 +3,7 @@ export const image = {
 };
 
 export const noDataImage = require('../assets/images/noData.png');
-export const wareHouseImage = require('../assets/images/wareHouseImage.jpg');
+export const wareHouseImage = require('../assets/images/Designer.jpeg');
 
 export const cancelIcon = require('../assets/icons/cancelIcon.png');
 export const itemIcon = require('../assets/icons/itemIcon.png');
@@ -46,3 +46,4 @@ export const tearmsAndConditionsIcon = require('../assets/icons/termsAndConditio
 export const contactUsIcon = require('../assets/icons/contactUsIcon.png');
 export const adminIcon = require('../assets/icons/adminIcon.png');
 export const watchIcon = require('../assets/icons/watchIcon.png');
+export const wareHouseIcon4 = require('../assets/icons/wareHouseIcon4.png');

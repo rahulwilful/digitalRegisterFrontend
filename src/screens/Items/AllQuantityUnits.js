@@ -14,7 +14,14 @@ import axiosClient from '../../../axiosClient';
 import HeadingText from '../../Components/HeadingText';
 import ES from '../../styles/ES';
 import ItemCard from './components/ItemCard';
-import {headerBackgroundColor, primaryColor} from '../../Constants/Colours';
+import {
+  headerBackgroundColor,
+  primaryButtonColor,
+  primaryColor,
+  primaryInputBorderColor,
+  primaryTextColor,
+  whiteButton,
+} from '../../Constants/Colours';
 import Loading from '../../Constants/Loading';
 import {useDispatch, useSelector} from 'react-redux';
 import {addAllItems, addIAlltems} from '../../Redux/actions/itemActions';
@@ -40,6 +47,12 @@ const AllQuantityUnits = ({navigation}) => {
   const [updateModal, setUpdateModal] = useState(false);
   const [unit, setUnit] = useState({});
 
+  const [buttonLoading, setButtonLoading] = useState(false);
+
+  const [deleted, setDeleted] = useState(false);
+  const [activeQuantities, setActiveQuantities] = useState([]);
+  const [deletedQuantities, setDeletedQuantities] = useState([]);
+
   const dispatch = useDispatch();
 
   const showToast = message => {
@@ -55,7 +68,7 @@ const AllQuantityUnits = ({navigation}) => {
     setSearchQuery(name);
 
     let form = {
-      item_name: name,
+      name: name,
     };
     console.log('name: ', form);
 
@@ -66,9 +79,9 @@ const AllQuantityUnits = ({navigation}) => {
     }
 
     try {
-      const res = await axiosClient.post(`/item/get/by/name`, form);
+      const res = await axiosClient.post(`/quantity_unit/get/by/name`, form);
 
-      // console.log('AllItems res: ', res.data.result.length);
+      console.log('AllQuntityUnits res: ', res.data.result.length);
       setQuantityUnits(res.data.result);
     } catch (error) {
       if (error.response.data.message) {
@@ -84,7 +97,7 @@ const AllQuantityUnits = ({navigation}) => {
 
   const handleDeleteItem = async id => {
     console.log('handleDeleteItem: ', id);
-
+    setButtonLoading(true);
     try {
       const res = await axiosClient.delete(`/quantity_unit/delete/${id}`);
       if (res) {
@@ -97,6 +110,8 @@ const AllQuantityUnits = ({navigation}) => {
       for (let i in temp) {
         if (temp[i]._id === id) {
           temp[i].is_delete = true;
+          setDeletedQuantities([...deletedQuantities, temp[i]]);
+          setActiveQuantities(activeQuantities.filter(item => item._id !== id));
         }
       }
 
@@ -117,11 +132,14 @@ const AllQuantityUnits = ({navigation}) => {
       }
       console.log('error: ', error);
     }
+    setButtonLoading(false);
+
     setModalVisible(false);
   };
 
   const handleRestoreItem = async id => {
     console.log('handleRestoreItem: ', id);
+    setButtonLoading(true);
 
     try {
       const res = await axiosClient.put(`/quantity_unit/restore/${id}`);
@@ -134,6 +152,10 @@ const AllQuantityUnits = ({navigation}) => {
       for (let i in temp) {
         if (temp[i]._id == id) {
           temp[i].is_delete = false;
+          setActiveQuantities([...activeQuantities, temp[i]]);
+          setDeletedQuantities(
+            deletedQuantities.filter(item => item._id !== id),
+          );
         }
       }
 
@@ -154,6 +176,8 @@ const AllQuantityUnits = ({navigation}) => {
       }
       console.log('error: ', error);
     }
+    setButtonLoading(false);
+
     setModalVisible(false);
   };
 
@@ -172,6 +196,21 @@ const AllQuantityUnits = ({navigation}) => {
     setIsLoading(false);
   };
 
+  const handleSortDeleted = itemsData => {
+    //if (itemsData.length <= 0) return;
+    const temp = itemsData.filter(item => !item.is_delete);
+    const temp2 = itemsData.filter(item => item.is_delete);
+
+    setActiveQuantities(temp);
+    setDeletedQuantities(temp2);
+    setRenderKey(renderKey + 1);
+  };
+
+  useEffect(() => {
+    handleSortDeleted(QuantityUnits);
+    //console.log('calling handleSortDeleted');
+  }, [QuantityUnits]);
+
   useEffect(() => {
     getQuantityUnits();
   }, []);
@@ -187,20 +226,31 @@ const AllQuantityUnits = ({navigation}) => {
 
   const handleUpdateList = unit => {
     console.log('AllQuantityUnits handleUpdateList unit: ', unit);
-    let temp = originalQuantityUnits;
+    let temp = [...originalQuantityUnits];
+    let temp2 = [...QuantityUnits];
 
     for (let i in temp) {
       if (temp[i]._id == unit._id) {
         temp[i] = unit;
-        setQuantityUnits(temp);
         setOriginalQuantityUnits(temp);
-        setRenderKey(renderKey + 1);
+        break;
+      }
+    }
+
+    for (let i in temp2) {
+      if (temp2[i]._id == unit._id) {
+        temp2[i] = unit;
+        setQuantityUnits(temp2);
+        handleSortDeleted(temp2);
         return;
       }
     }
     temp.push(unit);
-    setQuantityUnits(temp);
+    temp2.push(unit);
+
     setOriginalQuantityUnits(temp);
+    setQuantityUnits(temp2);
+    //handleSortDeleted(temp2);
   };
 
   return (
@@ -230,6 +280,7 @@ const AllQuantityUnits = ({navigation}) => {
           </View>
           <View style={[ES.centerItems]}>
             <Btn
+              buttonLoading={buttonLoading}
               width={'50%'}
               method={() =>
                 itemToDeleteRestore.is_delete
@@ -253,32 +304,66 @@ const AllQuantityUnits = ({navigation}) => {
             onChangeText={text => getItemsByName(text)}
           />
         </View>
+        <View
+          style={[
+            ES.w100,
+            ES.flexRow,
+            ES.gap2,
+            ES.px1,
+            ES.py04,
+            ES.centerItems,
+          ]}>
+          <Btn
+            width={'45%'}
+            color={deleted ? primaryTextColor : null}
+            bgColor={deleted ? whiteButton : primaryButtonColor}
+            method={() => {
+              setDeleted(false), setRenderKey(renderKey + 1);
+            }}>
+            Active
+          </Btn>
+          <Btn
+            width={'45%'}
+            color={deleted ? null : primaryTextColor}
+            bgColor={!deleted ? whiteButton : primaryButtonColor}
+            method={() => {
+              setDeleted(true), setRenderKey(renderKey + 1);
+            }}>
+            Deleted
+          </Btn>
+        </View>
 
-        {isLoading == false && QuantityUnits.length > 0 && (
-          <View style={[ES.w100, ES.fx1]} key={renderKey}>
-            <FlatList
-              data={QuantityUnits}
-              contentContainerStyle={[s.list]}
-              renderItem={({item}) => (
-                <QuantityUnitCard
-                  item={item}
-                  handleDeleteItem={handleDeleteItem}
-                  handleRestoreItem={handleRestoreItem}
-                  openModal={openModal}
-                  handleUpdateList={handleUpdateList}
-                />
-              )}
-              refreshing={isLoading}
-              onRefresh={getQuantityUnits}
-              maxToRenderPerBatch={20}
-            />
-          </View>
-        )}
+        {isLoading == false &&
+          isLoading == false &&
+          ((deleted == false && activeQuantities.length > 0) ||
+            (deleted == true && deletedQuantities.length > 0)) && (
+            <View style={[ES.w100, ES.fx1]} key={renderKey}>
+              <FlatList
+                removeClippedSubviews={false}
+                data={deleted ? deletedQuantities : activeQuantities}
+                contentContainerStyle={[s.list]}
+                renderItem={({item, index}) => (
+                  <QuantityUnitCard
+                    item={item}
+                    handleDeleteItem={handleDeleteItem}
+                    handleRestoreItem={handleRestoreItem}
+                    openModal={openModal}
+                    handleUpdateList={handleUpdateList}
+                    index={index}
+                  />
+                )}
+                refreshing={isLoading}
+                onRefresh={getQuantityUnits}
+              />
+            </View>
+          )}
         <AddButton method={() => setAddModal(true)} />
 
         <View
           style={[
-            isLoading == false && QuantityUnits.length == 0
+            isLoading == false &&
+            ((deleted == false && activeQuantities.length <= 0) ||
+              (deleted == true && deletedQuantities.length <= 0))
               ? ES.dBlock
               : ES.dNone,
             ES.fx1,
@@ -309,7 +394,11 @@ const s = StyleSheet.create({
   header: StyleSheet.flatten([ES.px1, ES.flexRow, ES.centerItems, ES.w100]),
 
   textInput: StyleSheet.flatten([
-    {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
+    {
+      borderBottomWidth: 1,
+      borderColor: primaryInputBorderColor,
+      borderRadius: 5,
+    },
     ES.w90,
     ES.px1,
     ES.f16,
@@ -329,5 +418,5 @@ const s = StyleSheet.create({
     ES.pt06,
     ES.pe06,
   ]),
-  list: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 100}]),
+  list: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 140}]),
 });

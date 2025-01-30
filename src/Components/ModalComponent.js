@@ -18,6 +18,7 @@ import {
 } from '../Constants/Colours';
 import LinearGradient from 'react-native-linear-gradient';
 import {cancelIcon} from '../Constants/imagesAndIcons';
+import {CrossVectoreIcon} from '../Constants/VectoreIcons';
 
 const ModalComponent = ({children, isModalVisible, closeModal, height}) => {
   return (
@@ -34,10 +35,7 @@ const ModalComponent = ({children, isModalVisible, closeModal, height}) => {
                 <View style={[ES.fx1, ES.p06]}>{children}</View>
                 <View style={[s.modalClose]}>
                   <TouchableOpacity onPress={closeModal} style={[]}>
-                    <Image
-                      source={cancelIcon}
-                      style={[ES.hs30, ES.ws30, ES.objectFitContain]}
-                    />
+                    <CrossVectoreIcon />
                   </TouchableOpacity>
                 </View>
               </LinearGradient>
@@ -71,5 +69,13 @@ const s = StyleSheet.create({
 
     {borderWidth: 0.5, borderColor: '#000'},
   ]),
-  modalClose: StyleSheet.flatten([ES.fx0, ES.alignItemsEnd, ES.pt06, ES.pe06]),
+  modalClose: StyleSheet.flatten([
+    ES.fx0,
+    ES.absolute,
+    ES.alignItemsEnd,
+    ES.pt06,
+    ES.pe06,
+
+    ES.right0,
+  ]),
 });

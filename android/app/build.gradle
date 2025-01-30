@@ -74,6 +74,59 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     namespace "com.digitalregister"
+    packagingOptions {
+        exclude '**/node_modules_reactnative_libraries_newappscreen_components_logo.png'
+        exclude '**/node_modules_reactnavigation_drawer_lib_commonjs_views_assets_toggledrawericon.png'
+        exclude '**/node_modules_reactnavigation_elements_lib_commonjs_assets_backicon.png'
+        exclude '**/node_modules_reactnavigation_elements_lib_commonjs_assets_backiconmask.png'
+        exclude '**/node_modules_reactnavigation_elements_lib_commonjs_assets_clearicon.png'
+        exclude '**/node_modules_reactnavigation_elements_lib_commonjs_assets_closeicon.png'
+        exclude '**/node_modules_reactnavigation_elements_lib_commonjs_assets_searchicon.png'
+        exclude '**/src_assets_icons_addicon.png'
+        exclude '**/src_assets_icons_adminicon.png'
+        exclude '**/src_assets_icons_allitemsicon.png'
+        exclude '**/src_assets_icons_alllocationsicon.png'
+        exclude '**/src_assets_icons_allrecordsicon.png'
+        exclude '**/src_assets_icons_allusersicon.png'
+        exclude '**/src_assets_icons_backarrowicon.png'
+        exclude '**/src_assets_icons_calandericon.png'
+        exclude '**/src_assets_icons_cancelicon.png'
+        exclude '**/src_assets_icons_contactusicon.png'
+        exclude '**/src_assets_icons_deleteicon.png'
+        exclude '**/src_assets_icons_downarrowicon.png'
+        exclude '**/src_assets_icons_editusericon.png'
+        exclude '**/src_assets_icons_filtericon.png'
+        exclude '**/src_assets_icons_homeicon.png'
+        exclude '**/src_assets_icons_itemicon.png'
+        exclude '**/src_assets_icons_kgicon.png'
+        exclude '**/src_assets_icons_locationicon.png'
+        exclude '**/src_assets_icons_locationorangeicon.png'
+        exclude '**/src_assets_icons_locationpinicon.png'
+        exclude '**/src_assets_icons_logicon.png'
+        exclude '**/src_assets_icons_logoutdarkicon.png'
+        exclude '**/src_assets_icons_logouticon.png'
+        exclude '**/src_assets_icons_menuicon.png'
+        exclude '**/src_assets_icons_newitemicon.png'
+        exclude '**/src_assets_icons_newrecordicon.png'
+        exclude '**/src_assets_icons_newusericon.png'
+        exclude '**/src_assets_icons_penicon.png'
+        exclude '**/src_assets_icons_pickuppersonicon.png'
+        exclude '**/src_assets_icons_privacypolicyicon.png'
+        exclude '**/src_assets_icons_recordicon.png'
+        exclude '**/src_assets_icons_reseticon.png'
+        exclude '**/src_assets_icons_restoreicon.png'
+        exclude '**/src_assets_icons_termsandconditionsicon.png'
+        exclude '**/src_assets_icons_usericon.png'
+        exclude '**/src_assets_icons_usericonorange.png'
+        exclude '**/src_assets_icons_warehouseicon2.jpg'
+        exclude '**/src_assets_icons_warehouseicon3.png'
+        exclude '**/src_assets_icons_warehousenobgicon.png'
+        exclude '**/src_assets_icons_watchicon.png'
+        exclude '**/src_assets_icons_whitepenicon.png'
+        exclude '**/src_assets_images_designer.jpeg'
+        exclude '**/src_assets_images_nodata.png'
+        exclude '**/src_assets_locationhome.jpg'
+    }
     defaultConfig {
         applicationId "com.digitalregister"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -121,7 +174,7 @@ dependencies {
 }
 
 project.ext.vectoricons = [
-    iconFontNames: [ 'MaterialIcons.ttf', 'EvilIcons.ttf','AntDesign.ttf','Entypo.ttf','Feather.ttf','FontAwesome.ttf','FontAwesome5.ttf','FontAwesome6.ttf'] // Specify font files
+    iconFontNames: [ 'MaterialIcons.ttf', 'EvilIcons.ttf','AntDesign.ttf','Entypo.ttf','Feather.ttf','FontAwesome.ttf','FontAwesome5.ttf','FontAwesome6.ttf','MaterialCommunityIcons.ttf'] // Specify font files
 ]
 
 

@@ -20,6 +20,7 @@ import {
   RestoreVectoreIcon,
   TrashVectoreIcon,
 } from '../../../Constants/VectoreIcons';
+import * as Animatable from 'react-native-animatable';
 
 const LocationCard = ({
   item,
@@ -28,6 +29,7 @@ const LocationCard = ({
   openModal,
   image,
   handleUpdateLocationList,
+  index,
 }) => {
   const navigation = useNavigation();
   const [updateModal, setUpdateModal] = useState(false);
@@ -40,15 +42,18 @@ const LocationCard = ({
         handleUpdateLocationList={handleUpdateLocationList}
         closeModal={() => setUpdateModal(false)}
       />
-      
-      <View
+
+      <Animatable.View
+        animation={'fadeInLeftBig'}
+        duration={500}
+        delay={index * 100}
         style={[
           ES.w100,
           ES.flexRow,
           ES.gap2,
           ES.p1,
           ES.bRadius10,
-          ES.shadow4,
+          ES.shadow1,
           ES.bgLight,
           ES.fx0,
         ]}
@@ -73,20 +78,9 @@ const LocationCard = ({
             {item.is_delete ? <RestoreVectoreIcon /> : <TrashVectoreIcon />}
           </TouchableOpacity>
         </View>
-      </View>
+      </Animatable.View>
     </>
   );
 };
 
 export default LocationCard;
-{
-  /* <Image
-                source={restoreIcon}
-                style={[ES.hs30, ES.ws30, ES.objectFitContain]}
-              /> 
-              
-              <Image
-                source={deleteIcon}
-                style={[ES.hs30, ES.ws25, ES.objectFitContain]}
-              />*/
-}

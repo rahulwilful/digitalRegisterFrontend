@@ -12,7 +12,11 @@ import React, {useEffect, useState} from 'react';
 import ES from '../../../styles/ES';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
-import {backgroundColor, primaryColor} from '../../../Constants/Colours';
+import {
+  backgroundColor,
+  primaryColor,
+  primaryInputBorderColor,
+} from '../../../Constants/Colours';
 import axiosClient from '../../../../axiosClient';
 import {toggleLogin} from '../../../Redux/actions/action';
 import {Picker} from '@react-native-picker/picker';
@@ -40,6 +44,7 @@ const UpdateUser = ({
   const [role, setRole] = useState('');
   const [user, setUser] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [buttonLoading, setButtonLoading] = useState(false);
 
   const [storageLocations, setStorageLocations] = useState([]);
   const [roles, setRoles] = useState([]);
@@ -53,7 +58,7 @@ const UpdateUser = ({
   };
 
   useEffect(() => {
-    console.log('user: ', userData);
+    //console.log('user: ', userData);
     setName(userData?.name);
     setEmail(userData?.email);
     setPassword(userData?.password);
@@ -88,6 +93,7 @@ const UpdateUser = ({
 
   const handleUpdateUser = async () => {
     if (!verifyInputs()) return;
+    setButtonLoading(true);
 
     try {
       const form = {
@@ -118,6 +124,7 @@ const UpdateUser = ({
       }
     }
 
+    setButtonLoading(false);
     closeModal();
   };
 
@@ -229,8 +236,11 @@ const UpdateUser = ({
                 </View>
               )}
               <View style={[ES.mt2, ES.w100]}>
-                <Btn width={'100%'} method={handleUpdateUser}>
-                  <Text style={[ES.textLight, ES.fw700, ES.f20]}>Update </Text>
+                <Btn
+                  buttonLoading={buttonLoading}
+                  width={'100%'}
+                  method={handleUpdateUser}>
+                  <Text style={[ES.textLight, ES.fw700, ES.f20]}>Update</Text>
                 </Btn>
               </View>
             </View>
@@ -249,7 +259,11 @@ export default UpdateUser;
 const s = StyleSheet.create({
   container: StyleSheet.flatten([ES.centerItems, ES.w100]),
   input: StyleSheet.flatten([
-    {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
+    {
+      borderBottomWidth: 1,
+      borderColor: primaryInputBorderColor,
+      borderRadius: 5,
+    },
     ES.w100,
     ES.px1,
     ES.f16,

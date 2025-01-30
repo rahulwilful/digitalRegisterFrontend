@@ -23,7 +23,7 @@ const screenHeight = Dimensions.get('window').height;
 
 const Background = ({children}) => {
   return (
-    <View style={[ES.fx1, {backgroundColor: 'rgb(246, 195, 106)'}]}>
+    <View style={[ES.fx1, {backgroundColor: 'rgb(0, 184, 176)'}]}>
       <ImageBackground
         source={wareHouseImage}
         resizeMode="cover"

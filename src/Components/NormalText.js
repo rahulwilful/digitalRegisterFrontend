@@ -16,10 +16,14 @@ const NormalText = ({
   baseLine,
   centerItems,
   tempBorder,
+  px,
+  py,
 }) => {
   return (
     <Text
       style={[
+        py ? {paddingVertical: py} : null,
+        px ? {paddingHorizontal: px} : null,
         ES.fx0,
         tempBorder ? ES.tempBorder : null,
         size ? {fontSize: size} : null,

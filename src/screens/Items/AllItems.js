@@ -11,7 +11,7 @@ import {
   Touchable,
   TouchableOpacity,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import axiosClient from '../../../axiosClient';
 import HeadingText from '../../Components/HeadingText';
 import ES from '../../styles/ES';
@@ -19,8 +19,10 @@ import ItemCard from './components/ItemCard';
 import {
   backgroundColor,
   headerBackgroundColor,
+  primaryButtonColor,
   primaryColor,
   primaryDarkColor,
+  primaryInputBorderColor,
   primaryTextColor,
   whiteButton,
 } from '../../Constants/Colours';
@@ -38,6 +40,9 @@ import Btn from '../../Components/Btn';
 import AddButton from '../../Components/AddButton';
 import NormalText from '../../Components/NormalText';
 import UpdateItem from './components/UpdateItem';
+import {DownArrowVectoreIcon} from '../../Constants/VectoreIcons';
+import AddItem from './components/AddItem';
+import {useFocusEffect} from '@react-navigation/native';
 
 const AllItems = ({navigation}) => {
   const reduxItems = useSelector(state => state.items);
@@ -56,9 +61,20 @@ const AllItems = ({navigation}) => {
   const [updateModal, setUpdateModal] = useState(false);
   const [quantityModal, setQuantityModal] = useState(false);
 
+  const [deleted, setDeleted] = useState(false);
+  const [activeItems, setActiveItems] = useState([]);
+  const [deletedItems, setDeleteItems] = useState([]);
+  const [buttonLoading, setButtonLoading] = useState(false);
+
   const [itemToDeleteRestore, setItemToDeleteRestore] = useState({});
 
-  const dispatch = useDispatch();
+  useFocusEffect(
+    useCallback(() => {
+      setDeleted(false);
+      setSearchQuery('');
+      getItems();
+    }, []),
+  );
 
   const showToast = message => {
     ToastAndroid.showWithGravity(
@@ -87,14 +103,15 @@ const AllItems = ({navigation}) => {
       const res = await axiosClient.post(`/item/get/by/name`, form);
 
       // console.log('AllItems res: ', res.data.result.length);
+
       setItems(res.data.result);
     } catch (error) {
+      setItems([]);
       if (error.response.data.message) {
         showToast(error.response.data.message);
       } else {
         showToast('Something went wrong');
       }
-      setItems([]);
       console.log('error: ', error);
     }
     setIsLoading(false);
@@ -102,7 +119,7 @@ const AllItems = ({navigation}) => {
 
   const handleDeleteItem = async id => {
     console.log('handleDeleteItem: ', id);
-
+    setButtonLoading(true);
     try {
       const res = await axiosClient.delete(`/item/${id}`);
       if (res) {
@@ -112,14 +129,16 @@ const AllItems = ({navigation}) => {
       console.log('res.data: ', res.data);
 
       let temp = items;
+      let temp2 = originalItems;
       for (let i in temp) {
         if (temp[i]._id === id) {
           temp[i].is_delete = true;
+          setDeleteItems([...deletedItems, temp[i]]);
+          setActiveItems(activeItems.filter(item => !item.is_delete));
         }
       }
 
       setItems(temp);
-      let temp2 = originalItems;
       for (let i in temp2) {
         if (temp2[i]._id === id) {
           temp2[i].is_delete = true;
@@ -135,11 +154,14 @@ const AllItems = ({navigation}) => {
       }
       console.log('error: ', error);
     }
+    setButtonLoading(false);
+
     setModalVisible(false);
   };
 
   const handleRestoreItem = async id => {
     console.log('handleRestoreItem: ', id);
+    setButtonLoading(true);
 
     try {
       const res = await axiosClient.put(`/item/restore/${id}`);
@@ -151,6 +173,8 @@ const AllItems = ({navigation}) => {
       for (let i in temp) {
         if (temp[i]._id === id) {
           temp[i].is_delete = false;
+          setActiveItems([...activeItems, temp[i]]);
+          setDeleteItems(deletedItems.filter(item => item.is_delete));
         }
       }
 
@@ -171,16 +195,19 @@ const AllItems = ({navigation}) => {
       }
       console.log('error: ', error);
     }
+    setButtonLoading(false);
+
     setModalVisible(false);
   };
 
   const getItems = async () => {
-    console.log('getItems: ');
+    //console.log('getItems: ');
     setSearchQuery('');
     setIsLoading(true);
     try {
       const res = await axiosClient.get(`/item/getall`);
-      console.log('AllItems res: ', res.data.result);
+      // console.log('AllItems res: ', res.data.result);
+
       setItems(res.data.result);
       setOriginalItems(res.data.result);
       useDispatch(addAllItems(res.data.result));
@@ -190,7 +217,23 @@ const AllItems = ({navigation}) => {
     setIsLoading(false);
   };
 
+  const handleSortDeleted = itemsData => {
+    //if (itemsData.length <= 0) return;
+    const temp = itemsData.filter(item => !item.is_delete);
+    const temp2 = itemsData.filter(item => item.is_delete);
+
+    setActiveItems(temp);
+    setDeleteItems(temp2);
+    setRenderKey(renderKey + 1);
+  };
+
   useEffect(() => {
+    handleSortDeleted(items);
+    //console.log('calling handleSortDeleted');
+  }, [items]);
+
+  useEffect(() => {
+    console.log('AllItems');
     getItems();
     getQuantityUnits();
   }, []);
@@ -202,55 +245,6 @@ const AllItems = ({navigation}) => {
   const openModal = item => {
     setItemToDeleteRestore(item);
     setModalVisible(true);
-  };
-
-  const navigateToAddNewItem = () => {
-    navigation.navigate('newItem');
-  };
-
-  const verifyInputs = () => {
-    if (!itemName) {
-      showToast('Please enter item name');
-      return false;
-    }
-
-    if (!quantityUnit) {
-      showToast('Please enter quantity unit');
-      return false;
-    }
-
-    return true;
-  };
-
-  const handleAddItem = async () => {
-    if (!verifyInputs()) return;
-
-    try {
-      const form = {
-        item_name: itemName,
-        quantity_unit: quantityUnit,
-      };
-
-      const res = await axiosClient.post('/item/add', form);
-
-      if (res) {
-        showToast('Item added successfully');
-        let tempItems = originalItems;
-        tempItems.push(res.data.result);
-        setItems(tempItems);
-        setOriginalItems(tempItems);
-      }
-    } catch (error) {
-      if (error.response?.status === 409) {
-        showToast(error.response.data.message);
-      } else if (error.response?.status === 403) {
-        showToast(error.response.data.message);
-      } else {
-        showToast('Something went wrong');
-        console.log('Unexpected error:', error);
-      }
-    }
-    setAddModal(false);
   };
 
   const getQuantityUnits = async () => {
@@ -266,16 +260,34 @@ const AllItems = ({navigation}) => {
 
   const handleUpdateItemList = itemData => {
     console.log('handleUpdateItemList: ', itemData);
-    let temp = originalItems;
+    let temp = [...originalItems];
+    let temp2 = [...items];
     for (let i in temp) {
       if (temp[i]._id === itemData._id) {
         temp[i] = itemData;
+        setOriginalItems(temp);
+
         break;
       }
     }
-    setItems(temp);
+
+    for (let i in temp2) {
+      if (temp2[i]._id === itemData._id) {
+        temp2[i] = itemData;
+        setItems(temp2);
+
+        handleSortDeleted(temp2);
+        return;
+      }
+    }
+
+    temp.push(itemData);
+    temp2.push(itemData);
+
+    setItems(temp2);
     setOriginalItems(temp);
-    setRenderKey(renderKey + 1);
+
+    handleSortDeleted(temp2);
   };
 
   return (
@@ -347,6 +359,7 @@ const AllItems = ({navigation}) => {
           </View>
           <View style={[ES.centerItems]}>
             <Btn
+              buttonLoading={buttonLoading}
               width={'50%'}
               method={() =>
                 itemToDeleteRestore.is_delete
@@ -361,58 +374,11 @@ const AllItems = ({navigation}) => {
         </View>
       </ModalComponent>
 
-      <ModalComponent
-        isModalVisible={addModal}
+      <AddItem
+        addModal={addModal}
         closeModal={() => setAddModal(false)}
-        height={'40%'}>
-        <View style={[ES.justifyContentSpaceEvenly, ES.fx1, ES.gap1]}>
-          <View style={[s.card]}>
-            <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
-              Add Item
-            </HeadingText>
-
-            <TextInput
-              style={[s.input]}
-              placeholder="Item Name"
-              value={itemName}
-              onChangeText={setItemName}
-            />
-            <View style={[ES.w100]}>
-              <View style={[ES.w100, ES.fx0, ES.centerItems]}>
-                <TouchableOpacity
-                  onPress={() => setQuantityModal(true)}
-                  style={[
-                    ES.flexRow,
-                    ES.justifyContentSpaceBetween,
-                    ES.alignItemsCenter,
-                    ES.py06,
-                    ES.ps06,
-                    ES.bRadius5,
-                    s.input,
-                  ]}>
-                  <NormalText color={'rgb(68, 64, 64)'}>
-                    <Text
-                      style={[
-                        !quantityUnit ? ES.placeHolderText : null,
-                        ES.capitalize,
-                      ]}>
-                      {quantityUnit ? quantityUnit : 'Select Quantity Unit'}
-                    </Text>
-                  </NormalText>
-                  <Image
-                    source={downArrowIcon}
-                    style={[ES.hs11, ES.objectFitContain]}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <Btn width={'90%'} method={handleAddItem}>
-              <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
-            </Btn>
-          </View>
-        </View>
-      </ModalComponent>
+        handleUpdateItemList={handleUpdateItemList}
+      />
 
       <View style={[ES.fx1]}>
         <View style={[s.header, ES.mt1]}>
@@ -423,33 +389,71 @@ const AllItems = ({navigation}) => {
             onChangeText={text => getItemsByName(text)}
           />
         </View>
+        <View
+          style={[
+            ES.w100,
+            ES.flexRow,
+            ES.gap2,
+            ES.px1,
+            ES.py04,
+            ES.centerItems,
+          ]}>
+          <Btn
+            width={'45%'}
+            color={deleted ? primaryTextColor : null}
+            bgColor={deleted ? whiteButton : primaryButtonColor}
+            method={() => {
+              setDeleted(false), setRenderKey(renderKey + 1);
+            }}>
+            Active
+          </Btn>
+          <Btn
+            width={'45%'}
+            color={deleted ? null : primaryTextColor}
+            bgColor={!deleted ? whiteButton : primaryButtonColor}
+            method={() => {
+              setDeleted(true), setRenderKey(renderKey + 1);
+            }}>
+            Deleted
+          </Btn>
+        </View>
 
-        {isLoading == false && items.length > 0 && (
-          <View style={[ES.w100, ES.fx1]} key={renderKey}>
-            <FlatList
-              data={items}
-              contentContainerStyle={[s.list]}
-              renderItem={({item}) => (
-                <ItemCard
-                  item={item}
-                  handleDeleteItem={handleDeleteItem}
-                  handleRestoreItem={handleRestoreItem}
-                  openModal={openModal}
-                  handleUpdateItemList={handleUpdateItemList}
-                />
-              )}
-              refreshing={isLoading}
-              onRefresh={getItems}
-              maxToRenderPerBatch={20}
-            />
-          </View>
-        )}
+        {isLoading == false &&
+          ((deleted == false && activeItems.length > 0) ||
+            (deleted == true && deletedItems.length > 0)) && (
+            <View style={[ES.w100, ES.fx1]} key={renderKey}>
+              <FlatList
+                removeClippedSubviews={false}
+                data={deleted ? deletedItems : activeItems}
+                contentContainerStyle={[s.list]}
+                renderItem={({item, index}) => (
+                  <View style={[]}>
+                    <ItemCard
+                      item={item}
+                      index={index}
+                      handleDeleteItem={handleDeleteItem}
+                      handleRestoreItem={handleRestoreItem}
+                      openModal={openModal}
+                      handleUpdateItemList={handleUpdateItemList}
+                    />
+                  </View>
+                )}
+                refreshing={isLoading}
+                onRefresh={getItems}
+                maxToRenderPerBatch={20}
+              />
+            </View>
+          )}
 
         <AddButton method={() => setAddModal(true)} />
 
         <View
           style={[
-            isLoading == false && items.length == 0 ? ES.dBlock : ES.dNone,
+            isLoading == false &&
+            ((deleted == false && activeItems.length <= 0) ||
+              (deleted == true && deletedItems.length <= 0))
+              ? ES.dBlock
+              : ES.dNone,
             ES.fx1,
             ES.gap2,
           ]}>
@@ -478,7 +482,11 @@ const s = StyleSheet.create({
   header: StyleSheet.flatten([ES.px1, ES.flexRow, ES.centerItems, ES.w100]),
 
   textInput: StyleSheet.flatten([
-    {borderBottomWidth: 1, borderColor: primaryDarkColor, borderRadius: 5},
+    {
+      borderBottomWidth: 1,
+      borderColor: primaryInputBorderColor,
+      borderRadius: 5,
+    },
     ES.w90,
     ES.px1,
     ES.f16,
@@ -498,9 +506,13 @@ const s = StyleSheet.create({
     ES.pt06,
     ES.pe06,
   ]),
-  list: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 100}]),
+  list: StyleSheet.flatten([ES.px1, ES.gap2, ES.mt1, {paddingBottom: 140}]),
   input: StyleSheet.flatten([
-    {borderBottomWidth: 1, borderColor: primaryDarkColor, borderRadius: 5},
+    {
+      borderBottomWidth: 1,
+      borderColor: primaryInputBorderColor,
+      borderRadius: 5,
+    },
     ES.w90,
     ES.f16,
   ]),

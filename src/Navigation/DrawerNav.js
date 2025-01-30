@@ -28,7 +28,7 @@ import {
 
 import Tabs from './Tabs';
 import AddUser from '../screens/Users/components/AddUser';
-import AddItem from '../screens/Items/AddItem';
+import AddItem from '../screens/Items/components/AddItem';
 import AddRecord from '../screens/WareHouse/AddRecord';
 import {ItemStack, HomeStack, UserStack, AccountStack} from './StackNav';
 
@@ -46,7 +46,13 @@ import PrivacyPolicy from '../screens/Home/PrivacyPolicy';
 import TearmsAndConditions from '../screens/Home/TearmsAndConditions';
 import ContactUs from '../screens/Home/ContactUs';
 import Icons from 'react-native-vector-icons/MaterialIcons';
-import {LockVectoreIcon, UserVectoreIcon} from '../Constants/VectoreIcons';
+import {
+  AccountSettingsVectoreIcon,
+  LockVectoreIcon,
+  MailVectoreIcon,
+  TextVectoreIcon,
+  UserVectoreIcon,
+} from '../Constants/VectoreIcons';
 
 const Drawer = createDrawerNavigator();
 const screenHeight = Dimensions.get('window').height;
@@ -76,27 +82,34 @@ const DrawerContent = ({}) => {
               ES.alignItemsCenter,
               {borderBottomWidth: 1, borderColor: 'rgba(0,0,0,0.1)'},
             ]}>
-            <TouchableOpacity onPress={() => navigation.navigate('account')}>
-              {/*  <Image
-                source={userIcon}
-                style={[ES.hs40, ES.ws40, ES.objectFitContain]}
-              /> */}
+            <View>
               <UserVectoreIcon />
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('account')}
-              style={[]}>
+            </View>
+            <View style={[]}>
               <HeadingText size={17}>{user?.name}</HeadingText>
               <NormalText>{user?.email}</NormalText>
-            </TouchableOpacity>
+            </View>
           </View>
           <View style={[]}></View>
+          <View style={[]}>
+            <TouchableOpacity onPress={() => navigation.navigate('account')}>
+              <View style={[ES.py04]}>
+                <View style={[ES.flexRow, ES.gap3, ES.alignItemsCenter]}>
+                  <AccountSettingsVectoreIcon size={34} />
+                  {/* <Image source={privacyPolicyIcon} style={[s.icon]} /> */}
+                  <NormalText textCenter color={lightDarkColor} size={fontSize}>
+                    Account Settings
+                  </NormalText>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </View>
           <View style={[]}>
             <TouchableOpacity
               onPress={() => navigation.navigate('privacyPolicy')}>
               <View style={[ES.py04]}>
                 <View style={[ES.flexRow, ES.gap3, ES.alignItemsCenter]}>
-                  <LockVectoreIcon />
+                  <LockVectoreIcon size={30} />
                   {/* <Image source={privacyPolicyIcon} style={[s.icon]} /> */}
                   <NormalText textCenter color={lightDarkColor} size={fontSize}>
                     Privacy Policy
@@ -110,7 +123,8 @@ const DrawerContent = ({}) => {
               onPress={() => navigation.navigate('tearmsAndConditions')}>
               <View style={[ES.py04]}>
                 <View style={[ES.flexRow, ES.gap3, ES.alignItemsCenter]}>
-                  <Image source={tearmsAndConditionsIcon} style={[s.icon]} />
+                  <TextVectoreIcon size={30} />
+                  {/*  <Image source={tearmsAndConditionsIcon} style={[s.icon]} /> */}
                   <NormalText textCenter color={lightDarkColor} size={fontSize}>
                     Tearms & Conditions
                   </NormalText>
@@ -122,7 +136,8 @@ const DrawerContent = ({}) => {
             <TouchableOpacity onPress={() => navigation.navigate('contactUs')}>
               <View style={[ES.py04]}>
                 <View style={[ES.flexRow, ES.gap3, ES.alignItemsCenter]}>
-                  <Image source={contactUsIcon} style={[s.icon]} />
+                  <MailVectoreIcon size={30} />
+
                   <NormalText textCenter color={lightDarkColor} size={fontSize}>
                     Contact Us
                   </NormalText>

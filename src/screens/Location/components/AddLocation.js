@@ -16,7 +16,11 @@ import React, {useEffect, useState} from 'react';
 import ES from '../../../styles/ES';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
-import {backgroundColor, primaryColor} from '../../../Constants/Colours';
+import {
+  backgroundColor,
+  primaryColor,
+  primaryInputBorderColor,
+} from '../../../Constants/Colours';
 import axiosClient from '../../../../axiosClient';
 import {toggleLogin} from '../../../Redux/actions/action';
 import {Picker} from '@react-native-picker/picker';
@@ -26,6 +30,7 @@ import Btn from '../../../Components/Btn';
 import {locationIcon, userIconOrange} from '../../../Constants/imagesAndIcons';
 import KeyboardAvoidingComponent from '../../../Components/KeyboardAvoidingComponent';
 import FullModalComponent from '../../../Components/FullModalComponent';
+import axios from 'axios';
 
 const AddLocation = ({addModal, closeModal, handleUpdateLocationList}) => {
   const [name, setName] = useState('');
@@ -41,6 +46,8 @@ const AddLocation = ({addModal, closeModal, handleUpdateLocationList}) => {
   const [storageLocations, setStorageLocations] = useState([]);
   const [roles, setRoles] = useState([]);
 
+  const [buttonLoading, setButtonLoading] = useState(false);
+
   const isLoggedIn = useSelector(state => state.auth);
   const dispatch = useDispatch();
 
@@ -48,6 +55,27 @@ const AddLocation = ({addModal, closeModal, handleUpdateLocationList}) => {
     const token = await AsyncStorage.getItem('token');
     if (token) dispatch(toggleLogin(true));
   };
+
+  const getCityAndState = async () => {
+    try {
+      const cityAndStateRes = await axios.get(
+        `https://api.postalpincode.in/pincode/${pinCode}`,
+      );
+      console.log('cityAndStateRes: ', cityAndStateRes.data[0].PostOffice[0]);
+      setCity(cityAndStateRes.data[0].PostOffice[0].Name);
+      setState(cityAndStateRes.data[0].PostOffice[0].State);
+      const city = cityAndStateRes.data[0].PostOffice[0].Name;
+      const state = cityAndStateRes.data[0].PostOffice[0].State;
+      const district = cityAndStateRes.data[0].PostOffice[0].District;
+      setAddress(`${city}, ${state}, ${district}`);
+    } catch (error) {
+      console.log('Error fetching city and state:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (pinCode && pinCode.length > 5) getCityAndState();
+  }, [pinCode]);
 
   const getData = async () => {
     try {
@@ -73,7 +101,7 @@ const AddLocation = ({addModal, closeModal, handleUpdateLocationList}) => {
 
   const handleAddLocation = async () => {
     if (!verifyInputs()) return;
-
+    setButtonLoading(true);
     try {
       const form = {
         name: name,
@@ -92,6 +120,11 @@ const AddLocation = ({addModal, closeModal, handleUpdateLocationList}) => {
         handleUpdateLocationList(res.data.result);
       }
       closeModal();
+      setName('');
+      setCity('');
+      setState('');
+      setAddress('');
+      setPinCode('');
     } catch (error) {
       if (error.response?.status === 409) {
         showToast(error.response.data.message);
@@ -101,6 +134,7 @@ const AddLocation = ({addModal, closeModal, handleUpdateLocationList}) => {
         console.log('Unexpected error:', error);
       }
     }
+    setButtonLoading(false);
   };
 
   const verifyInputs = () => {
@@ -128,6 +162,10 @@ const AddLocation = ({addModal, closeModal, handleUpdateLocationList}) => {
       showToast('Please enter pin code');
       return false;
     }
+    if (pinCode.length < 6) {
+      showToast('Please enter valide pincode');
+      return false;
+    }
 
     return true;
   };
@@ -143,19 +181,19 @@ const AddLocation = ({addModal, closeModal, handleUpdateLocationList}) => {
   return (
     <>
       <FullModalComponent
-        height={'60%'}
+        height={'53%'}
         isModalVisible={addModal}
         closeModal={closeModal}>
         <KeyboardAvoidingComponent bg={false}>
           <View style={[s.container]}>
             <View style={[s.card]}>
-              {/*  <View style={[s.imageContainer]}>
-                <Image
-                  source={locationIcon}
-                  style={[ES.hs100, ES.objectFitContain]}
-                />
-              </View> */}
-
+              <TextInput
+                style={[s.input]}
+                placeholder="Pin Code"
+                keyboardType="phone-pad"
+                value={pinCode}
+                onChangeText={setPinCode}
+              />
               <TextInput
                 style={[s.input]}
                 placeholder="Warehouse Name"
@@ -180,15 +218,12 @@ const AddLocation = ({addModal, closeModal, handleUpdateLocationList}) => {
                 value={address}
                 onChangeText={setAddress}
               />
-              <TextInput
-                style={[s.input]}
-                placeholder="Pin Code"
-                keyboardType="phone-pad"
-                value={pinCode}
-                onChangeText={setPinCode}
-              />
+
               <View style={[ES.w100, ES.fx0, ES.centerItems, ES.mt2]}>
-                <Btn width={'90%'} method={handleAddLocation}>
+                <Btn
+                  buttonLoading={buttonLoading}
+                  width={'90%'}
+                  method={handleAddLocation}>
                   <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
                 </Btn>
               </View>
@@ -205,7 +240,11 @@ export default AddLocation;
 const s = StyleSheet.create({
   container: StyleSheet.flatten([ES.centerItems, ES.w100]),
   input: StyleSheet.flatten([
-    {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
+    {
+      borderBottomWidth: 1,
+      borderColor: primaryInputBorderColor,
+      borderRadius: 5,
+    },
     ES.w90,
     ES.px1,
     ES.f16,

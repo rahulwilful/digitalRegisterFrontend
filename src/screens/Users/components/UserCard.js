@@ -14,7 +14,10 @@ import {
   PenVectoreIcon,
   RestoreVectoreIcon,
   TrashVectoreIcon,
+  TruckVectoreIcon,
+  UserCircleVectoreIcon,
 } from '../../../Constants/VectoreIcons';
+import * as Animatable from 'react-native-animatable';
 
 import ES from '../../../styles/ES';
 import NormalText from '../../../Components/NormalText';
@@ -24,7 +27,7 @@ import {useNavigation} from '@react-navigation/native';
 import {Screen} from 'react-native-screens';
 import UpdateUser from './UpdateUser';
 
-const UserCard = ({item, handleSetUpadateUserList, openModal}) => {
+const UserCard = ({item, handleSetUpadateUserList, openModal, index}) => {
   const navigation = useNavigation();
   const [updateModal, setUpdateModal] = useState(false);
   const [updateUser, setUpdateUser] = useState({});
@@ -40,27 +43,27 @@ const UserCard = ({item, handleSetUpadateUserList, openModal}) => {
         closeModal={() => setUpdateModal(false)}
         handleSetUpadateUserList={updateList}
       />
-      <View
+      <Animatable.View
+        animation={'fadeInLeftBig'}
+        duration={500}
+        delay={index * 100}
         style={[
           ES.w100,
           ES.flexRow,
           ES.gap2,
           ES.p1,
           ES.bRadius10,
-          ES.shadow4,
+          ES.shadow1,
           ES.bgLight,
           ES.fx0,
         ]}
         key={item.is_delete}>
         <View style={[ES.fx0, ES.centerItems]}>
-          <Image
-            source={
-              item.role_type.value == 'pickup_boy'
-                ? pickupPersonIcon
-                : userIconOrange
-            }
-            style={[ES.hs50, ES.ws50]}
-          />
+          {item.role_type.value == 'pickup_boy' ? (
+            <TruckVectoreIcon />
+          ) : (
+            <UserCircleVectoreIcon />
+          )}
         </View>
         <View style={[ES.flexColumn, ES.justifyContentCenter, ES.fx1]}>
           <HeadingText size={18}>{item.name}</HeadingText>
@@ -90,7 +93,7 @@ const UserCard = ({item, handleSetUpadateUserList, openModal}) => {
             {item.is_delete ? <RestoreVectoreIcon /> : <TrashVectoreIcon />}
           </TouchableOpacity>
         </View>
-      </View>
+      </Animatable.View>
     </>
   );
 };

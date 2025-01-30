@@ -21,7 +21,7 @@ const KeyboardAvoidingComponent = ({children, py, tempBorder, bg}) => {
     <KeyboardAvoidingView
       style={[
         ES.fx1,
-        bg === false
+        bg == false
           ? null
           : bg
           ? {backgroundColor: bg}

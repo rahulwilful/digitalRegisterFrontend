@@ -20,8 +20,15 @@ import {
   RestoreVectoreIcon,
   TrashVectoreIcon,
 } from '../../../Constants/VectoreIcons';
+import * as Animatable from 'react-native-animatable';
 
-const QuantityUnitCard = ({item, openModal, image, handleUpdateList}) => {
+const QuantityUnitCard = ({
+  item,
+  openModal,
+  image,
+  handleUpdateList,
+  index,
+}) => {
   const navigation = useNavigation();
   const [updateModal, setUpdateModal] = useState(false);
   const [unit, setUnit] = useState({});
@@ -34,14 +41,17 @@ const QuantityUnitCard = ({item, openModal, image, handleUpdateList}) => {
         closeModal={() => setUpdateModal(false)}
         handleUpdateList={handleUpdateList}
       />
-      <View
+      <Animatable.View
+        animation={'fadeInLeftBig'}
+        duration={500}
+        delay={index * 100}
         style={[
           ES.w100,
           ES.flexRow,
           ES.gap2,
           ES.p1,
           ES.bRadius10,
-          ES.shadow4,
+          ES.shadow1sign,
           ES.bgLight,
           ES.fx0,
         ]}
@@ -65,7 +75,7 @@ const QuantityUnitCard = ({item, openModal, image, handleUpdateList}) => {
             {item.is_delete ? <RestoreVectoreIcon /> : <TrashVectoreIcon />}
           </TouchableOpacity>
         </View>
-      </View>
+      </Animatable.View>
     </>
   );
 };

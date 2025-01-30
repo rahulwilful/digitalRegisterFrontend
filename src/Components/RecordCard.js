@@ -24,6 +24,7 @@ import {
 import {
   backgroundColor,
   lightTextColor,
+  primaryColor,
   primaryColorGreen,
   primaryTextColor,
   whiteTextColor,
@@ -32,11 +33,12 @@ import NormalText from './NormalText';
 import LinearGradient from 'react-native-linear-gradient';
 import HeadingText from './HeadingText';
 import {useNavigation} from '@react-navigation/native';
+import * as Animatable from 'react-native-animatable';
 
 const RecordCard = props => {
   const navigation = useNavigation();
   return (
-    <View style={[ES.w100]}>
+    <Animatable.View style={[ES.w100]}>
       <View style={[ES.w100]}>
         <LinearGradient
           colors={['#fff', '#fffaf7']}
@@ -133,7 +135,7 @@ const RecordCard = props => {
                   </NormalText>
 
                   <NormalText color={whiteTextColor} size={12}>
-                    : {subItem.quantity} {subItem.item_id.quantity_unit}
+                    : {subItem.quantity} {subItem.item_id.quantity_unit.name}
                   </NormalText>
                 </View>
               )}
@@ -154,7 +156,7 @@ const RecordCard = props => {
           </View>
         </LinearGradient>
       </View>
-    </View>
+    </Animatable.View>
   );
 };
 
@@ -252,7 +254,7 @@ const s = StyleSheet.create({
     ES.flexRow,
     ES.px08,
 
-    {backgroundColor: primaryColorGreen, borderRadius: 20, paddingVertical: 1},
+    {backgroundColor: primaryColor, borderRadius: 20, paddingVertical: 1},
   ]),
   borderBottom: {
     borderBottomWidth: 0.4,

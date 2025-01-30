@@ -21,6 +21,7 @@ import {
   image,
   locationIcon,
   wareHouseIcon,
+  wareHouseIcon4,
 } from '../../Constants/imagesAndIcons';
 import {useDispatch} from 'react-redux';
 import {setHeader} from '../../Redux/actions/action';
@@ -105,8 +106,16 @@ const WareHouses = ({navigation}) => {
                     navigation.navigate('stackRecord', {locationId: item._id})
                   }
                   style={[s.listContainer]}>
-                  <View style={[ES.h100, ES.ws90, ES.overflowHidden]}>
-                    <Image source={wareHouseIcon} style={[ES.hs90, ES.ws90]} />
+                  <View
+                    style={[
+                      ES.hs58,
+                      ES.ws52,
+                      ES.overflowHidden,
+
+                      ES.fx0,
+                      ES.centerItems,
+                    ]}>
+                    <Image source={wareHouseIcon4} style={[ES.hs50, ES.ws50]} />
                   </View>
 
                   <View style={[ES.fx1, ES.py06]}>
@@ -185,17 +194,19 @@ const s = StyleSheet.create({
   ]),
   flatList: StyleSheet.flatten([
     ES.gap2,
-    ES.py2,
+    ES.pt2,
+    {paddingBottom: 100},
     ES.w100,
     ES.fx0,
     ES.alignItemsCenter,
   ]),
   listContainer: StyleSheet.flatten([
     ES.bRadius12,
-    ES.shadow5,
+    ES.shadow1,
     ES.bgLight,
     ES.flexRow,
     ES.pe1,
+    ES.ps02,
     ES.overflowHidden,
 
     ES.gap2,

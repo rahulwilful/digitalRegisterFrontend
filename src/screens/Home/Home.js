@@ -37,6 +37,8 @@ import {setHeader} from '../../Redux/actions/action';
 import {addUser} from '../../Redux/actions/userActions';
 import Card from '../../Components/Card';
 import Loading from '../../Constants/Loading';
+import {HomeVectoreIcon, WeightVectoreIcon} from '../../Constants/VectoreIcons';
+import * as Animatable from 'react-native-animatable';
 
 const Home = ({navigation}) => {
   const [locations, setLocations] = useState([]);
@@ -111,33 +113,47 @@ const Home = ({navigation}) => {
               ES.gap2,
               ES.py2,
             ]}>
-            <TouchableOpacity
-              onPress={() => {
-                displaySuperAdminOptions
-                  ? navigation.navigate('stackWareHouses')
-                  : navigation.navigate('stackRecord', {
-                      locationId: currentUser.storage_location_id._id,
-                    });
-              }}>
-              <Card image={allRecordsIcon}>All Records</Card>
-            </TouchableOpacity>
+            <Animatable.View
+              animation={'fadeInLeftBig'}
+              duration={500}
+              delay={ 100}
+              style={[ES.w100, ES.fx0, ES.gap2]}>
+              <TouchableOpacity
+                onPress={() => {
+                  displaySuperAdminOptions
+                    ? navigation.navigate('stackWareHouses')
+                    : navigation.navigate('stackRecord', {
+                        locationId: currentUser.storage_location_id._id,
+                      });
+                }}>
+                <Card image={allRecordsIcon}>All Records</Card>
+              </TouchableOpacity>
+            </Animatable.View>
 
             {displayAdminOptions && (
-              <View style={[ES.w100, ES.fx0, ES.gap2]}>
+              <Animatable.View
+                animation={'fadeInLeftBig'}
+                duration={500}
+                delay={ 200}
+                style={[ES.w100, ES.fx0, ES.gap2]}>
                 <TouchableOpacity
                   onPress={() => navigation.navigate('stackAddRecord')}>
                   <Card image={newRecordIcon}>New Record</Card>
                 </TouchableOpacity>
-              </View>
+              </Animatable.View>
             )}
 
             {displaySuperAdminOptions && (
-              <View style={[ES.w100, ES.fx0, ES.gap2]}>
+              <Animatable.View
+                animation={'fadeInLeftBig'}
+                duration={500}
+                delay={ 200}
+                style={[ES.w100, ES.fx0, ES.gap2]}>
                 <TouchableOpacity
                   onPress={() => navigation.navigate('stackAllQuantityUnits')}>
                   <Card image={kgIcon}>All Quantity Units</Card>
                 </TouchableOpacity>
-              </View>
+              </Animatable.View>
             )}
           </View>
         </View>

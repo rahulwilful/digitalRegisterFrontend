@@ -16,6 +16,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {
   backgroundColor,
   primaryColor,
+  primaryInputBorderColor,
   primaryTextColor,
   whiteButton,
 } from '../../../Constants/Colours';
@@ -45,6 +46,7 @@ const AddQuentityUnit = ({addModal, closeModal, handleUpdateList}) => {
   const [roles, setRoles] = useState([]);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [buttonLoading, setButtonLoading] = useState(false);
 
   const isLoggedIn = useSelector(state => state.auth);
   const dispatch = useDispatch();
@@ -64,7 +66,7 @@ const AddQuentityUnit = ({addModal, closeModal, handleUpdateList}) => {
 
   const handleAddQuantityUnit = async () => {
     if (!verifyInputs()) return;
-
+    setButtonLoading(true);
     try {
       const form = {
         name: name,
@@ -75,6 +77,7 @@ const AddQuentityUnit = ({addModal, closeModal, handleUpdateList}) => {
       if (res) {
         handleUpdateList(res.data.result);
         showToast('Quantity unit added successfully');
+        setName('');
       }
     } catch (error) {
       if (error.response?.status === 409) {
@@ -86,6 +89,7 @@ const AddQuentityUnit = ({addModal, closeModal, handleUpdateList}) => {
         console.log('Unexpected error:', error);
       }
     }
+    setButtonLoading(false);
     closeModal();
   };
 
@@ -127,7 +131,10 @@ const AddQuentityUnit = ({addModal, closeModal, handleUpdateList}) => {
               />
 
               <View style={[ES.w90]}>
-                <Btn width={'100%'} method={handleAddQuantityUnit}>
+                <Btn
+                  buttonLoading={buttonLoading}
+                  width={'100%'}
+                  method={handleAddQuantityUnit}>
                   <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
                 </Btn>
               </View>
@@ -144,7 +151,11 @@ export default AddQuentityUnit;
 const s = StyleSheet.create({
   container: StyleSheet.flatten([ES.centerItems, ES.w100]),
   input: StyleSheet.flatten([
-    {borderBottomWidth: 1, borderColor: primaryColor, borderRadius: 5},
+    {
+      borderBottomWidth: 1,
+      borderColor: primaryInputBorderColor,
+      borderRadius: 5,
+    },
     ES.w90,
     ES.f16,
   ]),

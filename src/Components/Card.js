@@ -5,7 +5,7 @@ import {newRecordIcon} from '../Constants/imagesAndIcons';
 import HeadingText from './HeadingText';
 import {darkTextColor} from '../Constants/Colours';
 
-const Card = ({children, image}) => {
+const Card = ({children, image, icon}) => {
   return (
     <View style={[ES.px1]}>
       <View
@@ -19,7 +19,15 @@ const Card = ({children, image}) => {
           ES.shadow4,
           ES.bgLight,
         ]}>
-        <Image source={image} style={[ES.hs55, ES.ws55, ES.objectFitContain]} />
+        {icon ? (
+          icon
+        ) : image ? (
+          <Image
+            source={image}
+            style={[ES.hs55, ES.ws55, ES.objectFitContain]}
+          />
+        ) : null}
+        {/*  <Image source={image} style={[ES.hs55, ES.ws55, ES.objectFitContain]} /> */}
         <View style={[ES.fx1, ES.px2]}>
           <HeadingText size={18} color={darkTextColor}>
             {children}

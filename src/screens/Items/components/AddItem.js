@@ -15,6 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   backgroundColor,
+  modalColor,
   primaryColor,
   primaryInputBorderColor,
   primaryTextColor,
@@ -24,63 +25,65 @@ import axiosClient from '../../../../axiosClient';
 import {toggleLogin} from '../../../Redux/actions/action';
 import {Picker} from '@react-native-picker/picker';
 import Btn from '../../../Components/Btn';
-import headingText from '../../../Components/HeadingText';
 import HeadingText from '../../../Components/HeadingText';
-import Loading from '../../../Constants/Loading';
+import {addAllItems, addItem} from '../../../Redux/actions/itemActions';
 import KeyboardAvoidingComponent from '../../../Components/KeyboardAvoidingComponent';
-import FullModalComponent from '../../../Components/FullModalComponent';
 import ModalComponent from '../../../Components/ModalComponent';
-import {downArrowIcon} from '../../../Constants/imagesAndIcons';
+import Loading from '../../../Constants/Loading';
 import NormalText from '../../../Components/NormalText';
+import {downArrowIcon} from '../../../Constants/imagesAndIcons';
+import FullModalComponent from '../../../Components/FullModalComponent';
 import {DownArrowVectoreIcon} from '../../../Constants/VectoreIcons';
 import {Dropdown} from 'react-native-element-dropdown';
 
-const UpdateItem = ({
-  route,
-  navigation,
-  id,
-  updateModal,
-  handleUpdateItemList,
-  itemData,
-  closeModal,
-}) => {
+const AddItem = ({addModal, closeModal, handleUpdateItemList}) => {
   const [itemName, setItemName] = useState('');
-  const [quantityUnit, setQuantityUnit] = useState({
-    label: 'kg',
-    value: 'kg',
-    _id: 'dsdsd',
-  });
-  const [item, setItem] = useState({});
+  const [name, setName] = useState('rahul');
+  const [email, setEmail] = useState('rahre49@gmail.com');
+  const [password, setPassword] = useState('111111');
+  const [mobileNo, setMobileNo] = useState('1234567890');
+  const [storageLocation, setStorageLocation] = useState('');
+  const [role, setRole] = useState('');
 
+  const [buttonLoading, setButtonLoading] = useState(false);
+
+  const [quantityUnit, setQuantityUnit] = useState('');
   const [quantityUnits, setQuantityUnits] = useState([]);
   const [quantityModal, setQuantityModal] = useState(false);
 
-  //const id = route.params.item_id;
-
+  const items = useSelector(state => state.items);
   const [storageLocations, setStorageLocations] = useState([]);
   const [roles, setRoles] = useState([]);
 
-  const isLoggedIn = useSelector(state => state.auth);
-  const [loading, setLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const [buttonLoading, setButtonLoading] = useState(false);
 
+  const isLoggedIn = useSelector(state => state.auth);
   const dispatch = useDispatch();
 
-  const getData = async () => {
-    setLoading(true);
+  useEffect(() => {
+    //console.log('items.length', items.length);
+  }, [items]);
 
+  const checkLogin = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (token) dispatch(toggleLogin(true));
+  };
+
+  const getData = async () => {
     try {
-      const storageRes = await axiosClient.get(`/item/get/${id}`);
-      setItem(storageRes.data.result);
-      setItemName(storageRes.data.result.item_name);
-      setQuantityUnit(storageRes.data.result.quantity_unit);
-      console.log('storageRes: ', storageRes.data.result);
+      const storageRes = await axiosClient.get('/storage/location/getall');
+      setStorageLocations(storageRes.data.result);
+      //console.log('storageRes: ', storageRes.data.result);
     } catch (error) {
       console.log('Error fetching storage locations:', error);
     }
 
-    setLoading(false);
+    try {
+      const rolesRes = await axiosClient.get('/role/getall');
+      setRoles(rolesRes.data.result);
+    } catch (error) {
+      console.log('Error fetching roles:', error);
+    }
   };
 
   const getQuantityUnits = async () => {
@@ -105,26 +108,12 @@ const UpdateItem = ({
   };
 
   useEffect(() => {
-    //console.log('itemData: ', itemData);
-    setItemName(itemData?.item_name);
-    if (itemData?.quantity_unit) {
-      const temp = {
-        lable: itemData?.quantity_unit.name,
-        value: itemData?.quantity_unit.name,
-        _id: itemData?.quantity_unit._id,
-      };
-      setQuantityUnit(temp);
-    }
-    //setQuantityUnit(itemData?.quantity_unit);
+    checkLogin();
     getData();
     getQuantityUnits();
-  }, [itemData]);
+  }, []);
 
-  useEffect(() => {
-    console.log('uantityUnit', quantityUnit);
-  }, [quantityUnit]);
-
-  const handleUpdateItem = async () => {
+  const handleAddItem = async () => {
     if (!verifyInputs()) return;
     setButtonLoading(true);
     try {
@@ -132,21 +121,26 @@ const UpdateItem = ({
         item_name: itemName,
         quantity_unit: quantityUnit._id,
       };
-      console.log('form: ', form);
-      const res = await axiosClient.put(`/item/${itemData._id}`, form);
+
+      const res = await axiosClient.post('/item/add', form);
+
+      let tempItems = items;
 
       if (res) {
-        showToast(res.data.message);
+        dispatch(addItem(res.data.result));
+        showToast('Item added successfully');
         handleUpdateItemList(res.data.result);
         closeModal();
+        setItemName('');
+        setQuantityUnit('');
       }
     } catch (error) {
-      if (error.response.data.message) {
+      if (error?.response?.data?.message) {
         showToast(error.response.data.message);
       } else {
         showToast('Something went wrong');
+        console.log('Unexpected error:', error);
       }
-      console.log('Unexpected error:', error);
     }
     setButtonLoading(false);
   };
@@ -173,31 +167,29 @@ const UpdateItem = ({
     );
   };
 
-  useEffect(() => {
-    console.log('UpdateItem updateModal: ', updateModal);
-  }, [updateModal]);
-
   return (
     <>
       <FullModalComponent
         height={'40%'}
-        isModalVisible={updateModal}
+        isModalVisible={addModal}
         closeModal={closeModal}>
         <KeyboardAvoidingComponent bg={false}>
           <View style={[s.container]}>
-            <View style={[s.card, loading ? ES.dNone : ES.dBlock]}>
+            <View style={[s.card]}>
               <HeadingText style={[ES.textDark, ES.f26, ES.fw700]}>
-                Update Item
+                Add Item
               </HeadingText>
+
               <TextInput
                 style={[s.input]}
                 placeholder="Item Name"
                 value={itemName}
                 onChangeText={setItemName}
               />
+
               <View style={[ES.w100]}>
                 <View style={[ES.w100, ES.fx0, ES.centerItems]}>
-                  <View style={[s.input]} key={quantityUnit}>
+                  <View style={[s.input]}>
                     <Dropdown
                       style={[
                         {
@@ -209,7 +201,7 @@ const UpdateItem = ({
                       placeholderStyle={[ES.f16]}
                       selectedTextStyle={[ES.f16]}
                       inputSearchStyle={[ES.hs40, ES.f16]}
-                      iconStyle={{width: 20, height: 20}}
+                      iconStyle={{width: 26, height: 26}}
                       data={quantityUnits}
                       search
                       maxHeight={300}
@@ -225,18 +217,13 @@ const UpdateItem = ({
                   </View>
                 </View>
               </View>
-              <View style={[ES.w100, ES.centerItems, ES.mt1]}>
-                <Btn
-                  buttonLoading={buttonLoading}
-                  width={'90%'}
-                  method={handleUpdateItem}>
-                  <Text style={[ES.textLight, ES.fw700, ES.f20]}>Update </Text>
-                </Btn>
-              </View>
-            </View>
 
-            <View style={[loading ? ES.dBlock : ES.dNone]}>
-              <Loading />
+              <Btn
+                buttonLoading={buttonLoading}
+                width={'90%'}
+                method={handleAddItem}>
+                <Text style={[ES.textLight, ES.fw700, ES.f20]}>Add </Text>
+              </Btn>
             </View>
           </View>
         </KeyboardAvoidingComponent>
@@ -245,10 +232,10 @@ const UpdateItem = ({
   );
 };
 
-export default UpdateItem;
+export default AddItem;
 
 const s = StyleSheet.create({
-  container: StyleSheet.flatten([ES.fx1, , ES.centerItems, ES.w100]),
+  container: StyleSheet.flatten([ES.fx1, ES.centerItems, ES.my2, ES.w100]),
   input: StyleSheet.flatten([
     {
       borderBottomWidth: 1,
@@ -256,7 +243,6 @@ const s = StyleSheet.create({
       borderRadius: 5,
     },
     ES.w90,
-    ES.px1,
     ES.f16,
   ]),
   button: StyleSheet.flatten([

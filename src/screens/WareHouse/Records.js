@@ -498,7 +498,9 @@ const Records = ({route, navigation}) => {
                 data={records}
                 keyExtractor={(item, index) => index.toString()}
                 contentContainerStyle={[s.flatList]}
-                renderItem={({item}) => <RecordCard item={item} />}
+                renderItem={({item, index}) => (
+                  <RecordCard index={index} item={item} />
+                )}
                 onEndReached={
                   loadMore && !isSorting && records.length >= 10
                     ? handleLoadMoreRecords
@@ -614,7 +616,7 @@ const s = StyleSheet.create({
 
   flatList: StyleSheet.flatten([
     ES.gap2,
-    ES.pb2,
+    {paddingBottom: 100},
     ES.w100,
     ES.fx0,
     ES.alignItemsCenter,

@@ -37,13 +37,16 @@ import Header from '../../Components/Header';
 
 const screenHeight = Dimensions.get('window').height;
 
-const UpdateAccount = ({navigation}) => {
-  const [name, setName] = useState('rahul');
-  const [email, setEmail] = useState('rahre49@gmail.com');
-  const [password, setPassword] = useState('111111');
+const ChangePassword = ({navigation}) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+
   const [mobileNo, setMobileNo] = useState('');
   const [storageLocation, setStorageLocation] = useState('');
   const [role, setRole] = useState('');
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const [currentUser, setCurrentUser] = useState({});
 
@@ -102,37 +105,38 @@ const UpdateAccount = ({navigation}) => {
     getData();
   }, []);
 
-  const handleUpdateUser = async () => {
+  const handleChangePassword = async () => {
     if (!verifyInputs()) return;
 
     try {
       const form = {
-        name,
-        mobile_no: mobileNo,
-        email,
-        password,
-        storage_location_id: storageLocation,
-        role_type: role,
+        old_password: oldPassword,
+        password: newPassword,
+
+        email: email,
       };
 
       const token = await AsyncStorage.getItem('token');
 
-      const res = await axiosClient.post('/user/create', form);
-      dispatch(toggleLogin(true));
+      const res = await axiosClient.post('/user/reset/password', form);
+
       if (res) {
-        showToast('User added successfully');
+        showToast(res.data.message);
+
+        setOldPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
         setTimeout(() => {
           navigation.goBack();
         }, 1000);
       }
     } catch (error) {
-      if (error.response?.status === 409) {
-        showToast(error.response.data.message);
-      } else if (error.response?.status === 403) {
+      if (error?.response?.data?.message) {
         showToast(error.response.data.message);
       } else {
-        console.log('Unexpected error:', error);
+        showToast('Something went wrong');
       }
+      console.log('Unexpected error:', error);
     }
   };
 
@@ -142,8 +146,28 @@ const UpdateAccount = ({navigation}) => {
       return false;
     }
 
-    if (!mobileNo) {
-      showToast('Please enter mobile number');
+    if (!oldPassword) {
+      showToast('Please enter old password');
+      return false;
+    }
+
+    if (!newPassword) {
+      showToast('Please enter new password');
+      return false;
+    }
+
+    if (newPassword.length < 6) {
+      showToast('Password should be at least 6 characters long');
+      return false;
+    }
+
+    if (!confirmPassword) {
+      showToast('Please enter confirm password');
+      return false;
+    }
+
+    if (newPassword !== confirmPassword) {
+      showToast('Password and confirm password should be same');
       return false;
     }
 
@@ -166,69 +190,36 @@ const UpdateAccount = ({navigation}) => {
     <>
       <KeyboardAvoidingComponent>
         <View style={[ES.fx1, ES.h100, ES.w100, {height: screenHeight}]}>
-          <Header>Update Account</Header>
+          <Header>Change Password</Header>
           <View style={[s.container, isLoading ? ES.dNone : null]}>
             <View style={[s.card]}>
               <TextInput
                 style={[s.input]}
-                placeholder="Name"
-                value={name}
-                onChangeText={text => setName(text)}
+                placeholder="Old Password"
+                secureTextEntry={true}
+                value={oldPassword}
+                onChangeText={text => setOldPassword(text)}
               />
+              
               <TextInput
                 style={[s.input]}
-                placeholder="Mobile Number"
-                value={mobileNo.toString()}
-                onChangeText={text => setMobileNo(text)}
+                placeholder="New Password"
+                secureTextEntry={true}
+                value={newPassword}
+                onChangeText={text => setNewPassword(text)}
               />
-              {/*   <TextInput
-              style={[s.input]}
-              placeholder="Email"
-              keyboardType="email-address"
-              value={email}
-              /> */}
 
-              {/*
-{storageLocations.length > 0 &&
-              currentUser.role_type.value == 'super_admin' && (
-                <View style={[s.input]}>
-                <Picker
-                selectedValue={storageLocation}
-                onValueChange={setStorageLocation}>
-                    <Picker.Item label={'Select Location'} />
-                    {storageLocations.map(item => (
-                      <Picker.Item
-                        key={item._id}
-                        label={item.name}
-                        value={item._id}
-                      />
-                    ))}
-                  </Picker>
-                </View>
-              )} 
-               */}
+              <TextInput
+                style={[s.input]}
+                placeholder="Confirm Password"
+                secureTextEntry={true}
+                value={confirmPassword}
+                onChangeText={text => setConfirmPassword(text)}
+              />
 
-              {/* 
-            {roles.length > 0 && (
-              <View style={[s.input]}>
-                <Picker
-                  disabled={true}
-                  selectedValue={role}
-                  onValueChange={setRole}>
-                  <Picker.Item label={'Select Role'} />
-                  {roles.map(item => (
-                    <Picker.Item
-                      key={item._id}
-                      label={item.name}
-                      value={item._id}
-                    />
-                    ))}
-                </Picker>
-                </View>
-            )} */}
               <View style={[ES.flexRow, ES.gap2, ES.mt1]}>
-                <Btn method={handleUpdateUser} px={10} width={'50%'}>
-                  <Text>Update</Text>
+                <Btn method={handleChangePassword} px={10} width={'87%'}>
+                  <Text>Change Password</Text>
                 </Btn>
               </View>
             </View>
@@ -242,7 +233,7 @@ const UpdateAccount = ({navigation}) => {
   );
 };
 
-export default UpdateAccount;
+export default ChangePassword;
 
 const s = StyleSheet.create({
   container: StyleSheet.flatten([

@@ -16,7 +16,7 @@ const AddButton = ({
     <View
       style={[
         position ? {position: position} : ES.absolute,
-        bottom && !top ? {bottom: bottom} : ES.bottom3,
+        bottom && !top ? {bottom: bottom} : ES.bottom9,
         right && !left ? {right: right} : ES.right10,
         left ? {left: left} : null,
         top ? {top: top} : null,

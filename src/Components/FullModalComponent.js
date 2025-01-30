@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  Dimensions,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import ES from '../styles/ES';
@@ -17,32 +18,51 @@ import {
 } from '../Constants/Colours';
 import LinearGradient from 'react-native-linear-gradient';
 import {cancelIcon} from '../Constants/imagesAndIcons';
+import {CrossVectoreIcon} from '../Constants/VectoreIcons';
+import {ScrollView} from 'react-native-gesture-handler';
 
-const FullModalComponent = ({children, isModalVisible, closeModal, height}) => {
+const screenHeight = Dimensions.get('window').height;
+
+const FullModalComponent = ({
+  children,
+  isModalVisible,
+  closeModal,
+  height,
+  fullHeight,
+}) => {
+  useEffect(() => {
+    console.log('isModalVisible: ', isModalVisible);
+  }, [isModalVisible]);
+
   return (
     <>
       <Modal visible={isModalVisible} transparent={true} animationType="slide">
-        <TouchableWithoutFeedback onPress={() => closeModal()}>
-          <View style={[ES.fx1, ES.centerItems, ES.p1]}>
-            <TouchableWithoutFeedback onPress={() => {}}>
-              <LinearGradient
-                colors={modalColor}
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 1}}
-                style={[s.modal, height ? {height: height} : ES.h90]}>
-                <View style={[ES.fx1, ES.p06]}>{children}</View>
-                <View style={[s.modalClose]}>
-                  <TouchableOpacity onPress={() => closeModal()} style={[]}>
-                    <Image
-                      source={cancelIcon}
-                      style={[ES.hs30, ES.ws30, ES.objectFitContain]}
-                    />
-                  </TouchableOpacity>
-                </View>
-              </LinearGradient>
-            </TouchableWithoutFeedback>
+        <ScrollView contentContainerStyle={[ES.p1]}>
+          <View style={[{height: screenHeight}, ES.centerItems]}>
+            <TouchableOpacity
+              style={[ES.fx1, ES.w100]}
+              onPress={() => closeModal()}></TouchableOpacity>
+            <LinearGradient
+              colors={modalColor}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 1}}
+              style={[s.modal, height ? {height: height} : ES.h90]}>
+              <View style={[ES.fx1, ES.p06]}>{children}</View>
+              <View style={[s.modalClose]}>
+                <TouchableOpacity
+                  onPress={() => {
+                    closeModal();
+                  }}
+                  style={[]}>
+                  <CrossVectoreIcon />
+                </TouchableOpacity>
+              </View>
+            </LinearGradient>
+            <TouchableOpacity
+              style={[ES.fx1, ES.w100]}
+              onPress={() => closeModal()}></TouchableOpacity>
           </View>
-        </TouchableWithoutFeedback>
+        </ScrollView>
       </Modal>
     </>
   );
@@ -60,6 +80,7 @@ const s = StyleSheet.create({
     ES.f16,
   ]),
   modal: StyleSheet.flatten([
+    ES.tempBorder2,
     ES.w90,
     ES.h90,
     ES.bgLight,
@@ -70,5 +91,13 @@ const s = StyleSheet.create({
 
     {borderWidth: 0.5, borderColor: '#000'},
   ]),
-  modalClose: StyleSheet.flatten([ES.fx0, ES.alignItemsEnd, ES.pt06, ES.pe06]),
+  modalClose: StyleSheet.flatten([
+    ES.fx0,
+    ES.absolute,
+    ES.alignItemsEnd,
+    ES.pt06,
+    ES.pe06,
+
+    ES.right0,
+  ]),
 });

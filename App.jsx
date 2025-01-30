@@ -36,7 +36,7 @@ import AddRecord from './src/screens/WareHouse/AddRecord';
 import axiosClient from './axiosClient';
 import {addUser} from './src/Redux/actions/userActions';
 import {useDispatch, useSelector} from 'react-redux';
-import AddItem from './src/screens/Items/AddItem';
+import AddItem from './src/screens/Items/components/AddItem';
 import Records from './src/screens/WareHouse/Records';
 
 const App = () => {
@@ -62,7 +62,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    console.log('App user: ', user);
+    //console.log('App user: ', user);
   }, [user]);
 
   return (
