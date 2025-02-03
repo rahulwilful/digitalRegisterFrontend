@@ -12,3 +12,6 @@ export const Animations = [
   'flipInX',
   'flipInY',
 ];
+
+export const fadeIn = 'fadeInLeft';
+export const animationDuration = 500;

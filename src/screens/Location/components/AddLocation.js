@@ -181,7 +181,7 @@ const AddLocation = ({addModal, closeModal, handleUpdateLocationList}) => {
   return (
     <>
       <FullModalComponent
-        height={'53%'}
+        height={'60%'}
         isModalVisible={addModal}
         closeModal={closeModal}>
         <KeyboardAvoidingComponent bg={false}>
@@ -213,6 +213,8 @@ const AddLocation = ({addModal, closeModal, handleUpdateLocationList}) => {
                 onChangeText={setState}
               />
               <TextInput
+                multiline={true}
+                numberOfLines={4}
                 style={[s.input]}
                 placeholder="Address"
                 value={address}

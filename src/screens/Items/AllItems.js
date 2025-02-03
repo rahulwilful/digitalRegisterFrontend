@@ -11,7 +11,7 @@ import {
   Touchable,
   TouchableOpacity,
 } from 'react-native';
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import axiosClient from '../../../axiosClient';
 import HeadingText from '../../Components/HeadingText';
 import ES from '../../styles/ES';
@@ -43,6 +43,9 @@ import UpdateItem from './components/UpdateItem';
 import {DownArrowVectoreIcon} from '../../Constants/VectoreIcons';
 import AddItem from './components/AddItem';
 import {useFocusEffect} from '@react-navigation/native';
+
+import debounce from 'lodash/debounce';
+import RestoreButton from '../../Components/RestoreButton';
 
 const AllItems = ({navigation}) => {
   const reduxItems = useSelector(state => state.items);
@@ -84,7 +87,14 @@ const AllItems = ({navigation}) => {
     );
   };
 
+  useEffect(() => {
+    if (searchQuery.length == 0) {
+      setItems(originalItems);
+    }
+  }, [searchQuery]);
+
   const getItemsByName = async name => {
+    console.log('text: ', name);
     setIsLoading(true);
     setSearchQuery(name);
 
@@ -115,6 +125,15 @@ const AllItems = ({navigation}) => {
       console.log('error: ', error);
     }
     setIsLoading(false);
+  };
+
+  const debouncedGetItemsByName = debounce(getItemsByName, 700);
+
+  const handleDebounce = async text => {
+    console.log('text: ', text);
+
+    setSearchQuery(text);
+    debouncedGetItemsByName(text);
   };
 
   const handleDeleteItem = async id => {
@@ -210,7 +229,6 @@ const AllItems = ({navigation}) => {
 
       setItems(res.data.result);
       setOriginalItems(res.data.result);
-      useDispatch(addAllItems(res.data.result));
     } catch (error) {
       console.log('error: ', error);
     }
@@ -288,6 +306,11 @@ const AllItems = ({navigation}) => {
     setOriginalItems(temp);
 
     handleSortDeleted(temp2);
+  };
+
+  const handleRestoreFunction = () => {
+    setSearchQuery('');
+    getItems();
   };
 
   return (
@@ -386,7 +409,7 @@ const AllItems = ({navigation}) => {
             style={[s.textInput]}
             placeholder="Search"
             value={searchQuery}
-            onChangeText={text => getItemsByName(text)}
+            onChangeText={text => handleDebounce(text)}
           />
         </View>
         <View
@@ -439,7 +462,7 @@ const AllItems = ({navigation}) => {
                   </View>
                 )}
                 refreshing={isLoading}
-                onRefresh={getItems}
+                onRefresh={handleRestoreFunction}
                 maxToRenderPerBatch={20}
               />
             </View>
@@ -466,6 +489,7 @@ const AllItems = ({navigation}) => {
           <Text style={[ES.textCenter, ES.subHeadingText]}>
             No Records Found
           </Text>
+          <RestoreButton method={handleRestoreFunction} />
         </View>
 
         <View style={[isLoading ? ES.dBlock : ES.dNone, ES.h100]}>

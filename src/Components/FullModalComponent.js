@@ -30,10 +30,6 @@ const FullModalComponent = ({
   height,
   fullHeight,
 }) => {
-  useEffect(() => {
-    console.log('isModalVisible: ', isModalVisible);
-  }, [isModalVisible]);
-
   return (
     <>
       <Modal visible={isModalVisible} transparent={true} animationType="slide">

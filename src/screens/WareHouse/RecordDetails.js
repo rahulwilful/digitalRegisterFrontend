@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, Image, FlatList} from 'react-native';
+import {View, Text, StyleSheet, Image, FlatList, Touchable} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import axiosClient from '../../../axiosClient';
 import ES from '../../styles/ES';
@@ -15,14 +15,21 @@ import {
   modalColor,
   primaryColor,
   primaryTextColor,
+  softBlue,
+  softRed,
 } from '../../Constants/Colours';
 import HeadingText from '../../Components/HeadingText';
 import NormalText from '../../Components/NormalText';
 import Loading from '../../Constants/Loading';
+import {Tooltip, lightColors} from '@rneui/themed';
+import {TouchableOpacity} from 'react-native-gesture-handler';
+import ModalComponent from '../../Components/ModalComponent';
 
 const RecordDetails = ({route}) => {
   const [record, setRecords] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [pickupTooltip, setPickupTooltip] = useState(false);
+  const [adminTooltip, setAdminTooltip] = useState(false);
 
   /*************  ✨ Codeium Command ⭐  *************/
   /**
@@ -59,6 +66,38 @@ const RecordDetails = ({route}) => {
   }, [record]);
   return (
     <>
+      <ModalComponent
+        centerItems
+        height={'6%'}
+        isModalVisible={adminTooltip}
+        closeModal={() => setAdminTooltip(false)}>
+        <NormalText
+          capitalize
+          centerItems
+          textCenter
+          fw={700}
+          size={16}
+          color={primaryTextColor}>
+          {record?.warehouse_admin?.name}
+        </NormalText>
+      </ModalComponent>
+
+      <ModalComponent
+        centerItems
+        height={'6%'}
+        isModalVisible={pickupTooltip}
+        closeModal={() => setPickupTooltip(false)}>
+        <NormalText
+          capitalize
+          centerItems
+          textCenter
+          fw={700}
+          size={16}
+          color={primaryTextColor}>
+          {record?.pickup_person?.name}
+        </NormalText>
+      </ModalComponent>
+
       {record && (
         <View style={[ES.w100, ES.fx1, isLoading ? ES.dNone : ES.dBlock]}>
           <LinearGradient
@@ -67,54 +106,47 @@ const RecordDetails = ({route}) => {
             end={{x: 1, y: 1}}
             style={[s.card]}>
             <View style={[s.listConatinerHeaer]}>
-              {/*  
-              <View style={[ES.hs70, ES.ws70, ES.overflowHidden, ES.bRadius5]}>
-                <Image source={recordIcon} style={[ES.hs70, ES.ws70]} />
-              </View>
-               */}
-
               <View style={[ES.fx1, ES.justifyContentCenter, ES.gap1]}>
-                {/*   <HeadingText
-                  size={20}
-                  capitalize
-                  style={[ES.f20, ES.fw500, ES.capitalize, ES.fx1]}>
-                  {record.warehouse_admin?.name}
-                </HeadingText> */}
                 <View
                   style={[ES.flexRow, ES.fx0, ES.gap2, ES.alignItemsBaseline]}>
                   <View style={[ES.fx1]}>
-                    <HeadingText capitalize fw={500} size={17}>
-                      <Text style={[ES.tempBorder]}>
-                        <Image
-                          source={adminIcon}
-                          style={[ES.ws22, ES.hs22, ES.objectFitContain]}
-                        />
-                        <Text>
-                          {' '}
-                          :{' '}
-                          {record.warehouse_admin.name.length <= 10
-                            ? record.warehouse_admin.name
-                            : record.warehouse_admin.name.slice(0, 10) + '...'}
+                    <TouchableOpacity onPress={() => setAdminTooltip(true)}>
+                      <HeadingText capitalize fw={500} size={17}>
+                        <Text style={[ES.tempBorder]}>
+                          <Image
+                            source={adminIcon}
+                            style={[ES.ws22, ES.hs22, ES.objectFitContain]}
+                          />
+                          <Text>
+                            :
+                            {record.warehouse_admin.name.length <= 10
+                              ? record.warehouse_admin.name
+                              : record.warehouse_admin.name.slice(0, 10) +
+                                '...'}
+                          </Text>
                         </Text>
-                      </Text>
-                    </HeadingText>
+                      </HeadingText>
+                    </TouchableOpacity>
                   </View>
                   <View style={[ES.fx1]}>
-                    <HeadingText capitalize fw={500} size={17}>
-                      <Text style={[ES.tempBorder]}>
-                        <Image
-                          source={pickupPersonIcon}
-                          style={[ES.ws22, ES.hs22, ES.objectFitContain]}
-                        />
-                        <Text>
-                          {' '}
-                          :{' '}
-                          {record.pickup_person.name.length <= 10
-                            ? record.pickup_person.name
-                            : record.pickup_person.name.slice(0, 10) + '...'}
+                    <TouchableOpacity onPress={() => setPickupTooltip(true)}>
+                      <HeadingText capitalize fw={500} size={17}>
+                        <Text style={[ES.tempBorder]}>
+                          <Image
+                            source={pickupPersonIcon}
+                            style={[ES.ws22, ES.hs22, ES.objectFitContain]}
+                          />
+
+                          <Text>
+                            {' '}
+                            :{' '}
+                            {record.pickup_person.name.length <= 10
+                              ? record.pickup_person.name
+                              : record.pickup_person.name.slice(0, 10) + '...'}
+                          </Text>
                         </Text>
-                      </Text>
-                    </HeadingText>
+                      </HeadingText>
+                    </TouchableOpacity>
                   </View>
                 </View>
                 <View
@@ -139,6 +171,25 @@ const RecordDetails = ({route}) => {
                         />
                         <Text> : {record.createdAt.slice(11, 16)}</Text>
                       </Text>
+                    </NormalText>
+                  </View>
+                  <View style={[]}>
+                    <NormalText size={13}>
+                      <View
+                        style={[
+                          record.pickup_or_drop == 'pickup'
+                            ? {backgroundColor: softRed}
+                            : {backgroundColor: softBlue},
+
+                          ES.px1,
+                          ES.bRadius5,
+                          ES.centerItems,
+                        ]}>
+                        <Text style={[ES.textLight, ES.capitalize]}>
+                          {' '}
+                          {record.pickup_or_drop}
+                        </Text>
+                      </View>
                     </NormalText>
                   </View>
                 </View>

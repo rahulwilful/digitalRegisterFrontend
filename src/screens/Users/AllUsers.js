@@ -38,6 +38,9 @@ import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponen
 import UpdateUser from './components/UpdateUser';
 import {useFocusEffect} from '@react-navigation/native';
 
+import debounce from 'lodash/debounce';
+import RestoreButton from '../../Components/RestoreButton';
+
 const AllUsers = ({navigation}) => {
   const reduxItems = useSelector(state => state.items);
 
@@ -109,6 +112,15 @@ const AllUsers = ({navigation}) => {
       console.log('error: ', error);
     }
     setIsLoading(false);
+  };
+
+  const debouncedGetUsersByName = debounce(getUsersByName, 700);
+
+  const handleDebounce = async text => {
+    console.log('text: ', text);
+
+    setSearchQuery(text);
+    debouncedGetUsersByName(text);
   };
 
   const handleDeleteUser = async id => {
@@ -265,6 +277,11 @@ const AllUsers = ({navigation}) => {
     setRenderKey(renderKey + 1);
   };
 
+  const handleRestoreFunction = () => {
+    setSearchQuery('');
+    getUsers();
+  };
+
   return (
     <>
       <AddUser
@@ -302,11 +319,11 @@ const AllUsers = ({navigation}) => {
 
       <View style={[ES.fx1]}>
         <View style={[s.header, ES.mt1]}>
-          <TextInput
+          <TextInput  
             style={[s.textInput]}
             value={searchQuery}
             placeholder="Search"
-            onChangeText={text => getUsersByName(text)}
+            onChangeText={text => handleDebounce(text)}
           />
         </View>
         <View
@@ -357,7 +374,7 @@ const AllUsers = ({navigation}) => {
                   />
                 )}
                 refreshing={isLoading}
-                onRefresh={getUsers}
+                onRefresh={handleRestoreFunction}
                 maxToRenderPerBatch={20}
               />
             </View>
@@ -382,6 +399,7 @@ const AllUsers = ({navigation}) => {
           <Text style={[ES.textCenter, ES.subHeadingText]}>
             No Records Found
           </Text>
+          <RestoreButton method={handleRestoreFunction} />
         </View>
 
         <View style={[isLoading ? ES.dBlock : ES.dNone, ES.h100]}>

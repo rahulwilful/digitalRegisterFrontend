@@ -23,7 +23,11 @@ import {
   RestoreVectoreIcon,
   TrashVectoreIcon,
 } from '../../../Constants/VectoreIcons';
-import {Animations} from '../../../Constants/AnimationTypes';
+import {
+  animationDuration,
+  Animations,
+  fadeIn,
+} from '../../../Constants/AnimationTypes';
 
 const ItemCard = ({
   item,
@@ -56,8 +60,8 @@ const ItemCard = ({
       />
 
       <Animatable.View
-        animation={'fadeInLeftBig'}
-        duration={500}
+        animation={fadeIn}
+        duration={animationDuration}
         delay={index * 100}
         style={[
           ES.w100,

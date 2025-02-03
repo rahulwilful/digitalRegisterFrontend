@@ -27,6 +27,9 @@ import {
   primaryColor,
   primaryColorGreen,
   primaryTextColor,
+  redButton,
+  softBlue,
+  softRed,
   whiteTextColor,
 } from '../Constants/Colours';
 import NormalText from './NormalText';
@@ -92,7 +95,7 @@ const RecordCard = props => {
                 </View>
               </View>
               <View style={[ES.fx0, ES.flexRow, ES.gap2, ES.alignItemsCenter]}>
-                <View style={[ES.fx1]}>
+                <View style={[ES.fx4]}>
                   <NormalText size={13}>
                     <Text style={[]}>
                       <Image
@@ -103,7 +106,7 @@ const RecordCard = props => {
                     </Text>
                   </NormalText>
                 </View>
-                <View style={[ES.fx1]}>
+                <View style={[ES.fx4]}>
                   <NormalText size={13}>
                     <Text style={[]}>
                       <Image
@@ -112,6 +115,25 @@ const RecordCard = props => {
                       />
                       <Text> : {props.item.createdAt.slice(11, 16)}</Text>
                     </Text>
+                  </NormalText>
+                </View>
+                <View style={[]}>
+                  <NormalText size={13}>
+                    <View
+                      style={[
+                        props.item.pickup_or_drop == 'pickup'
+                          ? {backgroundColor: softRed}
+                          : {backgroundColor: softBlue},
+
+                        ES.px1,
+                        ES.bRadius5,
+                        ES.centerItems,
+                      ]}>
+                      <Text style={[ES.textLight, ES.capitalize]}>
+                        {' '}
+                        {props.item.pickup_or_drop}
+                      </Text>
+                    </View>
                   </NormalText>
                 </View>
               </View>

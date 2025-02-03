@@ -21,6 +21,7 @@ import {
   TrashVectoreIcon,
 } from '../../../Constants/VectoreIcons';
 import * as Animatable from 'react-native-animatable';
+import {animationDuration, fadeIn} from '../../../Constants/AnimationTypes';
 
 const QuantityUnitCard = ({
   item,
@@ -42,8 +43,8 @@ const QuantityUnitCard = ({
         handleUpdateList={handleUpdateList}
       />
       <Animatable.View
-        animation={'fadeInLeftBig'}
-        duration={500}
+        animation={fadeIn}
+        duration={animationDuration}
         delay={index * 100}
         style={[
           ES.w100,

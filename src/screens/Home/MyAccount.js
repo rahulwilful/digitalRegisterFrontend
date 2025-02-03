@@ -89,8 +89,8 @@ const MyAccount = ({navigation}) => {
       setName(currentRes.data.result.name);
       setMobileNo(currentRes.data.result.mobile_no);
       setEmail(currentRes.data.result.email);
-      setStorageLocation(currentRes.data.result.storage_location_id);
-      setRole(currentRes.data.result.role_type);
+      setStorageLocation(currentRes.data.result.storage_location_id || '');
+      setRole(currentRes.data.result.role_type || '');
     } catch (error) {
       console.log('Error fetching storage locations:', error);
     }
@@ -162,6 +162,7 @@ const MyAccount = ({navigation}) => {
 
     try {
       const form = {
+        currentUser: currentUser?._id,
         name,
         mobile_no: mobileNo,
         email,
@@ -279,7 +280,7 @@ const MyAccount = ({navigation}) => {
                 </NormalText>
                 <View style={[s.disabledInput]}>
                   <NormalText py={3} color={darkTextColor}>
-                    {storageLocation.name}
+                    {storageLocation?.name || 'N/A'}
                   </NormalText>
                 </View>
               </Animatable.View>
@@ -293,7 +294,7 @@ const MyAccount = ({navigation}) => {
                 </NormalText>
                 <View style={[s.disabledInput]}>
                   <NormalText py={3} color={darkTextColor}>
-                    {role.name}
+                    {role?.name || 'N/A'}
                   </NormalText>
                 </View>
               </Animatable.View>

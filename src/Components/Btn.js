@@ -36,6 +36,7 @@ const Btn = ({
             ES.fw700,
             ES.textCenter,
             ES.centerItems,
+            ES.capitalize,
           ]}>
           {buttonLoading ? (
             <View style={[buttonLoading ? ES.dBlock : ES.dNone, ES.hs30]}>

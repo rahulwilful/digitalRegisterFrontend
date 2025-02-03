@@ -31,6 +31,8 @@ export const lightGreyColor = 'rgb(218, 216, 216)';
 
 export const iconPrimaryColor = 'rgb(14, 188, 121)';
 
+export const deleteColor = 'rgb(255, 99, 99)';
+
 export const modalColor = ['rgb(248, 254, 249)', 'rgb(237, 255, 242)'];
 export const bex = 'rgb(29, 112, 80)';
 
@@ -48,7 +50,12 @@ export const primaryDisabledButtonColor = [
   'rgb(86, 86, 86)',
 ];
 export const whiteButton = ['rgb(255, 255, 255)', 'rgb(249, 250, 251)'];
-export const bluebutton = ['rgb(45, 131, 252)', 'rgb(23, 116, 246)'];
+export const bluebutton = ['rgb(62, 141, 253)', 'rgb(23, 116, 246)'];
+export const blueButton = ['rgb(62, 141, 253)', 'rgb(23, 116, 246)'];
+export const redButton = ['rgb(255, 109, 109)', 'rgb(249, 80, 80)'];
 export const blackButton = ['rgb(75, 74, 74)', 'rgb(69, 64, 56)'];
 
 export const primaryInputBorderColor = 'rgb(39, 39, 39)';
+
+export const softRed = 'rgb(255, 103, 103)';
+export const softBlue = 'rgb(68, 102, 255)';

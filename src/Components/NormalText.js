@@ -16,6 +16,7 @@ const NormalText = ({
   baseLine,
   centerItems,
   tempBorder,
+  fw,
   px,
   py,
 }) => {
@@ -27,7 +28,8 @@ const NormalText = ({
         ES.fx0,
         tempBorder ? ES.tempBorder : null,
         size ? {fontSize: size} : null,
-        ES.fw500,
+        fw ? {fontWeight: fw} : ES.fw500,
+
         color ? {color: color} : {color: lightTextColor},
         textCenter ? ES.textCenter : null,
         capitalize ? ES.capitalize : null,

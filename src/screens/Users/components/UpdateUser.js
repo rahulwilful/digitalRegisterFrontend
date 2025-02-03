@@ -144,6 +144,17 @@ const UpdateUser = ({
       return false;
     }
 
+    const validateEmail = email => {
+      const re =
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return re.test(String(email).toLowerCase());
+    };
+
+    if (!validateEmail(email)) {
+      showToast('Please enter valid email');
+      return false;
+    }
+
     if (!storageLocation) {
       showToast('Please select storage location');
       return false;
@@ -174,13 +185,7 @@ const UpdateUser = ({
         <KeyboardAvoidingComponent bg={false}>
           <View style={[s.container, isLoading ? ES.dNone : null]}>
             <View style={[s.card]}>
-              {/* <View style={[s.imageContainer]}>
-                <Image
-                  source={editUserIcon}
-                  style={[ES.hs65, ES.objectFitContain]}
-                />
-              </View> */}
-
+              
               <TextInput
                 style={[s.input]}
                 placeholder="Name"
@@ -235,6 +240,7 @@ const UpdateUser = ({
                   </Picker>
                 </View>
               )}
+
               <View style={[ES.mt2, ES.w100]}>
                 <Btn
                   buttonLoading={buttonLoading}

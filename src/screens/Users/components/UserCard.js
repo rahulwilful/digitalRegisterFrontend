@@ -26,6 +26,7 @@ import {TouchableOpacity} from 'react-native-gesture-handler';
 import {useNavigation} from '@react-navigation/native';
 import {Screen} from 'react-native-screens';
 import UpdateUser from './UpdateUser';
+import {animationDuration, fadeIn} from '../../../Constants/AnimationTypes';
 
 const UserCard = ({item, handleSetUpadateUserList, openModal, index}) => {
   const navigation = useNavigation();
@@ -44,8 +45,8 @@ const UserCard = ({item, handleSetUpadateUserList, openModal, index}) => {
         handleSetUpadateUserList={updateList}
       />
       <Animatable.View
-        animation={'fadeInLeftBig'}
-        duration={500}
+        animation={fadeIn}
+        duration={animationDuration}
         delay={index * 100}
         style={[
           ES.w100,

@@ -21,6 +21,7 @@ import {
   TrashVectoreIcon,
 } from '../../../Constants/VectoreIcons';
 import * as Animatable from 'react-native-animatable';
+import {animationDuration, fadeIn} from '../../../Constants/AnimationTypes';
 
 const LocationCard = ({
   item,
@@ -44,8 +45,8 @@ const LocationCard = ({
       />
 
       <Animatable.View
-        animation={'fadeInLeftBig'}
-        duration={500}
+        animation={fadeIn}
+        duration={animationDuration}
         delay={index * 100}
         style={[
           ES.w100,

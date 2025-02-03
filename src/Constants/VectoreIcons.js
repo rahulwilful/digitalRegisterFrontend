@@ -10,6 +10,7 @@ import EntyPo from 'react-native-vector-icons/Entypo';
 import feather from 'react-native-vector-icons/Feather';
 import Mci from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
+  deleteColor,
   iconPrimaryColor,
   lightDarkColor,
   primaryColor,
@@ -171,7 +172,7 @@ export const TrashVectoreIcon = ({size, color}) => {
     <Fa
       name="trash"
       size={size ? size : 25}
-      color={color ? color : iconPrimaryColor}
+      color={color ? color : deleteColor}
     />
   );
 };

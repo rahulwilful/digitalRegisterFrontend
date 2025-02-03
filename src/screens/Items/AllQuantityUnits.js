@@ -8,6 +8,7 @@ import {
   ToastAndroid,
   Image,
   Modal,
+  Touchable,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import axiosClient from '../../../axiosClient';
@@ -33,6 +34,11 @@ import QuantityUnitCard from './components/QuantityUnitCard';
 import AddButton from '../../Components/AddButton';
 import AddQuentityUnit from './components/AddQuentityUnit';
 import UpdateQuantityUnit from './components/UpdateQuantityUnit';
+
+import debounce from 'lodash/debounce';
+import {TouchableOpacity} from 'react-native-gesture-handler';
+import {RestoreVectoreIcon} from '../../Constants/VectoreIcons';
+import RestoreButton from '../../Components/RestoreButton';
 
 const AllQuantityUnits = ({navigation}) => {
   const reduxItems = useSelector(state => state.items);
@@ -63,13 +69,13 @@ const AllQuantityUnits = ({navigation}) => {
     );
   };
 
-  const getItemsByName = async name => {
+  const getQuantitiesByName = async name => {
     setIsLoading(true);
-    setSearchQuery(name);
 
     let form = {
       name: name,
     };
+
     console.log('name: ', form);
 
     if (name.length === 0) {
@@ -93,6 +99,16 @@ const AllQuantityUnits = ({navigation}) => {
       console.log('error: ', error);
     }
     setIsLoading(false);
+  };
+
+  const debouncedGetQuantitiesByName = debounce(getQuantitiesByName, 1000);
+
+  const handleDebounce = async text => {
+    console.log('text: ', text);
+
+    setSearchQuery(text);
+    debouncedGetQuantitiesByName(text);
+    //debouncedGetQuantitiesByName(text);
   };
 
   const handleDeleteItem = async id => {
@@ -253,6 +269,11 @@ const AllQuantityUnits = ({navigation}) => {
     //handleSortDeleted(temp2);
   };
 
+  const handleRestoreFunction = () => {
+    setSearchQuery('');
+    getQuantityUnits();
+  };
+
   return (
     <>
       <AddQuentityUnit
@@ -301,7 +322,7 @@ const AllQuantityUnits = ({navigation}) => {
             style={[s.textInput]}
             placeholder="Search"
             value={searchQuery}
-            onChangeText={text => getItemsByName(text)}
+            onChangeText={text => handleDebounce(text)}
           />
         </View>
         <View
@@ -353,7 +374,7 @@ const AllQuantityUnits = ({navigation}) => {
                   />
                 )}
                 refreshing={isLoading}
-                onRefresh={getQuantityUnits}
+                onRefresh={handleRestoreFunction}
               />
             </View>
           )}
@@ -378,6 +399,7 @@ const AllQuantityUnits = ({navigation}) => {
           <Text style={[ES.textCenter, ES.subHeadingText]}>
             No Records Found
           </Text>
+          <RestoreButton method={handleRestoreFunction} />
         </View>
 
         <View style={[isLoading ? ES.dBlock : ES.dNone, ES.h100]}>

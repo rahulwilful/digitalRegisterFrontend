@@ -16,11 +16,14 @@ import axiosClient from '../../../axiosClient';
 import {Picker} from '@react-native-picker/picker';
 import {
   backgroundColor,
+  blueButton,
+  bluebutton,
   lightTextColor,
   primaryColor,
   primaryInputBorderColor,
   primaryLightTextColor,
   primaryTextColor,
+  redButton,
   whiteButton,
 } from '../../Constants/Colours';
 import {useDispatch, useSelector} from 'react-redux';
@@ -58,6 +61,7 @@ const AddRecord = ({navigation}) => {
   const [pickupPersons, setPickupPersons] = useState([]);
   const [pickPersonModal, setPickPersonModal] = useState(false);
   const [pickupModalLoading, setPickupModalLoading] = useState(false);
+  const [pickupOrDrop, setPickupOrDrop] = useState('pickup');
 
   const [renderKey, setRenderKey] = useState(0);
   const [originalItems, setOriginalItems] = useState([]);
@@ -82,9 +86,7 @@ const AddRecord = ({navigation}) => {
     setIsLoading(true);
     console.log('AddRecorduser storage_location_id', user.storage_location_id);
     try {
-      const pickupRes = await axiosClient.get(
-        `/user/get/pickup-persons-by-storage-location/${user.storage_location_id._id}`,
-      );
+      const pickupRes = await axiosClient.get(`/user/get/all/pickup-persons`);
 
       console.log('pickupRes: ', pickupRes.data.result);
       const temp = pickupRes.data.result;
@@ -158,6 +160,7 @@ const AddRecord = ({navigation}) => {
         warehouse_admin: user._id,
         pickup_person: pickupPerson._id,
         item_list: item_list,
+        pickup_or_drop: pickupOrDrop,
       };
       console.log('form', form);
 
@@ -279,11 +282,14 @@ const AddRecord = ({navigation}) => {
     setIsLoading(false);
   };
 
+  const handleRestoreFunction = () => {};
+
   return (
     <>
       <ModalComponent
         isModalVisible={isModalVisible}
         height={'90%'}
+        enableCross
         closeModal={() => setModalVisible(false)}>
         <View style={[ES.fx1, ES.gap1]}>
           <View style={[]}>
@@ -329,8 +335,8 @@ const AddRecord = ({navigation}) => {
       <View style={[s.container, isLoading ? ES.dNone : null]}>
         <Header>Add Record</Header>
         <View style={[s.inputContainer]} key={renderKey}>
-          <View style={[ES.w100, ES.relative]}>
-            <View style={[s.input]}>
+          <View style={[ES.w100, ES.relative, ES.flexRow, ES.gap1]}>
+            <View style={[s.input, ES.fx1]}>
               <Dropdown
                 style={[
                   {
@@ -356,6 +362,15 @@ const AddRecord = ({navigation}) => {
                 }}
               />
             </View>
+            <Btn
+              method={() =>
+                setPickupOrDrop(pickupOrDrop == 'drop' ? 'pickup' : 'drop')
+              }
+              bgColor={pickupOrDrop == 'pickup' ? redButton : blueButton}
+              width={'30%'}
+              px={2}>
+              {pickupOrDrop}
+            </Btn>
           </View>
 
           <View style={[ES.w100, ES.relative, ES.mt1]}>

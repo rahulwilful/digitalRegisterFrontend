@@ -20,6 +20,9 @@ import {
   headerBackgroundColor,
   primaryColor,
   primaryTextColor,
+  redButton,
+  softBlue,
+  softRed,
   whiteButton,
 } from '../../Constants/Colours';
 import ES from '../../styles/ES';
@@ -62,6 +65,7 @@ const Records = ({route, navigation}) => {
 
   const [wareHouseAdmin, setWareHouseAdmin] = useState('');
   const [pickupPerson, setPickupPerson] = useState('');
+  const [pickupOrDrop, setPickupOrDrop] = useState('');
 
   const [fromDate, setFromDate] = useState(
     new Date('2024-01-01T00:00:00.000Z'),
@@ -224,6 +228,7 @@ const Records = ({route, navigation}) => {
         fromDate: fromDate,
         toDate: toDate,
         item_name: searchedValue || '',
+        pickup_or_drop: pickupOrDrop,
       });
       console.log('sortedRes: ', sortedRes.data.result);
       if (sortedRes.data.result.length > 0) {
@@ -260,6 +265,7 @@ const Records = ({route, navigation}) => {
   };
 
   const handleResetFilters = () => {
+    setPickupOrDrop('');
     setLoadMore(true);
     setIsSorting(false);
     setPickupPerson('');
@@ -268,6 +274,12 @@ const Records = ({route, navigation}) => {
     setToDate(new Date());
     getRecords();
     setFilterModal(false);
+  };
+
+  const handleSelectPickupOrDrop = () => {
+    if (pickupOrDrop == '') setPickupOrDrop('pickup');
+    if (pickupOrDrop == 'pickup') setPickupOrDrop('drop');
+    if (pickupOrDrop == 'drop') setPickupOrDrop('');
   };
 
   return (
@@ -369,9 +381,26 @@ const Records = ({route, navigation}) => {
       <ModalComponent
         isModalVisible={filterModal}
         closeModal={() => setFilterModal(false)}
-        height={'40%'}>
+        height={'45%'}>
         <View
           style={[ES.fx1, ES.justifyContentSpaceEvenly, ES.alignItemsCenter]}>
+          <Btn
+            px={1}
+            width={'85%'}
+            method={() => {
+              handleSelectPickupOrDrop();
+            }}
+            bgColor={
+              pickupOrDrop == 'pickup'
+                ? redButton
+                : pickupOrDrop == 'drop'
+                ? bluebutton
+                : null
+            }>
+            <Text>
+              {pickupOrDrop == '' ? 'Select Pickup Or Drop' : pickupOrDrop}
+            </Text>
+          </Btn>
           <Btn
             width={'85%'}
             method={() => {
@@ -400,6 +429,7 @@ const Records = ({route, navigation}) => {
           <Btn method={() => setIsToDatePickerOpen(true)} width={'85%'}>
             <Text>To {toDate ? toDate.toLocaleDateString() : 'To Date'}</Text>
           </Btn>
+
           <View style={[ES.w85, ES.flexRow, ES.justifyContentSpaceBetween]}>
             <Btn
               method={() => getSortedRecords()}

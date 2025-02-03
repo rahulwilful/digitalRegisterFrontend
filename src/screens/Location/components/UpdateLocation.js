@@ -174,7 +174,7 @@ const UpdateLocation = ({
   return (
     <>
       <FullModalComponent
-        height={'53%'}
+        height={'60%'}
         isModalVisible={updateModal}
         closeModal={closeModal}>
         <KeyboardAvoidingComponent bg={false}>
@@ -207,17 +207,20 @@ const UpdateLocation = ({
               />
               <TextInput
                 style={[s.input]}
-                placeholder="Address"
-                value={address}
-                onChangeText={setAddress}
-              />
-              <TextInput
-                style={[s.input]}
                 placeholder="Pin Code"
                 keyboardType="phone-pad"
                 value={pinCode.toString()}
                 onChangeText={setPinCode}
               />
+              <TextInput
+                multiline={true}
+                numberOfLines={4}
+                style={[s.input]}
+                placeholder="Address"
+                value={address}
+                onChangeText={setAddress}
+              />
+
               <View style={[ES.w100, ES.fx0, ES.centerItems, ES.mt2]}>
                 <Btn
                   buttonLoading={buttonLoading}

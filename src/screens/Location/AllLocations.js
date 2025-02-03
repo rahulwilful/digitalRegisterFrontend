@@ -30,12 +30,15 @@ import {
   wareHouseIcon3,
 } from '../../Constants/imagesAndIcons';
 
+import debounce from 'lodash/debounce';
+
 import ModalComponent from '../../Components/ModalComponent';
 import Btn from '../../Components/Btn';
 import LocationCard from './components/LocationCard';
 import AddButton from '../../Components/AddButton';
 import AddLocation from './components/AddLocation';
 import {useFocusEffect} from '@react-navigation/native';
+import RestoreButton from '../../Components/RestoreButton';
 
 const AllLocations = ({navigation}) => {
   const reduxItems = useSelector(state => state.items);
@@ -103,6 +106,15 @@ const AllLocations = ({navigation}) => {
       console.log('error: ', error);
     }
     setIsLoading(false);
+  };
+
+  const debouncedGetLocationsByName = debounce(getLocationsByName, 700);
+
+  const handleDebounce = async text => {
+    console.log('text: ', text);
+
+    setSearchQuery(text);
+    debouncedGetLocationsByName(text);
   };
 
   const handleDeleteItem = async id => {
@@ -233,7 +245,7 @@ const AllLocations = ({navigation}) => {
   };
 
   const handleUpdateLocationList = location => {
-    console.log('handleUpdateLocationList called');
+    // console.log('handleUpdateLocationList called');
     let temp = originalLocations;
     let temp2 = locations;
     for (let i in temp) {
@@ -260,6 +272,11 @@ const AllLocations = ({navigation}) => {
     setLocations(temp2);
     setActiveLocations([...activeLocations, location]);
     setRenderKey(renderKey + 1);
+  };
+
+  const handleRestoreFunction = () => {
+    setSearchQuery('');
+    getLocations();
   };
 
   return (
@@ -302,7 +319,7 @@ const AllLocations = ({navigation}) => {
             style={[s.textInput, ES.mt1]}
             placeholder="Search"
             value={searchQuery}
-            onChangeText={text => getLocationsByName(text)}
+            onChangeText={text => handleDebounce(text)}
           />
         </View>
 
@@ -355,7 +372,7 @@ const AllLocations = ({navigation}) => {
                   />
                 )}
                 refreshing={isLoading}
-                onRefresh={getLocations}
+                onRefresh={handleRestoreFunction}
                 maxToRenderPerBatch={20}
               />
             </View>
@@ -382,6 +399,8 @@ const AllLocations = ({navigation}) => {
           <Text style={[ES.textCenter, ES.subHeadingText]}>
             No Records Found
           </Text>
+
+          <RestoreButton method={handleRestoreFunction} />
         </View>
 
         <View style={[isLoading ? ES.dBlock : ES.dNone, ES.h100]}>

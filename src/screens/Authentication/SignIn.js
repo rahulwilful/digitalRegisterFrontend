@@ -21,8 +21,7 @@ import {
 import axios from 'axios';
 import axiosClient from '../../../axiosClient';
 import {toggleLogin} from '../../Redux/actions/action';
-import {ScrollView} from 'react-native-gesture-handler';
-import {wareHouseImage} from '../../Constants/imagesAndIcons';
+
 import Background from './Background';
 import HeadingText from '../../Components/HeadingText';
 import Loading from '../../Constants/Loading';
@@ -34,8 +33,8 @@ import KeyboardAvoidingComponent from '../../Components/KeyboardAvoidingComponen
 const screenHeight = Dimensions.get('window').height;
 
 const SignIn = ({navigation}) => {
-  const [email, setEmail] = useState('super_admin@gmail.com');
-  const [password, setPassword] = useState('111111');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const isLoggedIn = useSelector(state => state.auth);
@@ -57,7 +56,31 @@ const SignIn = ({navigation}) => {
     checkLogin();
   }, []);
 
+  const verifyInputs = () => {
+    if (!email) {
+      showToast('Please enter email');
+      return false;
+    }
+    const validateEmail = email => {
+      const re =
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return re.test(String(email).toLowerCase());
+    };
+
+    if (!validateEmail(email)) {
+      showToast('Please enter valid email');
+      return false;
+    }
+    if (!password) {
+      showToast('Please enter password');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleLogin = async () => {
+    if (!verifyInputs()) return;
     setIsLoading(true);
 
     try {

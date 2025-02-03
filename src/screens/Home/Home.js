@@ -39,6 +39,7 @@ import Card from '../../Components/Card';
 import Loading from '../../Constants/Loading';
 import {HomeVectoreIcon, WeightVectoreIcon} from '../../Constants/VectoreIcons';
 import * as Animatable from 'react-native-animatable';
+import {fadeIn} from '../../Constants/AnimationTypes';
 
 const Home = ({navigation}) => {
   const [locations, setLocations] = useState([]);
@@ -114,9 +115,9 @@ const Home = ({navigation}) => {
               ES.py2,
             ]}>
             <Animatable.View
-              animation={'fadeInLeftBig'}
+              animation={fadeIn}
               duration={500}
-              delay={ 100}
+              delay={100}
               style={[ES.w100, ES.fx0, ES.gap2]}>
               <TouchableOpacity
                 onPress={() => {
@@ -132,9 +133,9 @@ const Home = ({navigation}) => {
 
             {displayAdminOptions && (
               <Animatable.View
-                animation={'fadeInLeftBig'}
+                animation={fadeIn}
                 duration={500}
-                delay={ 200}
+                delay={200}
                 style={[ES.w100, ES.fx0, ES.gap2]}>
                 <TouchableOpacity
                   onPress={() => navigation.navigate('stackAddRecord')}>
@@ -145,9 +146,9 @@ const Home = ({navigation}) => {
 
             {displaySuperAdminOptions && (
               <Animatable.View
-                animation={'fadeInLeftBig'}
+                animation={fadeIn}
                 duration={500}
-                delay={ 200}
+                delay={200}
                 style={[ES.w100, ES.fx0, ES.gap2]}>
                 <TouchableOpacity
                   onPress={() => navigation.navigate('stackAllQuantityUnits')}>
@@ -236,42 +237,3 @@ const s = StyleSheet.create({
     ES.textSecondary,
   ]),
 });
-
-{
-  /*  <FlatList
-            data={locations}
-            keyExtractor={(item, index) => index.toString()} // Add this
-            contentContainerStyle={[s.flatList]}
-            renderItem={({item}) => (
-              <View style={[ES.w95]}>
-                <TouchableOpacity
-                  onPress={() =>
-                    navigation.navigate('stackRecord', {locationId: item._id})
-                  }
-                  style={[s.listContainer]}>
-                  <View style={[ES.h100, ES.ws90, ES.overflowHidden]}>
-                    <Image source={wareHouseIcon} style={[ES.hs90, ES.ws90]} />
-                  </View>
-
-                  <View style={[ES.fx1, ES.py06]}>
-                    <Text
-                      style={[
-                        ES.f20,
-                        ES.fw500,
-                        ES.capitalize,
-                        ES.fx1,
-                        {color: primaryTextColor},
-                      ]}>
-                      {item.name}
-                    </Text>
-                    <View style={[ES.fx1, ES.flexRow, ES.gap1]}>
-                      <Text style={[s.subInfo]}>State: {item.state}</Text>
-
-                      <Text style={[s.subInfo]}>City: {item.city}</Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              </View>
-            )}
-          /> */
-}

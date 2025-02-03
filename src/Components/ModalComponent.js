@@ -20,7 +20,15 @@ import LinearGradient from 'react-native-linear-gradient';
 import {cancelIcon} from '../Constants/imagesAndIcons';
 import {CrossVectoreIcon} from '../Constants/VectoreIcons';
 
-const ModalComponent = ({children, isModalVisible, closeModal, height}) => {
+const ModalComponent = ({
+  children,
+  isModalVisible,
+  closeModal,
+  height,
+  enableCross,
+  centerItems,
+  tempBorder,
+}) => {
   return (
     <>
       <Modal visible={isModalVisible} transparent={true} animationType="slide">
@@ -32,8 +40,17 @@ const ModalComponent = ({children, isModalVisible, closeModal, height}) => {
                 start={{x: 0, y: 0}}
                 end={{x: 1, y: 1}}
                 style={[s.modal, height ? {height: height} : ES.h90]}>
-                <View style={[ES.fx1, ES.p06]}>{children}</View>
-                <View style={[s.modalClose]}>
+                <View
+                  style={[
+                    ES.fx1,
+                    ES.p06,
+                    tempBorder ? ES.tempBorder : null,
+                    centerItems ? ES.centerItems : null,
+                  ]}>
+                  {children}
+                </View>
+                <View
+                  style={[s.modalClose, enableCross ? ES.dBlock : ES.dNone]}>
                   <TouchableOpacity onPress={closeModal} style={[]}>
                     <CrossVectoreIcon />
                   </TouchableOpacity>
